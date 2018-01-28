@@ -1,4 +1,4 @@
-#ifndef SCENE_H
+ #ifndef SCENE_H
 #define SCENE_H
 #pragma once
 #define _WIN32_WINNT 0x0500
@@ -9,6 +9,7 @@
 #include <iostream>
 #include <Windows.h>
 #include <Winuser.h>
+#include <string>
 
 class Scene
 {
@@ -19,6 +20,8 @@ public:
 	void setVSync(bool value);
 	void setFullScreen(bool value);
 	void setSceneSize(int width, int height);
+	void setWindowName(std::string value);
+	void setCursorEnable(bool value);
 	bool isFullScreen();
 	bool isVSync();
 	int getSceneWidth();

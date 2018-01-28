@@ -10,6 +10,7 @@
 #include "Entity.h"
 #include "Shader.h"
 #include "Camera.h"
+#include "AABBTree.h"
 using std::cout;
 using std::endl;
 
@@ -18,6 +19,7 @@ using nstd::hash;
 
 extern TPCamera TPcamera;
 extern Camera2D camera2d;
+
 
 class Render
 {
@@ -43,6 +45,24 @@ public:
 			glEnableVertexAttribArray(pos[i]);
 
 		}
+
+		//instance buffer
+		glBindBuffer(GL_ARRAY_BUFFER, VBOs.search("instance"));
+		GLsizei vec4Size = sizeof(glm::vec4);
+		glEnableVertexAttribArray(5);
+		glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)0);
+		glEnableVertexAttribArray(6);
+		glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(vec4Size));
+		glEnableVertexAttribArray(7);
+		glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(2 * vec4Size));
+		glEnableVertexAttribArray(8);
+		glVertexAttribPointer(8, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(3 * vec4Size));
+
+		glVertexAttribDivisor(5, 1);
+		glVertexAttribDivisor(6, 1);
+		glVertexAttribDivisor(7, 1);
+		glVertexAttribDivisor(8, 1);
+
 		glBindVertexArray(0);
 		dic<unsigned int> data(key, VAO);
 		VAOs.insert(data);
@@ -103,36 +123,37 @@ public:
 		shaders.insert(data);
 	}
 	/////////////////////////////////////////////////////////////////////////////////
-	static void draw(Entity obj, GLenum type = GL_TRIANGLES) {
-		(shaders.search(obj.shader)).use();
-		glBindVertexArray(VAOs.search(obj.VAO));
-		if (obj.texture != "") {
+	static void draw(Entity *obj, GLenum type = GL_TRIANGLES) {
+		//為了增加效能，將 use program 和 projection , view 移到函式外面
+
+		glBindVertexArray(VAOs.search(obj->VAO));
+		if (obj->texture != "") {
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, Render::textures.search(obj.texture));
+			glBindTexture(GL_TEXTURE_2D, Render::textures.search(obj->texture));
 		}
-		if (obj.specular != "") {
+		if (obj->specular != "") {
 			glActiveTexture(GL_TEXTURE1);
-			glBindTexture(GL_TEXTURE_2D, Render::textures.search(obj.specular));
+			glBindTexture(GL_TEXTURE_2D, Render::textures.search(obj->specular));
 		}
-		glm::mat4 projection;
-		projection = glm::perspective(glm::radians(45.0f), (float)1920 / (float)1080, 0.1f, 100.0f);
-		//projection = glm::ortho(0, 1920, 0, 1080, 0, 100);
-		//projection = glm::translate(projection, glm::vec3(0.0f, 0.0f, 0.0f));
-		//projection = glm::scale(projection, glm::vec3(0.2f, 0.2f, 0.2f));
-		glm::mat4 view;
-		view = TPcamera.getViewMatrix();/////////look out camera type
+
 		glm::mat4 model;
-		model = glm::translate(model, glm::vec3(obj.rigid.data.position.x, obj.rigid.data.position.y, obj.rigid.data.position.z));
-		Render::shaders.search(obj.shader).setMat4("view", view);
-		Render::shaders.search(obj.shader).setMat4("projection", projection);
-		Render::shaders.search(obj.shader).setMat4("model", model);
-		if (obj.EBO == "") {
-			glDrawArrays(type, 0, obj.size());
+		model = glm::translate(model, glm::vec3(obj->rigid.data.position.x, obj->rigid.data.position.y, obj->rigid.data.position.z));
+		Render::shaders.search(obj->shader).setMat4("model", model);
+		
+		if (obj->EBO == "") {
+			glDrawArrays(type, 0, obj->size());
 		}
 		else {
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Render::EBOs.search(obj.EBO));
-			glDrawElements(type, obj.size(), GL_UNSIGNED_INT, 0);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Render::EBOs.search(obj->EBO));
+			glDrawElements(type, obj->size(), GL_UNSIGNED_INT, 0);
 		}
+	}
+	
+	/////////////////////////////////////////////////////////////////////////////////
+	static void updateInstance(glm::mat4 matrix[], int length) {
+		unsigned int VBO = VBOs.search("instance");
+		glBindBuffer(GL_ARRAY_BUFFER, VBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(glm::mat4) * length, matrix, GL_STREAM_DRAW);
 	}
 	/////////////////////////////////////////////////////////////////////////////////
 	static hash<unsigned int> VAOs;

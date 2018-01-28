@@ -10,6 +10,8 @@
 using std::queue;
 
 
+static void foo();
+
 enum GameState {
 	PAUSE,
 	MENU,

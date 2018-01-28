@@ -19,9 +19,10 @@ public:
 	EventType getType();
 	void setTarget(T target);
 	//virtual void use() = 0;
+	T _target_id;
 protected:
 	EventType _type;
-	T _target_id;
+	
 };
 
 template<typename T>
@@ -88,7 +89,7 @@ public:
 	}
 	void use()
 	{
-		Render::draw(*_target_id, _draw_type);
+		Render::draw(_target_id, _draw_type);
 
 	}
 	void setDrawType(GLenum type);

@@ -1,4 +1,6 @@
-﻿// GLEW ( help you using functions without retreiving functions )
+﻿#define SOFTWARE_VERSION "0.3.1"
+
+// GLEW ( help you using functions without retreiving functions )
 #define _WIN32_WINNT 0x0500
 #define GLEW_STATIC
 #include <GL\glew.h>
@@ -27,12 +29,14 @@
 #include "Entity.h"
 #include "Render.h"
 #include "Game.h"
+#include <stdlib.h>
 //#include "Model.h"
 
 // Get error from GLFW for debuging
 //void error_callback(int error, const char* description);
 // Get keywords from GLFW windows
 //void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
+
 
 
 static GLint fogMode;
@@ -51,9 +55,6 @@ void processInput(Scene &sc)
 {
 	if (glfwGetKey(sc.window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(sc.window, true);
-	if (glfwGetKey(sc.window, GLFW_KEY_W) == GLFW_RELEASE) {
-
-	}
 	if (glfwGetKey(sc.window, GLFW_KEY_W) == GLFW_PRESS)
 		TPcamera.processKeyboard(FORWARD, dt);
 	if (glfwGetKey(sc.window, GLFW_KEY_S) == GLFW_PRESS)
@@ -62,6 +63,10 @@ void processInput(Scene &sc)
 		TPcamera.processKeyboard(LEFT, dt);
 	if (glfwGetKey(sc.window, GLFW_KEY_D) == GLFW_PRESS)
 		TPcamera.processKeyboard(RIGHT, dt);
+	if (glfwGetKey(sc.window, GLFW_KEY_W) == GLFW_RELEASE && glfwGetKey(sc.window, GLFW_KEY_S) == GLFW_RELEASE && glfwGetKey(sc.window, GLFW_KEY_A) == GLFW_RELEASE && glfwGetKey(sc.window, GLFW_KEY_D) == GLFW_RELEASE) {
+		TPcamera._v.x *= 0.5;
+		TPcamera._v.z *= 0.5;
+	}
 	if (glfwGetKey(sc.window, GLFW_KEY_SPACE) == GLFW_PRESS)
 		TPcamera.processKeyboard(SPACE, dt);
 	if (glfwGetKey(sc.window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) {
@@ -105,15 +110,16 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 int main() {
 	Scene sc;
 
+
+	srand(time(NULL));
+	sc.setVSync(false);
 	//Shader shader("./vertex.vs", "./fragment.fs");
-	Shader lampShader("./lamp.vs", "./lamp.fs");
+	Shader colorShader("./color.vs", "./color.fs");
 	//Shader groundShader("./vertex.vs", "./ground.fs");
 
 	glEnable(GL_DEPTH_TEST);
 	//glEnable(GL_CULL_FACE);
 
-
-	glfwSetInputMode(sc.window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSetCursorPosCallback(sc.window, mouse_callback);
 
 	//wglSwapIntervalEXT = (PFNWGLSWAPINTERVALFARPROC)wglGetProcAddress("wglSwapIntervalEXT");
@@ -174,6 +180,7 @@ int main() {
 	};
 
 
+	Render::addVBO(vertices, 1, "instance");
 	//封裝測試
 	Game game;
 
@@ -183,20 +190,20 @@ int main() {
 	int shift[3] = { 0,5,3 };
 	Render::addVAO(pos, size, shift, 3, "box", "box");
 	Render::addTexture("./container.png", "box");
-	Render::addShader("box", "./rtest.vs", "./rtest.fs");
+	Render::addShader("texture", "./texture.vs", "./texture.fs");
 
 	for (int i = 0; i < 5; ++i) {
 		Entity *box = new Entity(36);
 		box->VAO = "box";
 		box->VBO = "box";
 		box->texture = "box";
-		box->shader = "box";
+		box->shader = "texture";
 		box->rigid._is_static = false;
 		box->rigid.type = NO_COLLIDE;
 		box->rigid._mass = 10;
-		box->rigid.data.position = cubePositions[i];
+		box->rigid.data.position = cubePositions[i%5];
 		box->rigid.data.velocity = glm::vec3(0.0f, 0.0f, 0.0f);
-		ObjectManager::object_list.push_back(box);
+		//ObjectManager::object_list.push_back(box);
 		//cout << box->rigid.data.position.y << endl;
 
 	}
@@ -260,51 +267,57 @@ int main() {
 		int size[1] = { 3 };
 		int shift[1] = { 0 };
 		Render::addVAO(pos, size, shift, 1, "sphere", "sphere", "sphere");
-		Render::addShader("sphere", "./lamp.vs", "./lamp.fs");
-		Entity *sphere = new Entity(1944);
-		sphere->VAO = "sphere";
-		sphere->VBO = "sphere";
-		//sphere->EBO = "sphere";
-		sphere->shader = "sphere";
-		sphere->rigid._is_static = false;
-		sphere->rigid.data.position = glm::vec3(0.0f, 25.0f, 0.0f);
-		sphere->rigid.data.velocity = glm::vec3(0.0f, 0.0f, 0.0f);
-		sphere->rigid.setSphereRadius(0.5);
-		sphere->rigid._mass = 10;
-		sphere->rigid._restitution_coeffient = 0.8;
-		sphere->rigid.type = SPHERE;
-		//ObjectManager::object_list.push_back(sphere);
+		Render::addShader("color", "./color.vs", "./color.fs");
+		//*
+		for (int i = 0; i < 20; ++i) {
+			Entity *sphere = new Entity(1944);
+			sphere->VAO = "sphere";
+			sphere->VBO = "sphere";
+			//sphere->EBO = "sphere";
+			sphere->shader = "color";
+			sphere->rigid._is_static = false;
+			sphere->rigid.data.position = glm::vec3(rand()%25, 25.0f, rand()%25);
+			sphere->rigid.data.velocity = glm::vec3(0.0f, 0.0f, 0.0f);
+			sphere->rigid.setRadius(0.5);
+			sphere->rigid._mass = 1;
+			sphere->rigid._restitution_coeffient = 0.8;
+			sphere->rigid.type = SPHERE;
+			ObjectManager::object_list.push_back(sphere);
+			ObjectManager::aabb_tree.add(sphere);
+		}
+		//*/
 		Entity *sphere1 = new Entity(1944);
 		sphere1->VAO = "sphere";
 		sphere1->VBO = "sphere";
 		//sphere->EBO = "sphere";
-		sphere1->shader = "sphere";
+		sphere1->shader = "color";
 		sphere1->rigid._is_static = false;
-		sphere1->rigid.data.position = glm::vec3(0.0f, 10.0f, 0.5f);
+		sphere1->rigid.data.position = glm::vec3(0.0f, 10.0f, 0.0f);
 		sphere1->rigid.data.velocity = glm::vec3(0.0f, 0.0f, 0.0f);
-		sphere1->rigid.setSphereRadius(0.5);
-		sphere1->rigid._mass = 300;
+		sphere1->rigid.setRadius(0.5);
+		sphere1->rigid._mass = 100;
 		sphere1->rigid._restitution_coeffient = 0.8;
 		sphere1->rigid.type = SPHERE;
 		ObjectManager::object_list.push_back(sphere1);
-		
+		ObjectManager::aabb_tree.add(sphere1);
 	}
 	//sphere
 
 	Player *player = new Player(1944);
-	player->rigid.setSphereRadius(0.5);
+	player->rigid.setRadius(0.5);
 	player->rigid._mass = 50;
 	player->VAO = "sphere";
 	player->VBO = "sphere";
 	//sphere->EBO = "sphere";
-	player->shader = "sphere";
+	player->shader = "color";
 	player->rigid.data.position = glm::vec3(0.0f, 11.0f, 0.5f);
 	//player->rigid.data.position = TPcamera.Position + TPcamera.radius * TPcamera.Front;
-	player->rigid._restitution_coeffient = 0.8;
+	player->rigid._restitution_coeffient = 0;
 	player->rigid.type = SPHERE;
 	player->rigid._is_static = false;
 	player->e_type = PLAYER;
 	ObjectManager::object_list.push_back(player);
+	ObjectManager::aabb_tree.add(player);
 	
 	//surface
 	float surfaceVer[] = {
@@ -329,12 +342,12 @@ int main() {
 	Render::addVAO(pos, size, shift, 3, "ground", "ground");
 	Render::addTexture("./wall.jpg", "wall");
 	Render::addTexture("./grass.jpg", "grass");
-	Render::addShader("wall", "./rtest.vs", "./rtest.fs");
+	//wall
 	Entity *wall = new Entity(6);
 	wall->VAO = "wall";
 	wall->VBO = "wall";
 	wall->texture = "wall";
-	wall->shader = "wall";
+	wall->shader = "texture";
 	wall->rigid._is_static = true;
 	wall->rigid.data.position = glm::vec3(0.0f, 0.0f, 0.0f);
 	wall->rigid.data.velocity = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -350,13 +363,40 @@ int main() {
 	rigidVer.push_back(ver2);
 	rigidVer.push_back(ver3);
 	rigidVer.push_back(ver4);
-	wall->rigid.setRectangleVertex(rigidVer);
+	wall->rigid.setVertex(rigidVer);
+	wall->rigid.setAABB();
 	ObjectManager::object_list.push_back(wall);
+	ObjectManager::aabb_tree.add(wall);
+	Entity *wall2 = new Entity(6);
+	wall2->VAO = "wall";
+	wall2->VBO = "wall";
+	wall2->texture = "wall";
+	wall2->shader = "texture";
+	wall2->rigid._is_static = true;
+	wall2->rigid.data.position = glm::vec3(-10.0f, 0.0f, 0.0f);
+	wall2->rigid.data.velocity = glm::vec3(0.0f, 0.0f, 0.0f);
+	wall2->rigid._mass = 300000000;
+	wall2->rigid._restitution_coeffient = 1;
+	wall2->rigid.type = RECTANGLE;
+	rigidVer.clear();
+	ver1 = glm::vec3(-5.0f, 5.0f, 5.0f);
+	ver2 = glm::vec3(-5.0f, 5.0f, -5.0f);
+	ver3 = glm::vec3(-5.0f, -5.0f, -5.0f);
+	ver4 = glm::vec3(-5.0f, -5.0f, 5.0f);
+	rigidVer.push_back(ver1);
+	rigidVer.push_back(ver2);
+	rigidVer.push_back(ver3);
+	rigidVer.push_back(ver4);
+	wall2->rigid.setVertex(rigidVer);
+	wall2->rigid.setAABB();
+	ObjectManager::object_list.push_back(wall2);
+	ObjectManager::aabb_tree.add(wall2);
+	//wall
 	Entity *ground = new Entity(6);
 	ground->VAO = "ground";
 	ground->VBO = "ground";
 	ground->texture = "grass";
-	ground->shader = "wall";
+	ground->shader = "texture";
 	ground->rigid._is_static = true;
 	ground->rigid.data.position = glm::vec3(0.0f, 0.0f, 0.0f);
 	ground->rigid.data.velocity = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -372,17 +412,21 @@ int main() {
 	groundVer.push_back(Ver2);
 	groundVer.push_back(Ver3);
 	groundVer.push_back(Ver4);
-	ground->rigid.setRectangleVertex(groundVer);
+	ground->rigid.setVertex(groundVer);
+	ground->rigid.setAABB();
 	ObjectManager::object_list.push_back(ground);
+	ObjectManager::aabb_tree.add(ground);
 	//surface
 	//
 
 
-	Render::shaders.search("box").use();
-	Render::shaders.search("box").setInt("material.diffuse", 0);
+	Render::shaders.search("texture").use();
+	Render::shaders.search("texture").setInt("material.diffuse", 0);
 
 	
 
+	
+	//how to get an object's type
 	cout << typeid(player).name() << endl;
 
 	int lastClock = clock();
@@ -407,14 +451,8 @@ int main() {
 		// start to rending
 
 		
-
-		//player->rigid.data.position = camera.Position + camera.radius * camera.Front;
-		//player->rigid.data.position.y = 0;
 		player->rigid.data.velocity = TPcamera._v;
-		//cout << player->rigid.data.position.x << " " << player->rigid.data.position.y << " " << player->rigid.data.position.z << endl;
-		//cout << render.shaders.search("box").ID << endl;
-		//Render::draw(*box, GL_TRIANGLES);
-		//cout << camera.Position.y << endl;
+
 		game.update(dt);
 
 		TPcamera.Position = player->rigid.data.position - TPcamera.radius * TPcamera.Front;
@@ -422,11 +460,8 @@ int main() {
 
 		game.render();
 
-		//if(count%100==0)
-		//cout << player->rigid.data.velocity.x << " " << player->rigid.data.velocity.y << " " << player->rigid.data.velocity.z << endl;
 
-		//camera._is_moving = false;
-
+		//cout << player->rigid.data.position.x << "\t" << player->rigid.data.position.y << "\t" << player->rigid.data.position.z << endl;
 
 		// end of loop
 		while (1) {//控制FPS

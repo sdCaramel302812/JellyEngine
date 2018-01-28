@@ -7,11 +7,24 @@
 #include <string>
 //#include "Event.h"
 
+extern class AABBNode;
+
+class AABB {//等軸包圍盒
+public:
+	glm::vec3 _left_down_back;
+	glm::vec3 _right_top_front;
+
+	AABB();
+	void unionAABB(AABB ab1);
+	bool contain(AABB ab1);
+	bool isCollided(AABB ab1);
+	float volume();
+};
 
 enum RigidType {
 	NO_COLLIDE = 0,		//無碰撞
 	TRIANGLE,	//三角形
-	RECTANGLE,	//矩形
+	RECTANGLE,	//矩形			//僅作為靜態物體使用
 	CIRCLE,		//圓形
 	GROUND,		//網格
 	CUBE,		//立方體
@@ -34,33 +47,34 @@ public:
 
 };
 
-class AABB {//等軸包圍盒
-public:
-	int _x_top;
-	int _x_bottom;
-	int _y_top;
-	int _y_bottom;
-	int _z_top;
-	int _z_bottom;
-};
+//如果超出 AABB 樹的容許值則重新插入
+
+
+
 
 class RigidBody {
 public:
 	RigidBody(RigidType type = RECTANGLE);
 
-	void setTriangleVertex(std::vector<glm::vec3> value);
-	void setRectangleVertex(std::vector<glm::vec3> value);
-	void setCircleRadius(float r);
-	void setGroundVertex(std::vector<glm::vec3> value);
-	void setCubeVertex(std::vector<glm::vec3> value);
-	void setSphereRadius(float r);
 	void setPosition(int x, int y, int z);
-	void setAABB(int x1,int x2, int y1, int y2, int z1, int z2);
-	AABB &getAABB();
-	float getRadius();
+	void changePosition(float x, float y, float z);
+	void setPosition(glm::vec3 pos);
+	void changePosition(glm::vec3 changePos);
+	
+	//多面體頂點
+	void setVertex(std::vector<glm::vec3> value);
 	std::vector<glm::vec3> getVertices();
+	std::vector<glm::vec3> getNormal();
+
+	//圓形、球體半徑
+	void setRadius(float r);
+	float getRadius();
+
+	void setAABB();
+	AABB *getAABB();
 
 	DynamicData data;
+
 
 	//允許物理效果
 	bool _allow_physics = true;
@@ -74,10 +88,13 @@ public:
 	float _friction_coeffient = 3;
 	RigidType type;
 private:
-	std::vector<glm::vec3> vertices;//矩形頂點請順時鐘輸入
-	float radius;
-	AABB bounding_box;
+	void setNormal();
 
+	std::vector<glm::vec3> _vertices;//矩形頂點請順時鐘輸入
+	std::vector<glm::vec3> _normal;  //面法線
+	float _radius;
+	AABB bounding_box;
+	
 };
 
 
@@ -89,22 +106,31 @@ public:
 
 	//碰撞箱
 	RigidBody rigid;
+	//繪圖相關 key
 	std::string VAO;
 	std::string VBO;
 	std::string EBO;
 	std::string texture;
 	std::string specular;
 	std::string shader;
+
+	//set vertex size
 	void setSize(int);
 	int size();
+
 	int _id;
 	EntityType e_type;
+
+	AABBNode *_aabb_node = nullptr;
+
+	bool isVisible();
 	void setTrigger(bool value);
 	bool isTrigger();
 	virtual void trigger();
 private:
-	int vertex_size;	//繪製時會用到
+	int vertex_size;	//繪製時會用到(頂點數量)
 	bool _trigger;
+	bool _visible;
 	static int createID();
 	static int _obj_num;
 
@@ -125,3 +151,4 @@ class GroundObject :public Entity {
 public:
 	GroundObject(int size = 0);
 };
+

@@ -16,15 +16,49 @@ void Game::Init()
 {
 }
 
+void foo(){
+	cout << "fuck" << endl;
+}
+
 void Game::render()
 {
 	if (state == ACTIVATE) {
-		while (!EventManager::render_event.empty()) {	//執行event
-			EventManager::render_event.front()->use();
-			delete EventManager::render_event.front();
-			EventManager::render_event.pop();
+		glm::mat4 projection;
+		projection = glm::perspective(glm::radians(45.0f), (float)1920 / (float)1080, 0.1f, 100.0f);
+		glm::mat4 view;
+		view = TPcamera.getViewMatrix();
+
+		(Render::shaders.search("texture")).use();
+		Render::shaders.search("texture").setMat4("view", view);
+		Render::shaders.search("texture").setMat4("projection", projection);
+		while (!EventManager::texture_render_event.empty()) {	//執行event
+			EventManager::texture_render_event.back()->use();
+			delete EventManager::texture_render_event.back();
+			EventManager::texture_render_event.pop_back();
 		}
+
+		(Render::shaders.search("color")).use();
+		Render::shaders.search("color").setMat4("view", view);
+		Render::shaders.search("color").setMat4("projection", projection);
+		glm::mat4 *instMat;
+		instMat = new glm::mat4[EventManager::color_render_event.size()];
+		for (int i = 0; i < EventManager::color_render_event.size(); ++i) {
+			glm::mat4 model;
+			model = glm::translate(model, glm::vec3(EventManager::color_render_event.at(i)->_target_id->rigid.data.position.x, EventManager::color_render_event.at(i)->_target_id->rigid.data.position.y, EventManager::color_render_event.at(i)->_target_id->rigid.data.position.z));
+			instMat[i] = model;
+		}
+		Render::updateInstance(instMat, EventManager::color_render_event.size());
+		glBindVertexArray(Render::VAOs.search("sphere"));
+		glDrawArraysInstanced(GL_LINE_STRIP, 0, 1944, EventManager::color_render_event.size());
+		delete []instMat;
+		while (!EventManager::color_render_event.empty()) {	//執行event
+			//EventManager::color_render_event.back()->use();
+			delete EventManager::color_render_event.back();
+			EventManager::color_render_event.pop_back();
+		}
+
 	}
+	
 }
 
 void Game::update(float dt)
@@ -35,27 +69,11 @@ void Game::update(float dt)
 			delete EventManager::update_event.front();
 			EventManager::update_event.pop();
 		}
-		/*for (int i = 0; i < ObjectManager::object_list.size(); ++i) {      //old physics
-			Physics::gravity(ObjectManager::object_list.at(i), dt);
-			DrawEvent<Entity *> *event = new DrawEvent<Entity *>();
-			event->setTarget(ObjectManager::object_list.at(i));
-			EventManager::render_event.push(event);			//若需要向上轉型，必須手動轉型
-		}
-		//if (camera._is_moving) {
-		//	ObjectManager::object_list.at(7)->rigid.data.velocity = camera.Front * 10.0f;
-		//}
-		//else {
-		//	ObjectManager::object_list.at(7)->rigid.data.velocity = glm::vec3(0.0f, 0.0f, 0.0f);
-		//}
-		if (Physics::collisionDetect(ObjectManager::object_list.at(5), ObjectManager::object_list.at(6)) == -1) {
 
-		}
-		Physics::collisionReact(ObjectManager::object_list.at(5), ObjectManager::object_list.at(6), dt);
-		Physics::collisionReact(ObjectManager::object_list.at(5), ObjectManager::object_list.at(7), dt);
-		Physics::collisionReact(ObjectManager::object_list.at(6), ObjectManager::object_list.at(7), dt);/*/
 		for (int i = 0; i < ObjectManager::object_list.size(); ++i) {
 			Physics::displace(ObjectManager::object_list.at(i), dt);
 		}
+		ObjectManager::aabb_tree.update();
 	}
 }
 

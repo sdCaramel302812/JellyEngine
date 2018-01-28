@@ -56,9 +56,7 @@ void MotionEvent<T>::setRotate(float angle, float x, float y, float z)
 template<typename T>
 void MotionEvent<T>::use()
 {
-	_target_id->rigid.data.position.x += dx();
-	_target_id->rigid.data.position.y += dy();
-	_target_id->rigid.data.position.z += dz();
+	_target_id->rigid.changePosition(dx(), dy(), dz());
 }
 
 template<typename T>

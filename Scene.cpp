@@ -16,7 +16,7 @@ Scene::Scene(int wid, int hei)
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-	window = glfwCreateWindow(wid, hei, "OpenGL Tutorial", NULL, NULL);// glfwGetPrimaryMonitor() to be full screen
+	window = glfwCreateWindow(wid, hei, "Jelly 2D", NULL, NULL);// glfwGetPrimaryMonitor() to be full screen
 	full_sc = false;
 	if (window == nullptr) // window creation failed
 	{
@@ -37,16 +37,18 @@ Scene::Scene(int wid, int hei)
 	}
 
 	if (ImmIsIME(GetKeyboardLayout(0))) {
-		ImmSimulateHotKey(FindWindow(NULL,"OpenGL Tutorial"), 16);
+		ImmSimulateHotKey(FindWindow(NULL,"Jelly 2D"), 16);
 	}
 	// Define the viewport dimensions (if you will change the winodw size, put these in loop)
 	int width, height;
 	glfwGetFramebufferSize(window, &width, &height);
 	glViewport(0, 0, width, height);
 
-	setVSync(false);
+	setVSync(true);
 
-	
+	//set cursor disabled
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
 	//Test ts;
 	HWND hWnd = GetConsoleWindow(); //隱藏視窗1
 	//ShowWindow(hWnd, SW_HIDE); //隱藏視窗2
@@ -111,6 +113,21 @@ void Scene::setSceneSize(int width, int height)
 	}
 	else {
 		glfwSetWindowMonitor(window, NULL, 200, 200, sc_width, sc_height, 60);
+	}
+}
+
+void Scene::setWindowName(std::string value)
+{
+	glfwSetWindowTitle(window, value.c_str());
+}
+
+void Scene::setCursorEnable(bool value)
+{
+	if (value) {
+		glfwSetInputMode(window, GLFW_CURSOR,GLFW_CURSOR_NORMAL);
+	}
+	else {
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	}
 }
 
