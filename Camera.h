@@ -13,7 +13,8 @@ enum CameraMovement {
 	BACKWARD,
 	LEFT,
 	RIGHT,
-	SPACE
+	SPACE,
+	SHIFT
 };
 
 // Default camera values
@@ -126,6 +127,17 @@ public:
 			if (!_is_jumping) {
 				_v += glm::vec3(0.0f, 5.0f, 0.0f);
 			std::cerr << "space!!" << std::endl;
+				_jump_cool_down = clock();
+				_is_jumping = true;
+			}
+			if (clock() - _jump_cool_down > 300) {
+				_is_jumping = false;
+			}
+		}
+		if (direction == SHIFT) {
+			if (!_is_jumping) {
+				_v += glm::vec3(0.0f, -5.0f, 0.0f);
+				std::cerr << "shift!!" << std::endl;
 				_jump_cool_down = clock();
 				_is_jumping = true;
 			}

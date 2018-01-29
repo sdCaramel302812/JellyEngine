@@ -156,6 +156,39 @@ public:
 		glBufferData(GL_ARRAY_BUFFER, sizeof(glm::mat4) * length, matrix, GL_STREAM_DRAW);
 	}
 	/////////////////////////////////////////////////////////////////////////////////
+	static void drawAABB(AABB _aabb) {
+		/////////////////////////
+		float aabb[54] = {
+			_aabb._left_down_back.x, _aabb._left_down_back.y, _aabb._left_down_back.z,
+			_aabb._right_top_front.x, _aabb._left_down_back.y, _aabb._left_down_back.z,
+			_aabb._right_top_front.x, _aabb._right_top_front.y, _aabb._left_down_back.z,
+			_aabb._left_down_back.x,_aabb._right_top_front.y, _aabb._left_down_back.z,
+			_aabb._left_down_back.x, _aabb._left_down_back.y, _aabb._left_down_back.z,
+			_aabb._left_down_back.x,_aabb._right_top_front.y, _aabb._left_down_back.z,
+			_aabb._left_down_back.x, _aabb._right_top_front.y, _aabb._right_top_front.z,
+			_aabb._left_down_back.x, _aabb._left_down_back.y, _aabb._right_top_front.z,
+			_aabb._left_down_back.x, _aabb._left_down_back.y, _aabb._left_down_back.z,
+			_aabb._right_top_front.x, _aabb._left_down_back.y, _aabb._left_down_back.z,
+			_aabb._right_top_front.x, _aabb._right_top_front.y, _aabb._left_down_back.z,
+			_aabb._right_top_front.x, _aabb._right_top_front.y, _aabb._right_top_front.z,
+			_aabb._right_top_front.x, _aabb._left_down_back.y, _aabb._right_top_front.z,
+			_aabb._right_top_front.x, _aabb._left_down_back.y, _aabb._left_down_back.z,
+			_aabb._right_top_front.x, _aabb._left_down_back.y, _aabb._right_top_front.z,
+			_aabb._left_down_back.x, _aabb._left_down_back.y, _aabb._right_top_front.z,
+			_aabb._left_down_back.x, _aabb._right_top_front.y, _aabb._right_top_front.z,
+			_aabb._right_top_front.x, _aabb._right_top_front.y, _aabb._right_top_front.z,		
+		};
+		/////////////////////////
+		unsigned int VBO = VBOs.search("debuger");
+		glBindBuffer(GL_ARRAY_BUFFER, VBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(aabb), aabb, GL_STATIC_DRAW);
+		unsigned int VAO = VAOs.search("debuger");
+		glBindVertexArray(VAO);
+		glDrawArrays(GL_LINE_STRIP, 0, 18);
+		///////////////////////////
+	}
+	/////////////////////////////////////////////////////////////////////////////////
+	
 	static hash<unsigned int> VAOs;
 	static hash<unsigned int> VBOs;
 	static hash<unsigned int> EBOs;

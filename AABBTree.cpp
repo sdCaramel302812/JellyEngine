@@ -61,8 +61,8 @@ void AABBNode::updateAABB(float margin)
 	}
 	else {
 		AABB tmp = unionAABB(_children[0]->_aabb, _children[1]->_aabb);
-		tmp._left_down_back -= margin;
-		tmp._right_top_front += margin;
+		//tmp._left_down_back -= margin;
+		//tmp._right_top_front += margin;
 		_aabb = tmp;
 	}
 }
@@ -72,6 +72,11 @@ AABBNode * AABBNode::getSibling()
 	if (_parent) {
 		return ((this == _parent->_children[0]) ? _parent->_children[1] : _parent->_children[0]);
 	}
+}
+
+AABBTree::AABBTree()
+{
+	margin = 0.5;
 }
 
 void AABBTree::setMargin(float m)
@@ -169,29 +174,6 @@ void AABBTree::update()
 	}
 }
 
-
-AABBNode * AABBTree::pick(AABB *ab1)
-{
-	std::queue<AABBNode *> que;
-	AABBNode *current = _root;
-	que.push(current);
-	while (!que.empty()) {
-		current = que.front();
-		if (!current->isLeaf()) {
-			if (current->_children[0]->_aabb.contain(*ab1)) {
-				que.push(current->_children[0]);
-			}
-			if (current->_children[1]->_aabb.contain(*ab1)) {
-				que.push(current->_children[1]);
-			}
-		}
-		else {
-			//std::cout << current->_id << "\t"<< id << std::endl;
-		}
-		que.pop();
-	}
-	return nullptr;
-}
 
 void AABBTree::findInvalidNode(AABBNode * node)
 {

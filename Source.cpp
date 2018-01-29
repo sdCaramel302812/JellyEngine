@@ -1,4 +1,4 @@
-﻿#define SOFTWARE_VERSION "0.3.1"
+﻿#define SOFTWARE_VERSION "0.3.2"
 
 // GLEW ( help you using functions without retreiving functions )
 #define _WIN32_WINNT 0x0500
@@ -51,6 +51,8 @@ float last_frame = 0;
 
 Camera2D camera2d(cameraPos);
 
+bool is_player = false;
+
 void processInput(Scene &sc)
 {
 	if (glfwGetKey(sc.window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
@@ -69,6 +71,8 @@ void processInput(Scene &sc)
 	}
 	if (glfwGetKey(sc.window, GLFW_KEY_SPACE) == GLFW_PRESS)
 		TPcamera.processKeyboard(SPACE, dt);
+	if (glfwGetKey(sc.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+		TPcamera.processKeyboard(SHIFT, dt);
 	if (glfwGetKey(sc.window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) {
 		if (sc.isFullScreen()) {
 			sc.setFullScreen(false);
@@ -76,7 +80,14 @@ void processInput(Scene &sc)
 		else {
 			sc.setFullScreen(true);
 		}
-
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_TAB) == GLFW_PRESS) {
+		if (is_player) {
+			is_player = false;
+		}
+		else {
+			is_player = true;
+		}
 	}
 }
 
@@ -105,6 +116,37 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 //typedef BOOL(APIENTRY *PFNWGLSWAPINTERVALFARPROC)(int);
 //PFNWGLSWAPINTERVALFARPROC wglSwapIntervalEXT = 0;
 
+
+
+
+void aabbDebuger() {
+	//////////////////////////////////////////////////////////////////////draw aabb
+		
+		glm::mat4 projection;
+		projection = glm::perspective(glm::radians(45.0f), (float)1920 / (float)1080, 0.1f, 100.0f);
+		glm::mat4 view;
+		view = TPcamera.getViewMatrix(); 
+		glm::mat4 model;
+		(Render::shaders.search("color")).use();
+		Render::shaders.search("color").setMat4("view", view);
+		Render::shaders.search("color").setMat4("projection", projection);
+		Render::shaders.search("color").setMat4("model", model);
+
+		AABBNode *current = ObjectManager::aabb_tree._root;
+		std::queue<AABBNode *> que;
+		que.push(current);
+		while (!que.empty()) {
+			Render::drawAABB(current->_aabb);
+			if (!current->isLeaf()) {
+				que.push(current->_children[0]);
+				que.push(current->_children[1]);
+			}
+			current = que.front();
+			que.pop();
+		}
+
+	//////////////////////////////////////////////////////////////////////draw aabb
+}
 
 
 int main() {
@@ -181,6 +223,11 @@ int main() {
 
 
 	Render::addVBO(vertices, 1, "instance");
+	Render::addVBO(vertices, 1, "debuger");
+	int ppp[1] = { 0 };
+	int sss[1] = { 3 };
+	int shh[1] = { 0 };
+	Render::addVAO(ppp, sss, shh, 1, "debuger","debuger");
 	//封裝測試
 	Game game;
 
@@ -191,6 +238,7 @@ int main() {
 	Render::addVAO(pos, size, shift, 3, "box", "box");
 	Render::addTexture("./container.png", "box");
 	Render::addShader("texture", "./texture.vs", "./texture.fs");
+
 
 	for (int i = 0; i < 5; ++i) {
 		Entity *box = new Entity(36);
@@ -425,7 +473,12 @@ int main() {
 
 	
 
-	
+	/////////////////////////////////////////////////		warning			/////////////////////////////////////////
+	///////////////////////////////////////////////記得處理 hash 字串長度問題////////////////////////////////////////
+	/////////////////////////////////////////////////		warning			/////////////////////////////////////////
+
+
+
 	//how to get an object's type
 	cout << typeid(player).name() << endl;
 
@@ -450,16 +503,28 @@ int main() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		// start to rending
 
-		
-		player->rigid.data.velocity = TPcamera._v;
+		//test
+		if(is_player)
+			player->rigid.data.velocity = TPcamera._v;
+		//
 
 		game.update(dt);
 
-		TPcamera.Position = player->rigid.data.position - TPcamera.radius * TPcamera.Front;
-		TPcamera._v = player->rigid.data.velocity;
+		//test
+		if (is_player) {
+			TPcamera.Position = player->rigid.data.position - TPcamera.radius * TPcamera.Front;
+			TPcamera._v = player->rigid.data.velocity;
+		}
+		else {
+			TPcamera.Position += TPcamera._v * dt;
+		}
+		//
 
 		game.render();
 
+		//test
+		//aabbDebuger();
+		//
 
 		//cout << player->rigid.data.position.x << "\t" << player->rigid.data.position.y << "\t" << player->rigid.data.position.z << endl;
 

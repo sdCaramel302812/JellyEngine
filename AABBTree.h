@@ -25,17 +25,17 @@ public:
 
 class AABBTree {
 public:
+	AABBTree();
 	void setMargin(float m);
 	void add(Entity *e);
 	void remove(AABBNode *node);
 	void update();
-	AABBNode *pick(AABB *ab1);
 	std::vector<Entity *> &collisionWith(AABBNode *);
 
 	AABBNode *_root;
 
 	//margin 大小影響偵測到的碰撞體數量及更新頻率
-	float margin = 10.1;
+	float margin;
 
 private:
 	void insert(AABBNode *node, AABBNode **parent);

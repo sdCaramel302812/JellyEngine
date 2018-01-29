@@ -28,6 +28,7 @@ void Game::render()
 		glm::mat4 view;
 		view = TPcamera.getViewMatrix();
 
+
 		(Render::shaders.search("texture")).use();
 		Render::shaders.search("texture").setMat4("view", view);
 		Render::shaders.search("texture").setMat4("projection", projection);
@@ -40,19 +41,19 @@ void Game::render()
 		(Render::shaders.search("color")).use();
 		Render::shaders.search("color").setMat4("view", view);
 		Render::shaders.search("color").setMat4("projection", projection);
-		glm::mat4 *instMat;
-		instMat = new glm::mat4[EventManager::color_render_event.size()];
-		for (int i = 0; i < EventManager::color_render_event.size(); ++i) {
-			glm::mat4 model;
-			model = glm::translate(model, glm::vec3(EventManager::color_render_event.at(i)->_target_id->rigid.data.position.x, EventManager::color_render_event.at(i)->_target_id->rigid.data.position.y, EventManager::color_render_event.at(i)->_target_id->rigid.data.position.z));
-			instMat[i] = model;
-		}
-		Render::updateInstance(instMat, EventManager::color_render_event.size());
-		glBindVertexArray(Render::VAOs.search("sphere"));
-		glDrawArraysInstanced(GL_LINE_STRIP, 0, 1944, EventManager::color_render_event.size());
-		delete []instMat;
+//		glm::mat4 *instMat;
+//		instMat = new glm::mat4[EventManager::color_render_event.size()];
+//		for (int i = 0; i < EventManager::color_render_event.size(); ++i) {
+//			glm::mat4 model;
+//			model = glm::translate(model, glm::vec3(EventManager::color_render_event.at(i)->_target_id->rigid.data.position.x, EventManager::color_render_event.at(i)->_target_id->rigid.data.position.y, EventManager::color_render_event.at(i)->_target_id->rigid.data.position.z));
+//			instMat[i] = model;
+//		}
+//		Render::updateInstance(instMat, EventManager::color_render_event.size());
+//		glBindVertexArray(Render::VAOs.search("sphere"));
+//		glDrawArraysInstanced(GL_LINE_STRIP, 0, 1944, EventManager::color_render_event.size());
+//		delete []instMat;
 		while (!EventManager::color_render_event.empty()) {	//°õ¦æevent
-			//EventManager::color_render_event.back()->use();
+			EventManager::color_render_event.back()->use();
 			delete EventManager::color_render_event.back();
 			EventManager::color_render_event.pop_back();
 		}

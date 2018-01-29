@@ -53,7 +53,7 @@ bool AABB::contain(AABB ab1)
 bool AABB::isCollided(AABB ab1)
 {
 	if ((ab1._left_down_back.x<_right_top_front.x && ab1._right_top_front.x>_left_down_back.x) || (ab1._left_down_back.x>_right_top_front.x && ab1._right_top_front.x<_left_down_back.x)) {
-		if ((ab1._left_down_back.y<_right_top_front.y && ab1._right_top_front.x>_left_down_back.y) || (ab1._left_down_back.y>_right_top_front.y && ab1._right_top_front.x<_left_down_back.y)) {
+		if ((ab1._left_down_back.y<_right_top_front.y && ab1._right_top_front.y>_left_down_back.y) || (ab1._left_down_back.y>_right_top_front.y && ab1._right_top_front.y<_left_down_back.y)) {
 			if ((ab1._left_down_back.z<_right_top_front.z && ab1._right_top_front.z>_left_down_back.z) || (ab1._left_down_back.z>_right_top_front.z && ab1._right_top_front.z<_left_down_back.z)) {
 				return true;
 			}
