@@ -30,7 +30,7 @@ public:
 	void add(Entity *e);
 	void remove(AABBNode *node);
 	void update();
-	std::vector<Entity *> &collisionWith(AABBNode *);
+	std::vector<Entity *> &collisionWith(AABBNode *node);
 
 	AABBNode *_root;
 

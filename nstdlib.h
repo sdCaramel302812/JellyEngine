@@ -83,6 +83,7 @@ namespace nstd {
 		TString(const wstring &data);
 		TString(const string &data);
 		TString(const char *data);
+		TString(const wchar_t *data);
 		nstd::TString operator+(nstd::TString value);
 		nstd::TString operator+(string value);
 		nstd::TString operator+(wstring value);

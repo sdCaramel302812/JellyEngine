@@ -1,4 +1,4 @@
-﻿#define SOFTWARE_VERSION "0.3.2"
+﻿#define SOFTWARE_VERSION "0.3.3"
 
 // GLEW ( help you using functions without retreiving functions )
 #define _WIN32_WINNT 0x0500
@@ -230,6 +230,7 @@ int main() {
 	Render::addVAO(ppp, sss, shh, 1, "debuger","debuger");
 	//封裝測試
 	Game game;
+	game.Init();
 
 	Render::addVBO(vertices, 288, "box");
 	int pos[3] = { 0,1,2 };
@@ -316,15 +317,16 @@ int main() {
 		int shift[1] = { 0 };
 		Render::addVAO(pos, size, shift, 1, "sphere", "sphere", "sphere");
 		Render::addShader("color", "./color.vs", "./color.fs");
+		Render::addShader("color_ins", "./color_instance.vs", "./color.fs");
 		//*
-		for (int i = 0; i < 20; ++i) {
+		for (int i = 0; i < 100; ++i) {
 			Entity *sphere = new Entity(1944);
 			sphere->VAO = "sphere";
 			sphere->VBO = "sphere";
 			//sphere->EBO = "sphere";
-			sphere->shader = "color";
+			sphere->shader = "color_ins";
 			sphere->rigid._is_static = false;
-			sphere->rigid.data.position = glm::vec3(rand()%25, 25.0f, rand()%25);
+			sphere->rigid.data.position = glm::vec3(rand()%25, rand()%25, rand()%25);
 			sphere->rigid.data.velocity = glm::vec3(0.0f, 0.0f, 0.0f);
 			sphere->rigid.setRadius(0.5);
 			sphere->rigid._mass = 1;
@@ -338,7 +340,7 @@ int main() {
 		sphere1->VAO = "sphere";
 		sphere1->VBO = "sphere";
 		//sphere->EBO = "sphere";
-		sphere1->shader = "color";
+		sphere1->shader = "color_ins";
 		sphere1->rigid._is_static = false;
 		sphere1->rigid.data.position = glm::vec3(0.0f, 10.0f, 0.0f);
 		sphere1->rigid.data.velocity = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -357,7 +359,7 @@ int main() {
 	player->VAO = "sphere";
 	player->VBO = "sphere";
 	//sphere->EBO = "sphere";
-	player->shader = "color";
+	player->shader = "color_ins";
 	player->rigid.data.position = glm::vec3(0.0f, 11.0f, 0.5f);
 	//player->rigid.data.position = TPcamera.Position + TPcamera.radius * TPcamera.Front;
 	player->rigid._restitution_coeffient = 0;
@@ -524,6 +526,12 @@ int main() {
 
 		//test
 		//aabbDebuger();
+		glm::vec3 color(0.5, 0.8f, 0.2f);
+		glm::vec2 pos(100.0f, 100.0f);
+		//Render::drawCNString("opengl", color, pos);
+		TString tex(L"女子高生は最高だぜWWWwwWWW");
+		Render::drawText(tex, pos.x, pos.y, 1, color);
+
 		//
 
 		//cout << player->rigid.data.position.x << "\t" << player->rigid.data.position.y << "\t" << player->rigid.data.position.z << endl;

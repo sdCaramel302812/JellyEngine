@@ -33,7 +33,7 @@ void AABBNode::setLeaf(Entity * e)
 }
 
 AABB unionAABB(AABB ab1, AABB ab2)
-{
+{	//回傳一個完整包含 ab1 和 ab2 的 AABB
 	float left, right, top, down, front, back;
 	left = ab1._left_down_back.x > ab2._left_down_back.x ? ab2._left_down_back.x : ab1._left_down_back.x;
 	down = ab1._left_down_back.y > ab2._left_down_back.y ? ab2._left_down_back.y : ab1._left_down_back.y;
@@ -61,8 +61,6 @@ void AABBNode::updateAABB(float margin)
 	}
 	else {
 		AABB tmp = unionAABB(_children[0]->_aabb, _children[1]->_aabb);
-		//tmp._left_down_back -= margin;
-		//tmp._right_top_front += margin;
 		_aabb = tmp;
 	}
 }
@@ -156,6 +154,7 @@ void AABBTree::remove(AABBNode *node)
 
 void AABBTree::update()
 {
+	//更新 AABB tree 中無法包含其 data 的 node
 	if (!_root) {
 		return;
 	}

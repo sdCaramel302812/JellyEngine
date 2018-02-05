@@ -21,6 +21,6 @@ void main()
 	vec3 result =vec3(texture(material.diffuse,ourTex));
 
 
-	FragColor =vec4(result, 0.5);
+	FragColor =vec4(result, 0.8);
 }
 // 

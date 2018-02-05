@@ -67,7 +67,7 @@ void Physics::displace(Entity * obj,float dt)
 						float x0 = obj->rigid.data.position.x;
 						float y0 = obj->rigid.data.position.y;
 						float z0 = obj->rigid.data.position.z;
-						d = -(a*collide_list.at(i)->rigid.getVertices().at(0).x + b*collide_list.at(i)->rigid.getVertices().at(0).y + c*collide_list.at(i)->rigid.getVertices().at(0).z);
+						d = collide_list.at(i)->rigid.getNormal().at(0).w;
 						if (a*x0 + b*y0 + c*z0 + d < 0) {
 							normal *= -1;
 						}
@@ -81,9 +81,10 @@ void Physics::displace(Entity * obj,float dt)
 							if ((obj->rigid.type == SPHERE &&collide_list.at(i)->rigid.type == SPHERE)) {
 							//                try to use force to solve multiple ball collision problem                            //
 							//                                           unsolve                                                   //
+							//obj->rigid.data.velocity.x*small_dt, obj->rigid.data.velocity.y*small_dt, obj->rigid.data.velocity.z*small_dt
 							dis_event->setDisplace(obj->rigid.data.velocity.x*small_dt, obj->rigid.data.velocity.y*small_dt, obj->rigid.data.velocity.z*small_dt);
 							if (small_dt < 0.001) {
-								//dis_event->setDisplace(0, 0, 0);
+								dis_event->setDisplace(0, 0, 0);
 								break;
 							}
 						}
@@ -152,7 +153,7 @@ void Physics::displace(Entity * obj,float dt)
 						b = normal.y;
 						c = normal.z;
 						//低FPS元凶	<----------------------------------------------------------------------------****//
-						d = -(a*collide_list.at(i)->rigid.getVertices().at(0).x + b*collide_list.at(i)->rigid.getVertices().at(0).y + c*collide_list.at(i)->rigid.getVertices().at(0).z);
+						d = collide_list.at(i)->rigid.getNormal().at(0).w;
 
 						float x0 = obj->rigid.data.position.x;
 						float y0 = obj->rigid.data.position.y;
@@ -169,15 +170,15 @@ void Physics::displace(Entity * obj,float dt)
 						collide_event1_A->setTarget(obj);
 						collide_event1_A->setV(F*normal / obj->rigid._mass);
 
-						DataEvent<Entity *> *collide_event1_B = new DataEvent<Entity *>();
-						collide_event1_B->setTarget(collide_list.at(i));
-						collide_event1_B->setV(-F*normal / collide_list.at(i)->rigid._mass);
+						//DataEvent<Entity *> *collide_event1_B = new DataEvent<Entity *>();
+						//collide_event1_B->setTarget(collide_list.at(i));
+						//collide_event1_B->setV(-F*normal / collide_list.at(i)->rigid._mass);
 
 						collide_event1_A->use();
-						collide_event1_B->use();
+						//collide_event1_B->use();
 
 						delete collide_event1_A;
-						delete collide_event1_B;
+						//delete collide_event1_B;
 					}
 					//球對面碰撞反應
 				}
@@ -204,8 +205,8 @@ void Physics::displace(Entity * obj,float dt)
 	if (obj->shader == "texture") {
 		EventManager::texture_render_event.push_back(draw);
 	}
-	else if (obj->shader == "color") {
-EventManager::color_render_event.push_back(draw);
+	else if (obj->shader == "color_ins") {
+		EventManager::color_render_event.push_back(draw);
 	}
 	//View Frustum Culling
 
@@ -235,6 +236,7 @@ int Physics::collisionDetect(Entity * A, Entity * B, MotionEvent<Entity*>* event
 	//
 	//球對面碰撞偵測
 	if ((A->rigid.type == SPHERE && B->rigid.type == RECTANGLE)) {
+
 		glm::vec3 normal;
 		float a, b, c, d;//surface equation coefficient
 
@@ -242,15 +244,14 @@ int Physics::collisionDetect(Entity * A, Entity * B, MotionEvent<Entity*>* event
 		a = normal.x;
 		b = normal.y;
 		c = normal.z;
-
-		d = -(a*B->rigid.getVertices().at(0).x + b*B->rigid.getVertices().at(0).y + c*B->rigid.getVertices().at(0).z);
+		d = B->rigid.getNormal().at(0).w;
 
 		float dist;
 		float x0 = A->rigid.data.position.x + event->dx();
 		float y0 = A->rigid.data.position.y + event->dy();
 		float z0 = A->rigid.data.position.z + event->dz();
 		float r = A->rigid.getRadius();
-		dist = abs((a*x0 + b*y0 + c*z0 + d) * qsqrt(a*a + b*b + c*c));//點到面的距離 
+		dist = abs((a*x0 + b*y0 + c*z0 + d) * B->rigid.getNormalLengthInverse());//點到面的距離 
 		if (dist < r) {
 			glm::vec3 proj = A->rigid.data.position - normal*dist;//圓心在平面上投影點
 

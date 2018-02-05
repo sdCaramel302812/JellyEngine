@@ -3,6 +3,7 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
+#include "Math.h"
 //#include "Render.h"
 #include <string>
 //#include "Event.h"
@@ -23,19 +24,26 @@ public:
 
 enum RigidType {
 	NO_COLLIDE = 0,		//無碰撞
-	TRIANGLE,	//三角形
-	RECTANGLE,	//矩形			//僅作為靜態物體使用
-	CIRCLE,		//圓形
-	GROUND,		//網格
-	CUBE,		//立方體
-	SPHERE,		//球
-	CYLINDER,	//圓柱
-	LINE		//線
+	TRIANGLE,			//三角形
+	RECTANGLE,			//矩形			//僅作為靜態物體使用
+	CIRCLE,				//圓形
+	GROUND_COLLIDER,				//網格
+	CUBE,				//立方體
+	SPHERE,				//球
+	CYLINDER,			//圓柱
+	LINE,				//線
+	EVENT_COLLIDER,		//事件偵測器
 };
 
 enum EntityType {
 	NORMAL,
 	PLAYER,
+	NPC,
+	ENEMY,
+	BULLET,
+	BACK_GROUND,		//只存取背景圖，不碰撞
+	GROUND,				//只包含地板碰撞箱，不繪製
+	WALL,				//只包含牆壁碰撞箱，不繪製
 };
 
 class DynamicData {
@@ -64,7 +72,8 @@ public:
 	//多面體頂點
 	void setVertex(std::vector<glm::vec3> value);
 	std::vector<glm::vec3> getVertices();
-	std::vector<glm::vec3> getNormal();
+	std::vector<glm::vec4> getNormal();
+	float getNormalLengthInverse();
 
 	//圓形、球體半徑
 	void setRadius(float r);
@@ -91,7 +100,8 @@ private:
 	void setNormal();
 
 	std::vector<glm::vec3> _vertices;//矩形頂點請順時鐘輸入
-	std::vector<glm::vec3> _normal;  //面法線
+	std::vector<glm::vec4> _normal;  //面法線
+	float _normal_length_inverse;
 	float _radius;
 	AABB bounding_box;
 	

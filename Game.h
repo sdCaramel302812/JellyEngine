@@ -7,6 +7,8 @@
 #include "Physics.h"
 #include "EventManager.h"
 #include "ObjectManager.h"
+#include "TextItem.h"
+#include "ResourceManager.h"
 using std::queue;
 
 
@@ -39,5 +41,6 @@ public:
 	void render();
 	void update(float dt);
 	void input();
+	void textInit();
 };
 

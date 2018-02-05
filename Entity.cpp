@@ -225,7 +225,13 @@ void RigidBody::setNormal()
 		dir2 = getVertices().at(1) - getVertices().at(2);
 		normal = glm::cross(dir1, dir2);
 		normal = glm::normalize(normal);
-		_normal.push_back(normal);
+		float a = normal.x;
+		float b = normal.y;
+		float c = normal.z;
+		float d = -(a*getVertices().at(0).x + b*getVertices().at(0).y + c*getVertices().at(0).z);
+		glm::vec4 result = glm::vec4(a, b, c, d);
+		_normal.push_back(result);
+		_normal_length_inverse = Math::qsqrt(a*a + b*b + c*c);
 	}
 }
 
@@ -239,9 +245,14 @@ std::vector<glm::vec3> RigidBody::getVertices()
 	return _vertices;
 }
 
-std::vector<glm::vec3> RigidBody::getNormal()
+std::vector<glm::vec4> RigidBody::getNormal()
 {
 	return _normal;
+}
+
+float RigidBody::getNormalLengthInverse()
+{
+	return _normal_length_inverse;
 }
 
 SphereObject::SphereObject(int size) : Entity(size)
