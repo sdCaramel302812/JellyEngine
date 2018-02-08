@@ -6,6 +6,7 @@ UI::UI()
 {
 	_id = createID();
 	_callback_function = nullptr;
+	_hover_event = nullptr;
 }
 
 UI::UI(float x, float y, float height, float width) :UI()
@@ -70,6 +71,31 @@ void UI::callback()
 	else {
 		std::cerr << "ERROR::CALLBACK_FUNCTION_NOT_FIND" << std::endl;
 	}
+}
+
+void UI::setHover(CALL_BACK & hover)
+{
+	_hover_event = hover;
+}
+
+void UI::hover()
+{
+	if (_hover_event) {
+		_hover_event();
+	}
+	else {
+		std::cerr << "ERROR::HOVER_EVENT_FUNCTION_NOT_FIND" << std::endl;
+	}
+}
+
+void UI::setZ(int z)
+{
+	_z_value = z;
+}
+
+int UI::getZ()
+{
+	return _z_value;
 }
 
 int UI::_ui_num = 0;

@@ -1,6 +1,6 @@
 #include "Game.h"
 
-extern TPCamera TPcamera;
+extern Camera camera;
 
 Game::Game()
 {
@@ -30,9 +30,9 @@ void Game::render()
 {
 	if (state == ACTIVATE) {
 		glm::mat4 projection;
-		projection = glm::perspective(glm::radians(45.0f), (float)1920 / (float)1080, 0.1f, 100.0f);
+		projection = camera.getProjectMatrix();
 		glm::mat4 view;
-		view = TPcamera.getViewMatrix();
+		view = camera.getViewMatrix();
 
 
 		(Render::shaders.search("texture")).use();
@@ -108,10 +108,12 @@ void Game::textInit()
 	glGenBuffers(1, &VBO);
 	glBindVertexArray(VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 6 * 5, NULL, GL_DYNAMIC_DRAW);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), 0);
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), 0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void *)(4 * sizeof(float)));
+	glBindBuffer(GL_ARRAY_BUFFER, 1);
 	glBindVertexArray(0);
 	Render::addVAO("text", VAO);
 	Render::addVBO("text", VBO);

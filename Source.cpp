@@ -1,4 +1,4 @@
-﻿#define SOFTWARE_VERSION "0.3.3"
+﻿#define SOFTWARE_VERSION "ver 0.4.0a"
 
 // GLEW ( help you using functions without retreiving functions )
 #define _WIN32_WINNT 0x0500
@@ -45,7 +45,7 @@ glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 10.0f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -3.0f);
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
-TPCamera TPcamera(cameraPos, cameraUp);
+Camera camera(2);
 float dt = 0;
 float last_frame = 0;
 
@@ -58,21 +58,21 @@ void processInput(Scene &sc)
 	if (glfwGetKey(sc.window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(sc.window, true);
 	if (glfwGetKey(sc.window, GLFW_KEY_W) == GLFW_PRESS)
-		TPcamera.processKeyboard(FORWARD, dt);
+		camera.processKeyboard(FORWARD, dt);
 	if (glfwGetKey(sc.window, GLFW_KEY_S) == GLFW_PRESS)
-		TPcamera.processKeyboard(BACKWARD, dt);
+		camera.processKeyboard(BACKWARD, dt);
 	if (glfwGetKey(sc.window, GLFW_KEY_A) == GLFW_PRESS)
-		TPcamera.processKeyboard(LEFT, dt);
+		camera.processKeyboard(LEFT, dt);
 	if (glfwGetKey(sc.window, GLFW_KEY_D) == GLFW_PRESS)
-		TPcamera.processKeyboard(RIGHT, dt);
+		camera.processKeyboard(RIGHT, dt);
 	if (glfwGetKey(sc.window, GLFW_KEY_W) == GLFW_RELEASE && glfwGetKey(sc.window, GLFW_KEY_S) == GLFW_RELEASE && glfwGetKey(sc.window, GLFW_KEY_A) == GLFW_RELEASE && glfwGetKey(sc.window, GLFW_KEY_D) == GLFW_RELEASE) {
-		TPcamera._v.x *= 0.5;
-		TPcamera._v.z *= 0.5;
+		camera._v.x *= 0.5;
+		camera._v.z *= 0.5;
 	}
 	if (glfwGetKey(sc.window, GLFW_KEY_SPACE) == GLFW_PRESS)
-		TPcamera.processKeyboard(SPACE, dt);
+		camera.processKeyboard(SPACE, dt);
 	if (glfwGetKey(sc.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
-		TPcamera.processKeyboard(SHIFT, dt);
+		camera.processKeyboard(SHIFT, dt);
 	if (glfwGetKey(sc.window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) {
 		if (sc.isFullScreen()) {
 			sc.setFullScreen(false);
@@ -110,7 +110,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 
 	lastX = xpos;
 	lastY = ypos;
-	TPcamera.processMouseEvent(xoffset, yoffset);
+	camera.processMouseEvent(xoffset, yoffset);
 }
 
 //typedef BOOL(APIENTRY *PFNWGLSWAPINTERVALFARPROC)(int);
@@ -125,7 +125,7 @@ void aabbDebuger() {
 		glm::mat4 projection;
 		projection = glm::perspective(glm::radians(45.0f), (float)1920 / (float)1080, 0.1f, 100.0f);
 		glm::mat4 view;
-		view = TPcamera.getViewMatrix(); 
+		view = camera.getViewMatrix(); 
 		glm::mat4 model;
 		(Render::shaders.search("color")).use();
 		Render::shaders.search("color").setMat4("view", view);
@@ -148,10 +148,15 @@ void aabbDebuger() {
 	//////////////////////////////////////////////////////////////////////draw aabb
 }
 
+void showVersion() {
+	glm::vec3 color(0.9, 0.9f, 0.9f);
+	glm::vec2 pos(850.0f, 1000.0f);
+	TString tex(SOFTWARE_VERSION);
+	Render::drawText(tex, pos.x, pos.y, 1.0, color);
+}
 
 int main() {
 	Scene sc;
-
 
 	srand(time(NULL));
 	sc.setVSync(false);
@@ -319,7 +324,7 @@ int main() {
 		Render::addShader("color", "./color.vs", "./color.fs");
 		Render::addShader("color_ins", "./color_instance.vs", "./color.fs");
 		//*
-		for (int i = 0; i < 100; ++i) {
+		for (int i = 0; i < 1; ++i) {
 			Entity *sphere = new Entity(1944);
 			sphere->VAO = "sphere";
 			sphere->VBO = "sphere";
@@ -361,7 +366,7 @@ int main() {
 	//sphere->EBO = "sphere";
 	player->shader = "color_ins";
 	player->rigid.data.position = glm::vec3(0.0f, 11.0f, 0.5f);
-	//player->rigid.data.position = TPcamera.Position + TPcamera.radius * TPcamera.Front;
+	//player->rigid.data.position = camera.Position + camera.radius * camera.Front;
 	player->rigid._restitution_coeffient = 0;
 	player->rigid.type = SPHERE;
 	player->rigid._is_static = false;
@@ -482,7 +487,7 @@ int main() {
 
 
 	//how to get an object's type
-	cout << typeid(player).name() << endl;
+	//cout << typeid(player).name() << endl;
 
 	int lastClock = clock();
 	int count = 0;
@@ -507,18 +512,18 @@ int main() {
 
 		//test
 		if(is_player)
-			player->rigid.data.velocity = TPcamera._v;
+			player->rigid.data.velocity = camera._v;
 		//
 
 		game.update(dt);
 
 		//test
 		if (is_player) {
-			TPcamera.Position = player->rigid.data.position - TPcamera.radius * TPcamera.Front;
-			TPcamera._v = player->rigid.data.velocity;
+			camera.Position = player->rigid.data.position - camera.radius * camera.Front;
+			camera._v = player->rigid.data.velocity;
 		}
 		else {
-			TPcamera.Position += TPcamera._v * dt;
+			camera.Position += camera._v * dt;
 		}
 		//
 
@@ -526,12 +531,7 @@ int main() {
 
 		//test
 		//aabbDebuger();
-		glm::vec3 color(0.5, 0.8f, 0.2f);
-		glm::vec2 pos(100.0f, 100.0f);
-		//Render::drawCNString("opengl", color, pos);
-		TString tex(L"女子高生は最高だぜWWWwwWWW");
-		Render::drawText(tex, pos.x, pos.y, 1, color);
-
+		showVersion();
 		//
 
 		//cout << player->rigid.data.position.x << "\t" << player->rigid.data.position.y << "\t" << player->rigid.data.position.z << endl;
@@ -564,13 +564,13 @@ void processInput(GLFWwindow *window)
 
 	}
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-		TPcamera.processKeyboard(FORWARD, dt);
+		camera.processKeyboard(FORWARD, dt);
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-		TPcamera.processKeyboard(BACKWARD, dt);
+		camera.processKeyboard(BACKWARD, dt);
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-		TPcamera.processKeyboard(LEFT, dt);
+		camera.processKeyboard(LEFT, dt);
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-		TPcamera.processKeyboard(RIGHT, dt);
+		camera.processKeyboard(RIGHT, dt);
 	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
-		TPcamera.processKeyboard(SPACE, dt);
+		camera.processKeyboard(SPACE, dt);
 }

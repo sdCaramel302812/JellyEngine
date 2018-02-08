@@ -24,10 +24,18 @@ public:
 	void setCallback(CALL_BACK &callback);
 	void callback();
 
+	void setHover(CALL_BACK &hover);
+	void hover();
+
 	int _id;
 
+	void setZ(int z);
+	int getZ();
+
 private:
+	int _z_value = 1;
 	CALL_BACK _callback_function;
+	CALL_BACK _hover_event;
 	glm::vec2 _position;
 	glm::vec2 _height_width;
 	static int createID();

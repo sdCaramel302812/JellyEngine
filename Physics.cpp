@@ -1,7 +1,7 @@
 ﻿#include "Physics.h"
 #include <iostream>
 
-#define MAX_DT 0.016
+#define MAX_DT 0.032
 #define MIN_DT 0.001
 #define TERMINAL_SPEED 150
 #define ALLOW_DIST 0.001

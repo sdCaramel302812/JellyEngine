@@ -20,7 +20,7 @@ using std::endl;
 using nstd::dic;
 using nstd::hash;
 
-extern TPCamera TPcamera;
+extern Camera camera;
 extern Camera2D camera2d;
 
 
@@ -200,13 +200,15 @@ public:
 		///////////////////////////
 	}
 	/////////////////////////////////////////////////////////////////////////////////
-	static void drawText(wstring text, float x, float y, float scale, glm::vec3 color) {
+	static void drawText(wstring text, float x, float y, float scale, glm::vec3 color, float line_width = 0, float z = 1) {
 		shaders.search("text").use();
 		glm::mat4 projection = glm::ortho(0.0f, static_cast<GLfloat>(1280), 0.0f, static_cast<GLfloat>(720));
 		shaders.search("text").setFloat3("textColor", color.x, color.y, color.z);
 		shaders.search("text").setMat4("projection", projection);
 		glActiveTexture(GL_TEXTURE0);
 		glBindVertexArray(VAOs.search("text"));
+
+		float left_x = x;
 
 		std::wstring::const_iterator c;
 		for (c = text.begin(); c != text.end(); c++)
@@ -222,14 +224,14 @@ public:
 			GLfloat w = ch.Size.x * scale;
 			GLfloat h = ch.Size.y * scale;
 			// 对每个字符更新VBO
-			GLfloat vertices[6][4] = {
-				{ xpos,     ypos + h,   0.0, 0.0 },
-				{ xpos,     ypos,       0.0, 1.0 },
-				{ xpos + w, ypos,       1.0, 1.0 },
+			GLfloat vertices[6][5] = {
+				{ xpos,     ypos + h,   0.0, 0.0 , z },
+				{ xpos,     ypos,       0.0, 1.0 , z },
+				{ xpos + w, ypos,       1.0, 1.0 , z },
 
-				{ xpos,     ypos + h,   0.0, 0.0 },
-				{ xpos + w, ypos,       1.0, 1.0 },
-				{ xpos + w, ypos + h,   1.0, 0.0 }
+				{ xpos,     ypos + h,   0.0, 0.0 , z },
+				{ xpos + w, ypos,       1.0, 1.0 , z },
+				{ xpos + w, ypos + h,   1.0, 0.0 , z }
 			};
 			// 在四边形上绘制字形纹理
 			glBindTexture(GL_TEXTURE_2D, ch.textureID);
@@ -241,20 +243,27 @@ public:
 			glDrawArrays(GL_TRIANGLES, 0, 6);
 			// 更新位置到下一个字形的原点，注意单位是1/64像素
 			x += (ch.Advance >> 6) * scale; // 位偏移6个单位来获取单位为像素的值 (2^6 = 64)
+
+			//若超過限制寬度則換行
+			if (line_width != 0 && x - left_x > line_width) {
+				x = left_x;
+				y -= (ch.Advance >> 6)*scale;
+			}
 		}
 		glBindVertexArray(0);
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 	/////////////////////////////////////////////////////////////////////////////////
-	static void drawText(TString txt, float x, float y, float scale, glm::vec3 color) {
+	static void drawText(TString txt, float x, float y, float scale, glm::vec3 color, float line_width = 0, float z = 1) {
 		shaders.search("text").use();
-		glm::mat4 projection = glm::ortho(0.0f, static_cast<GLfloat>(1280), 0.0f, static_cast<GLfloat>(720));
+		glm::mat4 projection = glm::ortho(0.0f, static_cast<GLfloat>(1920), 0.0f, static_cast<GLfloat>(1080));
 		shaders.search("text").setFloat3("textColor", color.x, color.y, color.z);
 		shaders.search("text").setMat4("projection", projection);
 		glActiveTexture(GL_TEXTURE0);
 		glBindVertexArray(VAOs.search("text"));
 
 		wstring text = txt.data();
+		float left_x = x;
 
 		std::wstring::const_iterator c;
 		for (c = text.begin(); c != text.end(); c++)
@@ -270,14 +279,14 @@ public:
 			GLfloat w = ch.Size.x * scale;
 			GLfloat h = ch.Size.y * scale;
 			// 对每个字符更新VBO
-			GLfloat vertices[6][4] = {
-				{ xpos,     ypos + h,   0.0, 0.0 },
-				{ xpos,     ypos,       0.0, 1.0 },
-				{ xpos + w, ypos,       1.0, 1.0 },
+			GLfloat vertices[6][5] = {
+				{ xpos,     ypos + h,   0.0, 0.0 , z},
+				{ xpos,     ypos,       0.0, 1.0 , z},
+				{ xpos + w, ypos,       1.0, 1.0 , z},
 
-				{ xpos,     ypos + h,   0.0, 0.0 },
-				{ xpos + w, ypos,       1.0, 1.0 },
-				{ xpos + w, ypos + h,   1.0, 0.0 }
+				{ xpos,     ypos + h,   0.0, 0.0 , z},
+				{ xpos + w, ypos,       1.0, 1.0 , z},
+				{ xpos + w, ypos + h,   1.0, 0.0 , z}
 			};
 			// 在四边形上绘制字形纹理
 			glBindTexture(GL_TEXTURE_2D, ch.textureID);
@@ -289,6 +298,11 @@ public:
 			glDrawArrays(GL_TRIANGLES, 0, 6);
 			// 更新位置到下一个字形的原点，注意单位是1/64像素
 			x += (ch.Advance >> 6) * scale; // 位偏移6个单位来获取单位为像素的值 (2^6 = 64)
+
+			if (line_width != 0 && x - left_x > line_width) {
+				x = left_x;
+				y -= (ch.Advance >> 6)*scale;
+			}
 		}
 		glBindVertexArray(0);
 		glBindTexture(GL_TEXTURE_2D, 0);

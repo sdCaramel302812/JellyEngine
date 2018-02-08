@@ -14,3 +14,24 @@ TextItem::TextItem()
 TextItem::~TextItem()
 {
 }
+
+void TextItem::setText(TString txt)
+{
+	text = txt;
+}
+
+void TextItem::setText(wstring txt)
+{
+	text = txt;
+}
+
+void TextItem::setFontSize(int size)
+{
+	font_size = size;
+	scale = (float)size / 48.0f;
+}
+
+void TextItem::setLineWidth(float width)
+{
+	line_width = width;
+}
