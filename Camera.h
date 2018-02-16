@@ -43,7 +43,7 @@ public:
 	float speed;
 	float sensitivity;
 	float zoom;
-	float radius = 3;
+	float radius = 5;
 	bool _is_moving = false;
 	bool _is_jumping = false;
 	int _jump_cool_down;

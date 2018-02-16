@@ -164,6 +164,34 @@ public:
 	}
 	
 	/////////////////////////////////////////////////////////////////////////////////
+	static void draw(UI *ui) {
+		glm::mat4 view;
+		glm::mat4 projection = glm::ortho(0.0f, static_cast<GLfloat>(1280), 0.0f, static_cast<GLfloat>(720));
+		glm::mat4 model;
+		model = glm::translate(model, glm::vec3(ui->x(), ui->y(), ui->getZ()));
+		model = glm::scale(model, glm::vec3(ui->width(), ui->height(), 1));
+
+		glBindVertexArray(VAOs.search("ui_vao"));
+		if (ui->_texture != "") {
+			shaders.search("texture").use();
+			shaders.search("texture").setMat4("projection", projection);
+			shaders.search("color").setMat4("view", view);
+			Render::shaders.search("texture").setMat4("model", model);
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, Render::textures.search(ui->_texture));
+		}
+		else {
+			shaders.search("color").use();
+			shaders.search("color").setMat4("projection", projection);
+			shaders.search("color").setMat4("view", view);
+			shaders.search("color").setFloat3("color", ui->_color.x, ui->_color.y, ui->_color.z);
+			Render::shaders.search("color").setMat4("model", model);
+		}
+
+
+		glDrawArrays(ui->_draw_type, 0, 6);
+	}
+	/////////////////////////////////////////////////////////////////////////////////
 	static void updateInstance(glm::mat4 matrix[], int length) {
 		unsigned int VBO = VBOs.search("instance");
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -254,7 +282,7 @@ public:
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 	/////////////////////////////////////////////////////////////////////////////////
-	static void drawText(TString txt, float x, float y, float scale, glm::vec3 color, float line_width = 0, float z = 1) {
+	static void drawText(TString txt, float x, float y, float scale, glm::vec3 color, float line_width = 0, float z = 6) {
 		shaders.search("text").use();
 		glm::mat4 projection = glm::ortho(0.0f, static_cast<GLfloat>(1920), 0.0f, static_cast<GLfloat>(1080));
 		shaders.search("text").setFloat3("textColor", color.x, color.y, color.z);

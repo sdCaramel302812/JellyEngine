@@ -1,4 +1,4 @@
-﻿#define SOFTWARE_VERSION "ver 0.4.0a"
+﻿#define SOFTWARE_VERSION "ver 0.4.1"
 
 // GLEW ( help you using functions without retreiving functions )
 #define _WIN32_WINNT 0x0500
@@ -30,6 +30,7 @@
 #include "Render.h"
 #include "Game.h"
 #include <stdlib.h>
+#include "Button.h"
 //#include "Model.h"
 
 // Get error from GLFW for debuging
@@ -38,23 +39,17 @@
 //void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
 
-
-static GLint fogMode;
-
-glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 10.0f);
-glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -3.0f);
-glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
-
 Camera camera(2);
 float dt = 0;
 float last_frame = 0;
-
-Camera2D camera2d(cameraPos);
 
 bool is_player = false;
 
 void processInput(Scene &sc)
 {
+	if (glfwGetKey(sc.window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+
+	}
 	if (glfwGetKey(sc.window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(sc.window, true);
 	if (glfwGetKey(sc.window, GLFW_KEY_W) == GLFW_PRESS)
@@ -94,8 +89,13 @@ void processInput(Scene &sc)
 bool firstMouse = true;
 float lastX = 1080 / 2, lastY = 760 / 2;
 
+
+double mouse_x;
+double mouse_y;
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
+	mouse_x = xpos;
+	mouse_y = ypos;
 	if (firstMouse)
 	{
 		lastX = xpos;
@@ -111,6 +111,16 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 	lastX = xpos;
 	lastY = ypos;
 	camera.processMouseEvent(xoffset, yoffset);
+}
+
+bool is_mouse_press = false;
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
+	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+		is_mouse_press = true;
+	}
+	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
+		is_mouse_press = false;
+	}
 }
 
 //typedef BOOL(APIENTRY *PFNWGLSWAPINTERVALFARPROC)(int);
@@ -168,6 +178,7 @@ int main() {
 	//glEnable(GL_CULL_FACE);
 
 	glfwSetCursorPosCallback(sc.window, mouse_callback);
+	glfwSetMouseButtonCallback(sc.window, mouse_button_callback);
 
 	//wglSwapIntervalEXT = (PFNWGLSWAPINTERVALFARPROC)wglGetProcAddress("wglSwapIntervalEXT");
 	//wglSwapIntervalEXT(0);
@@ -236,6 +247,17 @@ int main() {
 	//封裝測試
 	Game game;
 	game.Init();
+	game.textureInit();
+	game.uiInit();
+	
+
+	Button *button = new Button(200, 200, 300, 300);
+	button->setButtonText("button");
+	button->setCallback([=]() {
+		//std::cout << "click" << endl;
+	});
+	ObjectManager::addUI(button);
+
 
 	Render::addVBO(vertices, 288, "box");
 	int pos[3] = { 0,1,2 };
@@ -244,6 +266,7 @@ int main() {
 	Render::addVAO(pos, size, shift, 3, "box", "box");
 	Render::addTexture("./container.png", "box");
 	Render::addShader("texture", "./texture.vs", "./texture.fs");
+	Render::addShader("texture_ins", "./texture_instance.vs", "texture.fs");
 
 
 	for (int i = 0; i < 5; ++i) {
@@ -347,7 +370,7 @@ int main() {
 		//sphere->EBO = "sphere";
 		sphere1->shader = "color_ins";
 		sphere1->rigid._is_static = false;
-		sphere1->rigid.data.position = glm::vec3(0.0f, 10.0f, 0.0f);
+		sphere1->rigid.data.position = glm::vec3(0.0f, 5.0f, 0.0f);
 		sphere1->rigid.data.velocity = glm::vec3(0.0f, 0.0f, 0.0f);
 		sphere1->rigid.setRadius(0.5);
 		sphere1->rigid._mass = 100;
@@ -365,7 +388,7 @@ int main() {
 	player->VBO = "sphere";
 	//sphere->EBO = "sphere";
 	player->shader = "color_ins";
-	player->rigid.data.position = glm::vec3(0.0f, 11.0f, 0.5f);
+	player->rigid.data.position = glm::vec3(0.0f, 4.0f, 0.5f);
 	//player->rigid.data.position = camera.Position + camera.radius * camera.Front;
 	player->rigid._restitution_coeffient = 0;
 	player->rigid.type = SPHERE;
@@ -532,6 +555,9 @@ int main() {
 		//test
 		//aabbDebuger();
 		showVersion();
+		game.mouseCallback(sc.window, mouse_x, mouse_y);
+		game.input(sc, dt);
+		game.mouseButtonCallback(is_mouse_press);
 		//
 
 		//cout << player->rigid.data.position.x << "\t" << player->rigid.data.position.y << "\t" << player->rigid.data.position.z << endl;

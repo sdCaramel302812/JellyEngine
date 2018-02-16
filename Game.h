@@ -9,6 +9,7 @@
 #include "ObjectManager.h"
 #include "TextItem.h"
 #include "ResourceManager.h"
+#include "Scene.h"
 using std::queue;
 
 
@@ -38,9 +39,21 @@ public:
 	Game();
 	~Game();
 	void Init();
+	void textInit();
+	void textureInit();
+	void uiInit();
+
 	void render();
 	void update(float dt);
-	void input();
-	void textInit();
+	void input(Scene &sc, float dt);
+	void mouseCallback(GLFWwindow* window, double xpos, double ypos);
+	void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
+
+	//test for mouse button callback
+	void mouseButtonCallback(bool mouse_state);
+
+private:
+	double _mouse_x;
+	double _mouse_y;
 };
 

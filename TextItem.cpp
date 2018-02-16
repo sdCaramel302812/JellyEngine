@@ -8,6 +8,8 @@
 
 TextItem::TextItem()
 {
+	font_size = 48;
+	scale = 1;
 }
 
 
@@ -34,4 +36,9 @@ void TextItem::setFontSize(int size)
 void TextItem::setLineWidth(float width)
 {
 	line_width = width;
+}
+
+void TextItem::draw()
+{
+	//Render::drawText(text, x(), y(), scale, glm::vec3(255, 255, 255));
 }

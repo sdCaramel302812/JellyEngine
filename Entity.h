@@ -32,7 +32,6 @@ enum RigidType {
 	SPHERE,				//球
 	CYLINDER,			//圓柱
 	LINE,				//線
-	EVENT_COLLIDER,		//事件偵測器
 };
 
 enum EntityType {
@@ -44,6 +43,7 @@ enum EntityType {
 	BACK_GROUND,		//只存取背景圖，不碰撞
 	GROUND,				//只包含地板碰撞箱，不繪製
 	WALL,				//只包含牆壁碰撞箱，不繪製
+	EVENT_COLLIDER,		//事件偵測器
 };
 
 class DynamicData {
@@ -128,21 +128,25 @@ public:
 	void setSize(int);
 	int size();
 
+	glm::mat4 _model_matrix;//rotate * scale
+
 	int _id;
 	EntityType e_type;
 
 	AABBNode *_aabb_node = nullptr;
 
 	bool isVisible();
+	void setVisible(bool value);
 	void setTrigger(bool value);
 	bool isTrigger();
 	virtual void trigger();
-private:
+protected:
 	int vertex_size;	//繪製時會用到(頂點數量)
 	bool _trigger;
 	bool _visible;
 	static int createID();
 	static int _obj_num;
+	
 
 	
 };
@@ -157,8 +161,22 @@ public:
 	SphereObject(int size = 0);
 };
 
-class GroundObject :public Entity {
+class WallObject :public Entity {
 public:
-	GroundObject(int size = 0);
+	WallObject(glm::vec3 point1, glm::vec3 point2);
 };
 
+class BackgroundObject :public Entity {
+public:
+	BackgroundObject(std::string texture, glm::vec3 left_down_back, glm::vec3 right_top_front);
+};
+
+class GroundObject :public Entity {
+public:
+	GroundObject(glm::vec3 left_down_back, glm::vec3 right_top_front);
+};
+
+class MovableObject :public Entity {
+public:
+	MovableObject(std::string texture, glm::vec3 position, glm::vec2 texCood1,glm::vec2 texCood2);//texCood 用來區分貼圖所在位置
+};

@@ -1,6 +1,7 @@
 #pragma once
 #include "TextItem.h"
 #include "UI.h"
+#include "Render.h"
 
 class Button : public UI
 {
@@ -16,6 +17,8 @@ public:
 	
 	void setColor(glm::vec4 color);
 	void setColor(float r, float g, float b, float a = 1);
+
+	virtual void draw();
 
 	wstring &getText();
 	TextItem &getTextItem();

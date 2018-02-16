@@ -62,8 +62,8 @@ namespace nstd {
 		vector<list<dic<T>>> table;
 		int size;//size of table
 
-		int preHashing(string key) {
-			int exp = 8, key_value = 0, p = 1;
+		unsigned long long int preHashing(string key) {
+			unsigned long long int exp = 8, key_value = 0, p = 1;
 			for (int i = key.size(); i > 0; --i) {
 				key_value += key[i] * p;
 				p *= exp;

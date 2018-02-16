@@ -1,8 +1,10 @@
 #include "Entity.h"
 #include <iostream>
+#include <cmath>
 using namespace std;
 
 #define CONTAIN_LIMIT 0.1
+#define FLOOR_HEIGHT 5
 
 AABB::AABB()
 {
@@ -94,6 +96,11 @@ int Entity::size()
 bool Entity::isVisible()
 {
 	return _visible;
+}
+
+void Entity::setVisible(bool value)
+{
+	_visible = value;
 }
 
 void Entity::setTrigger(bool value)
@@ -259,14 +266,73 @@ SphereObject::SphereObject(int size) : Entity(size)
 {
 }
 
-GroundObject::GroundObject(int size) : Entity(size)
-{
-}
-
 Player::Player(int size) : Entity(size)
 {
 }
 
+WallObject::WallObject(glm::vec3 point1, glm::vec3 point2) : Entity(6)
+{
+	rigid._is_static = true;
+	_visible = false;
+	rigid._restitution_coeffient = 0.3;
+	rigid.type = RECTANGLE;
+	rigid._mass = 300000000;
+	vector<glm::vec3> rigidVer;
+	glm::vec3 ver1 = point1;
+	glm::vec3 ver2 = point2;
+	glm::vec3 ver3 = point2;
+	ver3.y += FLOOR_HEIGHT;
+	glm::vec3 ver4 = point1;
+	ver3.y += FLOOR_HEIGHT;
+	rigidVer.push_back(ver1);
+	rigidVer.push_back(ver2);
+	rigidVer.push_back(ver3);
+	rigidVer.push_back(ver4);
+	rigid.setVertex(rigidVer);
+	rigid.setAABB();
+}
 
+BackgroundObject::BackgroundObject(string texture, glm::vec3 left_down_back, glm::vec3 right_top_front) : Entity(6)
+{
+	float height = right_top_front.x - left_down_back.x;
+	float width = right_top_front.z - left_down_back.z;
+	this->texture = texture;
+	glm::mat4 scale;
+	glm::scale(scale, glm::vec3(height, 1, width));
+	glm::mat4 rotate;
+	rotate = glm::rotate(rotate, glm::radians(90.0f), glm::vec3(0, 0, 1));
+	rotate = glm::rotate(rotate, atan2(height, width), glm::vec3(0, 1, 0));
+	_model_matrix = rotate * scale;
+	VAO = "instance_texture";
+	rigid.data.position = glm::vec3(left_down_back.x, left_down_back.y, left_down_back.z);
+}
 
+GroundObject::GroundObject(glm::vec3 left_down_back, glm::vec3 right_top_front) : Entity(6)
+{
+	rigid._is_static = true;
+	_visible = false;
+	rigid._restitution_coeffient = 0.3;
+	rigid.type = RECTANGLE;
+	rigid._mass = 300000000;
+	vector<glm::vec3> rigidVer;
+	glm::vec3 ver1 = left_down_back;
+	glm::vec3 ver2 = glm::vec3(left_down_back.x, left_down_back.y, right_top_front.z);
+	glm::vec3 ver3 = right_top_front;
+	glm::vec3 ver4 = glm::vec3(right_top_front.x, right_top_front.y, left_down_back.z);
+	rigidVer.push_back(ver1);
+	rigidVer.push_back(ver2);
+	rigidVer.push_back(ver3);
+	rigidVer.push_back(ver4);
+	rigid.setVertex(rigidVer);
+	rigid.setAABB();
+}
 
+MovableObject::MovableObject(std::string texture, glm::vec3 position, glm::vec2 texCood1, glm::vec2 texCood2)
+{
+	rigid.type = SPHERE;
+	rigid.data.position = position;
+	rigid.setRadius(0.5);
+	this->texture = texture;
+	rigid._restitution_coeffient = 0;
+	rigid.setAABB();
+}

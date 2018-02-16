@@ -17,6 +17,6 @@ public:
 	static vector<RenderEvent<Entity *> *> color_render_event;
 
 	//將不同材質做分類，減少 set uniform 次數
-	static void eventSort(vector<RenderEvent<Entity *> *>);
+	static void eventSort(vector<RenderEvent<Entity *> *> &list);
 };
 

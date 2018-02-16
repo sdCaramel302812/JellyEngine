@@ -8,6 +8,7 @@ Button::Button()
 
 Button::Button(float x, float y, float height, float width) : UI(x, y, height, width)
 {
+	button_text.setXY(x, y);
 }
 
 
@@ -45,6 +46,12 @@ void Button::setColor(glm::vec4 color)
 void Button::setColor(float r, float g, float b, float a)
 {
 	_color = glm::vec4(r, g, b, a);
+}
+
+void Button::draw()
+{
+	Render::drawText(getTextItem().text, getTextItem().x(), getTextItem().y(), getTextItem().scale, glm::vec3(1.0, 1.0, 1.0));
+	Render::draw(this);
 }
 
 wstring & Button::getText()

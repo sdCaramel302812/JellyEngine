@@ -4,7 +4,7 @@
 #define MAX_DT 0.032
 #define MIN_DT 0.001
 #define TERMINAL_SPEED 150
-#define ALLOW_DIST 0.001
+#define ALLOW_DIST 0.0001
 const float Physics::g = 9.8;
 
 void Physics::displace(Entity * obj,float dt)

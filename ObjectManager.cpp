@@ -15,6 +15,24 @@ ObjectManager::~ObjectManager()
 {
 }
 
+void ObjectManager::addEntity(Entity *obj)
+{
+	object_list.push_back(obj);
+	aabb_tree.add(obj);
+}
+
+void ObjectManager::removeEntity(Entity *obj)
+{
+	aabb_tree.remove(obj->_aabb_node);
+	for (std::vector<Entity *>::iterator itr = object_list.begin(); itr != object_list.end(); ++itr) {
+		if (*itr == obj) {
+			object_list.erase(itr);
+			break;
+		}
+	}
+	delete obj;
+}
+
 std::vector<UI*>& ObjectManager::getUI()
 {
 	return ui_list;

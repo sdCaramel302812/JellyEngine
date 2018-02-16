@@ -58,13 +58,15 @@ void UI::setWidth(float width)
 	_height_width.y = width;
 }
 
-void UI::setCallback(CALL_BACK & callback)
+void UI::setCallback(const CALL_BACK & callback)
 {
 	_callback_function = callback;
+	_has_callback = true;
 }
 
 void UI::callback()
 {
+	std::cout << "callback" << std::endl;
 	if (_callback_function) {
 		_callback_function();
 	}
@@ -73,9 +75,15 @@ void UI::callback()
 	}
 }
 
-void UI::setHover(CALL_BACK & hover)
+bool UI::hasCallback()
+{
+	return _has_callback;
+}
+
+void UI::setHover(const CALL_BACK & hover)
 {
 	_hover_event = hover;
+	_has_hover = true;
 }
 
 void UI::hover()
@@ -88,6 +96,25 @@ void UI::hover()
 	}
 }
 
+bool UI::hasHover()
+{
+	return _has_hover;
+}
+
+void UI::draw()
+{
+}
+
+bool UI::visable()
+{
+	return _visable;
+}
+
+void UI::setVisable(bool value)
+{
+	_visable = value;
+}
+
 void UI::setZ(int z)
 {
 	_z_value = z;
@@ -96,6 +123,21 @@ void UI::setZ(int z)
 int UI::getZ()
 {
 	return _z_value;
+}
+
+void UI::setTexture(string texture)
+{
+	_texture = texture;
+}
+
+void UI::setColor(glm::vec3 color)
+{
+	_color = color;
+}
+
+void UI::setDrawType(GLenum type)
+{
+	_draw_type = type;
 }
 
 int UI::_ui_num = 0;

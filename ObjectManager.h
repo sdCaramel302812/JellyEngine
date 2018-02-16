@@ -11,6 +11,8 @@ class ObjectManager
 public:
 	ObjectManager();
 	~ObjectManager();
+	static void addEntity(Entity *);
+	static void removeEntity(Entity *);
 	static std::vector<Entity *> object_list;
 	static AABBTree aabb_tree;
 	

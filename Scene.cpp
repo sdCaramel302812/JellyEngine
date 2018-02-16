@@ -47,7 +47,7 @@ Scene::Scene(int wid, int hei)
 	setVSync(true);
 
 	//set cursor disabled
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	//Test ts;
 	HWND hWnd = GetConsoleWindow(); //隱藏視窗1
