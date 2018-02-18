@@ -15,24 +15,27 @@ class UI
 {
 public:
 	typedef std::function<void(void)> CALL_BACK;
+	typedef std::function<void(UI *)> HOVER_CALL_BACK;
 
 	UI();
-	UI(float x, float y, float height, float width);
+	UI(float x, float y, float width, float height);
 	~UI();
 	float x();
 	float y();
 	float height();
 	float width();
-	void setXY(float x, float y);
-	void setHeight(float height);
-	void setWidth(float width);
+	virtual void setXY(float x, float y);
+	virtual void setHeight(float height);
+	virtual void setWidth(float width);
 
 	void setCallback(const CALL_BACK &callback);
-	void callback();
+	virtual void callback();
 	bool hasCallback();
 
-	void setHover(const CALL_BACK &hover);
-	void hover();
+	void setHoverIn(const HOVER_CALL_BACK &hover);
+	void setHoverOut(const HOVER_CALL_BACK &hover);
+	virtual void hoverIn();
+	virtual void hoverOut();
 	bool hasHover();
 
 	virtual void draw();
@@ -42,21 +45,23 @@ public:
 
 	int _id;
 
-	void setZ(int z);
-	int getZ();
+	void setZ(float z);
+	float getZ();
 
 	string _texture = "";
-	glm::vec3 _color = glm::vec3(0.0f, 0.0f, 0.0f);
+	glm::vec4 _color = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 	GLenum _draw_type = GL_TRIANGLES;
 	void setTexture(string texture);
-	void setColor(glm::vec3 color);
+	void setColor(glm::vec4 color);
+	void setColor(float r, float g, float b, float a);
 	void setDrawType(GLenum type);
 
-private:
+protected:
 	bool _visable = true;
-	int _z_value = 1;
+	float _z_value = 0;
 	CALL_BACK _callback_function;
-	CALL_BACK _hover_event;
+	HOVER_CALL_BACK _hover_in;
+	HOVER_CALL_BACK _hover_out;
 	bool _has_hover = false;
 	bool _has_callback = false;
 	glm::vec2 _position;

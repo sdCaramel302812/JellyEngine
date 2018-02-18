@@ -18,13 +18,8 @@ static void foo();
 enum GameState {
 	PAUSE,
 	MENU,
-	ACTIVATE
-};
-
-enum CameraType {
-	FP_CAMERA,
-	TP_CAMERA,
-	CAMERA_2D,
+	ACTIVATE,
+	LEVEL_EDITOR,
 };
 
 class Game

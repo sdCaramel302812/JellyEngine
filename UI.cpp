@@ -6,10 +6,11 @@ UI::UI()
 {
 	_id = createID();
 	_callback_function = nullptr;
-	_hover_event = nullptr;
+	_hover_in = nullptr;
+	_hover_out = nullptr;
 }
 
-UI::UI(float x, float y, float height, float width) :UI()
+UI::UI(float x, float y, float width, float height) :UI()
 {
 	_position.x = x;
 	_position.y = y;
@@ -66,7 +67,6 @@ void UI::setCallback(const CALL_BACK & callback)
 
 void UI::callback()
 {
-	std::cout << "callback" << std::endl;
 	if (_callback_function) {
 		_callback_function();
 	}
@@ -80,16 +80,32 @@ bool UI::hasCallback()
 	return _has_callback;
 }
 
-void UI::setHover(const CALL_BACK & hover)
+void UI::setHoverIn(const HOVER_CALL_BACK & hover)
 {
-	_hover_event = hover;
+	_hover_in = hover;
 	_has_hover = true;
 }
 
-void UI::hover()
+void UI::setHoverOut(const HOVER_CALL_BACK & hover)
 {
-	if (_hover_event) {
-		_hover_event();
+	_hover_out = hover;
+	_has_hover = true;
+}
+
+void UI::hoverIn()
+{
+	if (_hover_in) {
+		_hover_in(this);
+	}
+	else {
+		std::cerr << "ERROR::HOVER_EVENT_FUNCTION_NOT_FIND" << std::endl;
+	}
+}
+
+void UI::hoverOut()
+{
+	if (_hover_out) {
+		_hover_out(this);
 	}
 	else {
 		std::cerr << "ERROR::HOVER_EVENT_FUNCTION_NOT_FIND" << std::endl;
@@ -115,12 +131,12 @@ void UI::setVisable(bool value)
 	_visable = value;
 }
 
-void UI::setZ(int z)
+void UI::setZ(float z)
 {
 	_z_value = z;
 }
 
-int UI::getZ()
+float UI::getZ()
 {
 	return _z_value;
 }
@@ -130,9 +146,14 @@ void UI::setTexture(string texture)
 	_texture = texture;
 }
 
-void UI::setColor(glm::vec3 color)
+void UI::setColor(glm::vec4 color)
 {
 	_color = color;
+}
+
+void UI::setColor(float r, float g, float b, float a)
+{
+	_color = glm::vec4(r, g, b, a);
 }
 
 void UI::setDrawType(GLenum type)

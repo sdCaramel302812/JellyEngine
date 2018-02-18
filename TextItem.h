@@ -3,7 +3,7 @@
 #include "nstdlib.h"
 #include <ft2build.h>
 #include <map>
-//#include "Render.h"
+#include "Render.h"
 #include FT_FREETYPE_H 
 using nstd::TString;
 
@@ -13,6 +13,7 @@ class TextItem : public UI
 public:
 
 	TextItem();
+	TextItem(float x, float y, float width, float height);
 	~TextItem();
 	void setText(TString txt);
 	void setText(wstring txt);
@@ -22,9 +23,9 @@ public:
 	virtual void draw();
 
 	TString text;
-	float scale;
-	int font_size;
-	float line_width;
+	float scale = 1;
+	int font_size = 48;
+	float line_width = 0;
 
 };
 

@@ -1,7 +1,8 @@
 #include "ResourceManager.h"
 
 
-std::map<wchar_t, Character> ResourceManager::Characters;
+string ResourceManager::_file_name;
+string ResourceManager::_path_name;
 
 ResourceManager::ResourceManager()
 {
@@ -12,62 +13,59 @@ ResourceManager::~ResourceManager()
 {
 }
 
-void ResourceManager::addGlyph(wchar_t c)
+
+void ResourceManager::loadResource(char * fileName)
 {
-
-	FT_Library ft;
-	if (FT_Init_FreeType(&ft)) {
-		std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
-	}
-
-	FT_Face face;
-	if (FT_New_Face(ft, "../fonts/SourceHanSansTC-Normal.otf", 0, &face)) {
-		std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
-	}
-
-	// Set size to load glyphs as
-	FT_Set_Pixel_Sizes(face, 0, 48);
-
-	// Disable byte-alignment restriction
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-	// Load first 128 characters of ASCII set
-		// Load character glyph 
-		if (FT_Load_Char(face, c, FT_LOAD_RENDER))
-		{
-			std::cout << "ERROR::FREETYTPE: Failed to load Glyph" << std::endl;
-		}
-		// Generate texture
-		GLuint texture;
-		glGenTextures(1, &texture);
-		glBindTexture(GL_TEXTURE_2D, texture);
-		glTexImage2D(
-			GL_TEXTURE_2D,
-			0,
-			GL_RED,
-			face->glyph->bitmap.width,
-			face->glyph->bitmap.rows,
-			0,
-			GL_RED,
-			GL_UNSIGNED_BYTE,
-			face->glyph->bitmap.buffer
-		);
-		// Set texture options
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		// Now store character for later use
-		Character character = {
-			texture,
-			glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
-			glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
-			face->glyph->advance.x
-		};
-		Characters.insert(std::pair<wchar_t, Character>(c, character));
+	FILE *inFile;
+	fopen_s(&inFile, fileName, "r");
+	char content[512];
+	char *buf;
+	string target;
+	fread(content, 512, 1, inFile);
 	
-	glBindTexture(GL_TEXTURE_2D, 0);
-	// Destroy FreeType once we're finished
-	FT_Done_Face(face);
-	FT_Done_FreeType(ft);
+	char *word;
+	
+	word = strtok_s(content, "< =>\n\t", &buf);
+	while (word != NULL) {
+		if (strcmp(word, "Path")) {
+			target = "Path";
+		}
+		if (strcmp(word, "/Path")) {
+			_path_name = "";
+		}
+		if (strcmp(word, "Image")) {
+			target = "Image";
+		}
+		if (strncmp(word, "\"", 1) == 0) {
+			string name;
+			string key;
+			for (char *c = word + 1; *c != '"'; ++c) {
+				if (*c != '"') {
+					name.push_back(*c);
+				}
+			}
+			for (char *c = word + 1; *c != '"'; ++c) {
+				if (*c == '.' && target == "Image") {
+					break;
+				}
+				if (*c != '"') {
+					key.push_back(*c);
+				}
+			}
+			if (target == "Path") {
+				_path_name = name;
+				
+			}
+			if (target == "Image") {
+				_file_name = _path_name;
+				_file_name.append(name);
+				
+				Render::addTexture(_file_name, key);
+			}
+		}
+
+		word = strtok_s(NULL, "< =>\n\t", &buf);
+	}
+
+	fclose(inFile);
 }

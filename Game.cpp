@@ -1,4 +1,6 @@
 #include "Game.h"
+#define SCENE_WIDTH 1280
+#define SCENE_HEIGHT 720
 
 extern Camera camera;
 
@@ -22,7 +24,7 @@ void Game::Init()
 	Render::addShader("texture", "./texture.vs", "./texture.fs");
 	Render::addShader("texture_ins", "./texture_instance.vs", "texture.fs");
 	Render::addShader("color", "./color.vs", "./color.fs");
-	Render::addShader("color_ins", "./color_instance.vs", "./color.fs");
+	Render::addShader("color_ins", "./color_instance.vs", "./color_instance.fs");
 	textInit();
 }
 
@@ -168,14 +170,21 @@ void Game::input(Scene &sc, float dt)
 void Game::mouseCallback(GLFWwindow * window, double xpos, double ypos)
 {
 	_mouse_x = xpos;
-	_mouse_y = ypos;
-	//cout << xpos << "\t" << ypos << endl;
+	_mouse_y = SCENE_HEIGHT - ypos;
+	_mouse_x /= SCENE_WIDTH;
+	_mouse_y /= SCENE_HEIGHT;
+	_mouse_x *= 1920;
+	_mouse_y *= 1080;
+	//cout << _mouse_x << "\t" << _mouse_y << endl;
 	for (int i = 0; i < ObjectManager::getUI().size(); ++i) {
 		if (ObjectManager::getUI().at(i)->x() > _mouse_x) {
-			break;
+		//	break;
 		}
 		if (_mouse_x - ObjectManager::getUI().at(i)->x() < ObjectManager::getUI().at(i)->width() && _mouse_x > ObjectManager::getUI().at(i)->x() && _mouse_y - ObjectManager::getUI().at(i)->y() < ObjectManager::getUI().at(i)->height() && _mouse_y > ObjectManager::getUI().at(i)->y() && ObjectManager::getUI().at(i)->hasHover()) {
-			ObjectManager::getUI().at(i)->hover();
+			ObjectManager::getUI().at(i)->hoverIn();
+		}
+		else if(ObjectManager::getUI().at(i)->hasHover()){
+			ObjectManager::getUI().at(i)->hoverOut();
 		}
 	}
 }
@@ -257,10 +266,10 @@ void Game::uiInit()
 	float vbo_vertex[] = {
 		0.0f, 0.0f, 0.0f,
 		1.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 1.0f,
-		0.0f, 0.0f, 1.0f,
+		0.0f, 1.0f, 0.0f,
+		0.0f, 1.0f, 0.0f,
 		1.0f, 0.0f, 0.0f,
-		1.0f, 0.0f, 1.0f,
+		1.0f, 1.0f, 0.0f,
 	};
 	Render::addVBO(vbo_vertex, 18, "ui_vbo");
 	int pos[1] = { 0 };

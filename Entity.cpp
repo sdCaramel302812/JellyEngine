@@ -336,3 +336,30 @@ MovableObject::MovableObject(std::string texture, glm::vec3 position, glm::vec2 
 	rigid._restitution_coeffient = 0;
 	rigid.setAABB();
 }
+
+StairObject::StairObject(glm::vec3 left_down_back, glm::vec3 right_top_front, float rotate, int type)
+{
+	rigid._is_static = true;
+	_visible = false;
+	rigid._restitution_coeffient = 0.3;
+	rigid.type = RECTANGLE;
+	rigid._mass = 300000000;
+	if (type == 1) {
+		vector<glm::vec3> rigidVer;
+		glm::vec3 ver1 = left_down_back;
+		glm::vec3 ver2 = glm::vec3(left_down_back.x, left_down_back.y, right_top_front.z);
+		glm::vec3 ver3 = right_top_front;
+		glm::vec3 ver4 = glm::vec3(right_top_front.x, right_top_front.y, left_down_back.z);
+		rigidVer.push_back(ver1);
+		rigidVer.push_back(ver2);
+		rigidVer.push_back(ver3);
+		rigidVer.push_back(ver4);
+		rigid.setVertex(rigidVer);
+		rigid.setAABB();
+		_lower_floor = left_down_back.y / FLOOR_HEIGHT;
+		_higher_floor = right_top_front.y / FLOOR_HEIGHT;
+	}
+	else if (type == 2) {
+
+	}
+}

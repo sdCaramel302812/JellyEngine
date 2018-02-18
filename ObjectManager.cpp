@@ -103,19 +103,10 @@ void ObjectManager::insertionSortForUI(std::vector<UI*> &list)
 		for (int i = 0; i < list.size(); ++i) {
 			sorted_list.at(i) = list.at(i);
 			for (int j = i; i > 0; --j) {
-				if (sorted_list.at(j)->x() <= sorted_list.at(j-1)->x()) {
-					if (sorted_list.at(j)->x() == sorted_list.at(j - 1)->x()) {
-						if (sorted_list.at(j)->y() < sorted_list.at(j - 1)->y()) {
-							UI *tmp = sorted_list.at(j);
-							sorted_list.at(j) = sorted_list.at(j - 1);
-							sorted_list.at(j - 1) = tmp;
-						}
-					}
-					else {
-						UI *tmp = sorted_list.at(j);
-						sorted_list.at(j) = sorted_list.at(j - 1);
-						sorted_list.at(j - 1) = tmp;
-					}
+				if (sorted_list.at(j)->x() < sorted_list.at(j-1)->x()) {
+					UI *tmp = sorted_list.at(j);
+					sorted_list.at(j) = sorted_list.at(j - 1);
+					sorted_list.at(j - 1) = tmp;
 				}
 				else {
 					break;

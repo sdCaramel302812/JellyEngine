@@ -1,6 +1,7 @@
 ﻿#include "Physics.h"
 #include <iostream>
 
+
 #define MAX_DT 0.032
 #define MIN_DT 0.001
 #define TERMINAL_SPEED 150
@@ -255,31 +256,31 @@ int Physics::collisionDetect(Entity * A, Entity * B, MotionEvent<Entity*>* event
 		if (dist < r) {
 			glm::vec3 proj = A->rigid.data.position - normal*dist;//圓心在平面上投影點
 
-			std::vector<glm::vec3> pos;
-			pos.push_back(proj);
-			//if (GJK(pos, B->rigid.getVertices())) {
-				if (dist < r - ALLOW_DIST) {
-					return -1;
-				}
-				else {
-					return 1;
-				}
-			//}
+			//將平面及投影點轉換到 XY 平面，再依照座標軸比較投影點是否位於矩形內部
+			glm::vec3 line1 = B->rigid.getVertices().at(3) - B->rigid.getVertices().at(0);
+			glm::vec3 line2 = B->rigid.getVertices().at(1) - B->rigid.getVertices().at(0);
+			glm::mat3 transMat;
+			transMat[0][0] = line1[0];
+			transMat[1][0] = line1[1];
+			transMat[2][0] = line1[2];
+			transMat[0][1] = line2[0];
+			transMat[1][1] = line2[1];
+			transMat[2][1] = line2[2];
+			transMat[0][2] = B->rigid.getNormal().at(0)[0];
+			transMat[1][2] = B->rigid.getNormal().at(0)[1];
+			transMat[2][2] = B->rigid.getNormal().at(0)[2];
+			float x0, x1, x2, y0, y1, y2;
+			glm::vec3 newPoint1 = transMat * B->rigid.getVertices().at(0);
+			glm::vec3 newPoint2 = transMat * B->rigid.getVertices().at(2);
+			glm::vec3 newPoint = transMat * proj;
+			x0 = newPoint.x;
+			y0 = newPoint.y;
+			x1 = newPoint1.x;
+			y1 = newPoint1.y;
+			x2 = newPoint2.x;
+			y2 = newPoint2.y;
 
-			glm::vec3 line1 = B->rigid.getVertices().at(0) - B->rigid.getVertices().at(3);
-			glm::vec3 line2 = B->rigid.getVertices().at(2) - B->rigid.getVertices().at(1);
-			glm::vec3 line3 = B->rigid.getVertices().at(1) - B->rigid.getVertices().at(0);
-			glm::vec3 line4 = B->rigid.getVertices().at(3) - B->rigid.getVertices().at(2);
-			glm::vec3 cross1 = glm::cross(line1, proj - B->rigid.getVertices().at(3));
-			glm::vec3 cross2 = glm::cross(line2, proj - B->rigid.getVertices().at(1));
-			glm::vec3 cross3 = glm::cross(line3, proj - B->rigid.getVertices().at(0));
-			glm::vec3 cross4 = glm::cross(line4, proj - B->rigid.getVertices().at(2));
-			float dist2line1 = (pow(cross1.x, 2) + pow(cross1.y, 2) + pow(cross1.z, 2)) / (pow(line1.x, 2) + pow(line1.y, 2) + pow(line1.z, 2));  //平方
-			float dist2line2 = (pow(cross2.x, 2) + pow(cross2.y, 2) + pow(cross2.z, 2)) / (pow(line2.x, 2) + pow(line2.y, 2) + pow(line2.z, 2));  //平方
-			float dist2line3 = (pow(cross3.x, 2) + pow(cross3.y, 2) + pow(cross3.z, 2)) / (pow(line3.x, 2) + pow(line3.y, 2) + pow(line3.z, 2));  //平方
-			float dist2line4 = (pow(cross4.x, 2) + pow(cross4.y, 2) + pow(cross4.z, 2)) / (pow(line4.x, 2) + pow(line4.y, 2) + pow(line4.z, 2));  //平方
-			//投影點距四邊距離皆小於面長度時即發生碰撞
-			if (dist2line1 < r + (pow(line3.x, 2) + pow(line3.y, 2) + pow(line3.z, 2)) && dist2line2 < (pow(line3.x, 2) + pow(line3.y, 2) + pow(line3.z, 2)) && dist2line3 < (pow(line1.x, 2) + pow(line1.y, 2) + pow(line1.z, 2)) && dist2line4 < (pow(line1.x, 2) + pow(line1.y, 2) + pow(line1.z, 2))) {  //平方
+			if (x0 > x1 - r&&x1<x2 + r&&y0>y1 - r&&y0 < y2 + r) {
 				if (dist < r - ALLOW_DIST) {
 					return -1;
 				}
@@ -288,6 +289,8 @@ int Physics::collisionDetect(Entity * A, Entity * B, MotionEvent<Entity*>* event
 				}
 			}
 		}
+
+
 
 		//
 		return 0;

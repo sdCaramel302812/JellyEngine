@@ -75,6 +75,12 @@
     <ClInclude Include="LevelEditor.h">
       <Filter>標頭檔</Filter>
     </ClInclude>
+    <ClInclude Include="LevelEditorUI.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="Define.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
@@ -137,6 +143,9 @@
     <ClCompile Include="LevelEditor.cpp">
       <Filter>原始程式檔</Filter>
     </ClCompile>
+    <ClCompile Include="LevelEditorUI.cpp">
+      <Filter>原始程式檔</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="fragment.fs" />
@@ -152,5 +161,7 @@
     <None Include="texture_instance.vs" />
     <None Include="text.vs" />
     <None Include="text.fs" />
+    <None Include="color_instance.fs" />
+    <None Include="resource.rec" />
   </ItemGroup>
 </Project>

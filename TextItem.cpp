@@ -12,6 +12,13 @@ TextItem::TextItem()
 	scale = 1;
 }
 
+TextItem::TextItem(float x, float y, float width, float height)
+{
+	setXY(x, y);
+	setHeight(height);
+	setWidth(width);
+}
+
 
 TextItem::~TextItem()
 {
@@ -40,5 +47,5 @@ void TextItem::setLineWidth(float width)
 
 void TextItem::draw()
 {
-	//Render::drawText(text, x(), y(), scale, glm::vec3(255, 255, 255));
+	Render::drawText(text, x(), y(), scale, glm::vec3(1.0, 1.0, 1.0), line_width, getZ());
 }

@@ -23,11 +23,13 @@
     <ClInclude Include="Button.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Character.h" />
+    <ClInclude Include="Define.h" />
     <ClInclude Include="Entity.h" />
     <ClInclude Include="Event.h" />
     <ClInclude Include="EventManager.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="LevelEditor.h" />
+    <ClInclude Include="LevelEditorUI.h" />
     <ClInclude Include="Math.h" />
     <ClInclude Include="nstdlib.h" />
     <ClInclude Include="ObjectManager.h" />
@@ -50,6 +52,7 @@
     <ClCompile Include="EventManager.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="LevelEditor.cpp" />
+    <ClCompile Include="LevelEditorUI.cpp" />
     <ClCompile Include="Math.cpp" />
     <ClCompile Include="nstdlib.cpp" />
     <ClCompile Include="ObjectManager.cpp" />
@@ -63,6 +66,7 @@
     <ClCompile Include="UI.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="color_instance.fs" />
     <None Include="color_instance.vs" />
     <None Include="fragment.fs" />
     <None Include="ground.fs" />
@@ -70,6 +74,7 @@
     <None Include="color.vs" />
     <None Include="model.fs" />
     <None Include="model.vs" />
+    <None Include="resource.rec" />
     <None Include="text.fs" />
     <None Include="text.vs" />
     <None Include="texture.fs" />
@@ -149,6 +154,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
     </ClCompile>
     <Link>
       <AdditionalDependencies>opengl32.lib;glfw3.lib;glew32s.lib;Imm32.lib;freetype271MT.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -172,6 +178,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>

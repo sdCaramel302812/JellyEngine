@@ -7,14 +7,26 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H 
 #include <iostream>
+#include <fstream>
+#include <string>
+#include <cstring>
+#include <vector>
+#include "Render.h"
+#include <cstdlib>
+using std::vector;
+using std::string;
+using std::ifstream;
 
 class ResourceManager
 {
 public:
 	ResourceManager();
 	~ResourceManager();
-	static void addGlyph(wchar_t c);
 
-	static std::map<wchar_t, Character> Characters;
+	static void loadResource(char *fileName);
+
+private:
+	static string _path_name;
+	static string _file_name;
 };
 

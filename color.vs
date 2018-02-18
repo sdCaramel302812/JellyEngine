@@ -1,6 +1,5 @@
 #version 400 core
 layout(location = 0) in vec3 aPos;
-layout(location = 5) in mat4 instanceMatrix;	//4 vec4, location : 5, 6, 7, 8
 
 uniform mat4 model;
 uniform mat4 view;

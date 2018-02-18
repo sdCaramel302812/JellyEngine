@@ -1,7 +1,11 @@
-﻿#define SOFTWARE_VERSION "ver 0.4.1"
+﻿#define SOFTWARE_VERSION "ver 0.4.2"
 
 // GLEW ( help you using functions without retreiving functions )
 #define _WIN32_WINNT 0x0500
+
+#define SCENE_WIDTH 1280
+#define SCENE_HEIGHT 720
+
 #define GLEW_STATIC
 #include <GL\glew.h>
 // GLFW ( make you a windows that support opengl operation to work fine with your platform )
@@ -31,6 +35,7 @@
 #include "Game.h"
 #include <stdlib.h>
 #include "Button.h"
+#include "LevelEditor.h"
 //#include "Model.h"
 
 // Get error from GLFW for debuging
@@ -160,9 +165,9 @@ void aabbDebuger() {
 
 void showVersion() {
 	glm::vec3 color(0.9, 0.9f, 0.9f);
-	glm::vec2 pos(850.0f, 1000.0f);
+	glm::vec2 pos(900.0f, 1030.0f);
 	TString tex(SOFTWARE_VERSION);
-	Render::drawText(tex, pos.x, pos.y, 1.0, color);
+	Render::drawText(tex, pos.x, pos.y, 0.7, color);
 }
 
 int main() {
@@ -171,7 +176,7 @@ int main() {
 	srand(time(NULL));
 	sc.setVSync(false);
 	//Shader shader("./vertex.vs", "./fragment.fs");
-	Shader colorShader("./color.vs", "./color.fs");
+	//Shader colorShader("./color.vs", "./color.fs");
 	//Shader groundShader("./vertex.vs", "./ground.fs");
 
 	glEnable(GL_DEPTH_TEST);
@@ -180,64 +185,7 @@ int main() {
 	glfwSetCursorPosCallback(sc.window, mouse_callback);
 	glfwSetMouseButtonCallback(sc.window, mouse_button_callback);
 
-	//wglSwapIntervalEXT = (PFNWGLSWAPINTERVALFARPROC)wglGetProcAddress("wglSwapIntervalEXT");
-	//wglSwapIntervalEXT(0);
-	// set up vertex data (and buffer(s)) and configure vertex attributes
-	// ------------------------------------------------------------------
-	float vertices[] = {
-		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 0.0f, -1.0f,
-		0.5f,  0.5f, -0.5f,  1.0f, 1.0f, 0.0f, 0.0f, -1.0f,
-		0.5f, -0.5f, -0.5f,  1.0f, 0.0f, 0.0f, 0.0f, -1.0f,
-		0.5f,  0.5f, -0.5f,  1.0f, 1.0f, 0.0f, 0.0f, -1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 0.0f, -1.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f, 0.0f, 0.0f, -1.0f,
-
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-		0.5f, -0.5f,  0.5f,  1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-		0.5f,  0.5f,  0.5f,  1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-		0.5f,  0.5f,  0.5f,  1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-
-		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f, -1.0f, 0.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f,  1.0f, 1.0f, -1.0f, 0.0f, 0.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f, -1.0f, 0.0f, 0.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f, -1.0f, 0.0f, 0.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f, -1.0f, 0.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f, -1.0f, 0.0f, 0.0f,
-
-		0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-		0.5f, -0.5f, -0.5f,  0.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-		0.5f,  0.5f, -0.5f,  1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-		0.5f, -0.5f, -0.5f,  0.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-		0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-		0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f, 0.0f, -1.0f, 0.0f,
-		0.5f, -0.5f, -0.5f,  1.0f, 1.0f, 0.0f, -1.0f, 0.0f,
-		0.5f, -0.5f,  0.5f,  1.0f, 0.0f, 0.0f, -1.0f, 0.0f,
-		0.5f, -0.5f,  0.5f,  1.0f, 0.0f, 0.0f, -1.0f, 0.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 0.0f, -1.0f, 0.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f, 0.0f, -1.0f, 0.0f,
-
-		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-		0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-		0.5f,  0.5f, -0.5f,  1.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-		0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-
-	};
-
-	glm::vec3 cubePositions[] = {
-		glm::vec3(0.0f, 5.0f, -1.0f),
-		glm::vec3(1.0f, 10.0f, -3.0f),
-		glm::vec3(2.0f, 15.0f, -5.0f),
-		glm::vec3(3.0f, 20.0f, -7.0f),
-		glm::vec3(4.0f, 25.0f, -9.0f)
-	};
-
-
+	float vertices[1] = { 0 };
 	Render::addVBO(vertices, 1, "instance");
 	Render::addVBO(vertices, 1, "debuger");
 	int ppp[1] = { 0 };
@@ -250,40 +198,19 @@ int main() {
 	game.textureInit();
 	game.uiInit();
 	
+	LevelEditor editor;
 
-	Button *button = new Button(200, 200, 300, 300);
+	Button *button = new Button(200, 200, 300, 100);
 	button->setButtonText("button");
 	button->setCallback([=]() {
-		//std::cout << "click" << endl;
+		std::cout << "click" << endl;
 	});
-	ObjectManager::addUI(button);
+	//ObjectManager::addUI(button);
 
 
-	Render::addVBO(vertices, 288, "box");
 	int pos[3] = { 0,1,2 };
 	int size[3] = { 3,2,3 };
 	int shift[3] = { 0,5,3 };
-	Render::addVAO(pos, size, shift, 3, "box", "box");
-	Render::addTexture("./container.png", "box");
-	Render::addShader("texture", "./texture.vs", "./texture.fs");
-	Render::addShader("texture_ins", "./texture_instance.vs", "texture.fs");
-
-
-	for (int i = 0; i < 5; ++i) {
-		Entity *box = new Entity(36);
-		box->VAO = "box";
-		box->VBO = "box";
-		box->texture = "box";
-		box->shader = "texture";
-		box->rigid._is_static = false;
-		box->rigid.type = NO_COLLIDE;
-		box->rigid._mass = 10;
-		box->rigid.data.position = cubePositions[i%5];
-		box->rigid.data.velocity = glm::vec3(0.0f, 0.0f, 0.0f);
-		//ObjectManager::object_list.push_back(box);
-		//cout << box->rigid.data.position.y << endl;
-
-	}
 
 	//sphere
 	{
@@ -344,8 +271,8 @@ int main() {
 		int size[1] = { 3 };
 		int shift[1] = { 0 };
 		Render::addVAO(pos, size, shift, 1, "sphere", "sphere", "sphere");
-		Render::addShader("color", "./color.vs", "./color.fs");
-		Render::addShader("color_ins", "./color_instance.vs", "./color.fs");
+		//Render::addShader("color", "./color.vs", "./color.fs");
+		//Render::addShader("color_ins", "./color_instance.vs", "./color_instance.fs");
 		//*
 		for (int i = 0; i < 1; ++i) {
 			Entity *sphere = new Entity(1944);
@@ -419,7 +346,8 @@ int main() {
 	Render::addVAO(pos, size, shift, 3, "wall", "wall");
 	Render::addVAO(pos, size, shift, 3, "ground", "ground");
 	Render::addTexture("./wall.jpg", "wall");
-	Render::addTexture("./grass.jpg", "grass");
+	Render::addTexture("./background.jpg", "background");
+	//ResourceManager::loadResource("./resource.rec");
 	//wall
 	Entity *wall = new Entity(6);
 	wall->VAO = "wall";
@@ -473,7 +401,7 @@ int main() {
 	Entity *ground = new Entity(6);
 	ground->VAO = "ground";
 	ground->VBO = "ground";
-	ground->texture = "grass";
+	ground->texture = "background";
 	ground->shader = "texture";
 	ground->rigid._is_static = true;
 	ground->rigid.data.position = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -497,27 +425,21 @@ int main() {
 	//surface
 	//
 
-
 	Render::shaders.search("texture").use();
 	Render::shaders.search("texture").setInt("material.diffuse", 0);
-
-	
-
-	/////////////////////////////////////////////////		warning			/////////////////////////////////////////
-	///////////////////////////////////////////////記得處理 hash 字串長度問題////////////////////////////////////////
-	/////////////////////////////////////////////////		warning			/////////////////////////////////////////
-
-
 
 	//how to get an object's type
 	//cout << typeid(player).name() << endl;
 
+
 	int lastClock = clock();
 	int count = 0;
+	//////////////////////////////////////	start of the main loop	//////////////////////////////////////
 	while (!glfwWindowShouldClose(sc.window)) {
 		float current_frame = glfwGetTime();
 		dt = current_frame - last_frame;
 		last_frame = current_frame;
+		/////////////////////////////////	display fps
 		int currentClock = clock();
 		if (currentClock - lastClock < 1000) {
 			++count;
@@ -527,6 +449,7 @@ int main() {
 			std::cerr << "fps : " << count << endl;
 			count = 0;
 		}
+		/////////////////////////////////	display fps
 
 		processInput(sc);
 		glClearColor(0.5, 0.5, 0.5, 1.0);
@@ -560,7 +483,7 @@ int main() {
 		game.mouseButtonCallback(is_mouse_press);
 		//
 
-		//cout << player->rigid.data.position.x << "\t" << player->rigid.data.position.y << "\t" << player->rigid.data.position.z << endl;
+		//cout << camera.Position.x << "\t" << camera.Position.y << "\t" << camera.Position.z << endl;
 
 		// end of loop
 		while (1) {//控制FPS
@@ -568,6 +491,7 @@ int main() {
 				break;
 			}
 		}
+		//////////////////////////////////////	end of the main loop	//////////////////////////////////////
 		glfwSwapBuffers(sc.window);
 		glfwPollEvents();
 	}

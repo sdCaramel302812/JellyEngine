@@ -6,60 +6,68 @@ Button::Button()
 {
 }
 
-Button::Button(float x, float y, float height, float width) : UI(x, y, height, width)
+Button::Button(float x, float y, float width, float height) : UI(x, y, width, height)
 {
-	button_text.setXY(x, y);
+	_has_hover = true;
+	button_text = new TextItem();
+	button_text->setXY(x + 20, y + (height - 50 > 0 ? (height - 50) / 2 : 0));
+	button_text->setLineWidth(width);
+	button_text->setZ(getZ() - 0.1);
+	setColor(glm::vec4(0.5, 0.5, 0.5, 0.5));
 }
 
 
 Button::~Button()
 {
+	delete button_text;
 }
 
 void Button::setButtonText(wstring text)
 {
-	button_text.setText(text);
+	button_text->setText(text);
 }
 
 void Button::setButtonText(TString text)
 {
-	button_text.setText(text);
+	button_text->setText(text);
 }
 
 void Button::setButtonText(wstring text, int font_size)
 {
-	button_text.setText(text);
-	button_text.setFontSize(font_size);
+	button_text->setText(text);
+	button_text->setFontSize(font_size);
 }
 
 void Button::setButtonText(TString text, int font_size)
 {
-	button_text.setText(text);
-	button_text.setFontSize(font_size);
+	button_text->setText(text);
+	button_text->setFontSize(font_size);
 }
 
-void Button::setColor(glm::vec4 color)
-{
-	_color = color;
-}
-
-void Button::setColor(float r, float g, float b, float a)
-{
-	_color = glm::vec4(r, g, b, a);
-}
 
 void Button::draw()
 {
-	Render::drawText(getTextItem().text, getTextItem().x(), getTextItem().y(), getTextItem().scale, glm::vec3(1.0, 1.0, 1.0));
+	button_text->draw();
 	Render::draw(this);
+	
+}
+
+void Button::hoverIn()
+{
+	setColor(glm::vec4(0.5, 0.5, 0.5, 0.8));
+}
+
+void Button::hoverOut()
+{
+	setColor(glm::vec4(0.5, 0.5, 0.5, 0.5));
 }
 
 wstring & Button::getText()
 {
-	return button_text.text.data();
+	return button_text->text.data();
 }
 
 TextItem & Button::getTextItem()
 {
-	return button_text;
+	return *button_text;
 }

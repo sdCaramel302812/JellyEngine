@@ -48,6 +48,11 @@ public:
 	bool _is_jumping = false;
 	int _jump_cool_down;
 
+	float _interval_x1 = -6.4;
+	float _interval_x2 = 6.4;
+	float _interval_y1 = -3.6;
+	float _interval_y2 = 3.6;
+
 	int _camera_mode = 3;	// 1 : first person, 2 : 2D camera, 3 : third person
 
 	/////////////////////////////////////////////////////////////////////////////////
@@ -94,11 +99,15 @@ public:
 	/////////////////////////////////////////////////////////////////////////////////
 	glm::mat4 getProjectMatrix() {
 		if (_camera_mode == 2) {
-			return glm::ortho(-3.2f, 3.2f, -1.8f, 1.8f, 0.1f, 10.0f);
+			return glm::ortho(_interval_x1, _interval_x2, _interval_y1, _interval_y2, 0.1f, 10.0f);
 		}
 		else if (_camera_mode == 3) {
 			return glm::perspective(glm::radians(45.0f), (float)1920 / (float)1080, 0.1f, 100.0f);
 		}
+	}
+	/////////////////////////////////////////////////////////////////////////////////
+	glm::vec4 getOrthoIntervalX1X2Y1Y2() {
+		return glm::vec4(_interval_x1, _interval_x2, _interval_y1, _interval_y2);
 	}
 	/////////////////////////////////////////////////////////////////////////////////
 	// Processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
@@ -296,143 +305,6 @@ private:
 };
 
 
-
-class Camera2D
-{
-public:
-	// Camera Attributes
-	//	int count = 0;
-	glm::vec3 Front;
-	glm::vec3 Right;
-	glm::vec3 Up;
-	glm::vec3 WorldUp;
-	glm::vec3 Position;
-	glm::vec3 _v;
-	// Eular Angles
-
-	float speed;
-	float sensitivity;
-	float zoom;
-	float radius = 3;
-	bool _is_moving = false;
-	bool _is_jumping = false;
-	int _jump_cool_down;
-
-	Camera2D(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 0.0f, -1.0f)) : Front(0.0f, -3.0f, 0.0f), speed(SPEED), sensitivity(SENSITIVITY), zoom(ZOOM) {
-		Position = position;
-		Position.y += 3;
-		_v = glm::vec3(0.0f, 0.0f, 0.0f);
-		WorldUp = glm::vec3(0.0f, 0.0f, 1.0f);
-		updateCamera();
-	}
-	Camera2D(float posX, float posY, float posZ, float upX, float upY, float upZ) : Front(0.0f, -3.0f, 0.0f), speed(SPEED), sensitivity(SENSITIVITY), zoom(ZOOM) {
-		Position.x = posX;
-		Position.y = posY+3;
-		Position.z = posZ;
-		WorldUp.x = 0;
-		WorldUp.y = 0;
-		WorldUp.z = -1;
-		_v = glm::vec3(0.0f, 0.0f, 0.0f);
-		updateCamera();
-	}
-	~Camera2D() {}
-
-	// Returns the view matrix calculated using Eular Angles and the LookAt Matrix
-	glm::mat4 getViewMatrix() {
-		return glm::lookAt(Position, Position + Front, Up);
-	}
-
-	// Processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
-	void processKeyboard(CameraMovement direction, float delta_time) {
-		float velocity = speed*delta_time;
-		_is_moving = true;
-		if (direction == FORWARD) {
-			//Position.x += Front.x*velocity;
-			//Position.z += Front.z*velocity;
-			if (glm::length(_v) < 8) {
-				_v += glm::vec3(Front.x*velocity * 6, 0.0f, Front.z*velocity * 6);
-			}
-			else {
-				_v *= 0.5;
-				_v += glm::vec3(Front.x*velocity * 5, 0.0f, Front.z*velocity * 5);
-			}
-		}
-		if (direction == BACKWARD) {
-			//Position.x -= Front.x*velocity;
-			//Position.z -= Front.z*velocity;
-			if (glm::length(_v) < 8) {
-				_v += glm::vec3(-Front.x*velocity * 6, 0.0f, -Front.z*velocity * 6);
-			}
-			else {
-				_v *= 0.5;
-				_v += glm::vec3(-Front.x*velocity * 5, 0.0f, -Front.z*velocity * 5);
-			}
-		}
-		if (direction == LEFT) {
-			//Position.x -= Right.x*velocity;
-			//Position.z -= Right.z*velocity;
-			if (glm::length(_v) < 8) {
-				_v += glm::vec3(-Right.x*velocity * 6, 0.0f, -Right.z*velocity * 6);
-			}
-			else {
-				_v *= 0.5;
-				_v += glm::vec3(-Right.x*velocity * 5, 0.0f, -Right.z*velocity * 5);
-			}
-		}
-		if (direction == RIGHT) {
-			//Position.x += Right.x*velocity;
-			//Position.z += Right.z*velocity;
-			if (glm::length(_v) < 8) {
-				_v += glm::vec3(Right.x*velocity * 6, 0.0f, Right.z*velocity * 6);
-			}
-			else {
-				_v *= 0.5;
-				_v += glm::vec3(Right.x*velocity * 5, 0.0f, Right.z*velocity * 5);
-			}
-		}
-		if (direction == SPACE) {
-
-		}
-		//		std::cerr << "press keyboard" <<count<< std::endl;
-		//		++count;
-	}
-
-	// Processes input received from a mouse input system. Expects the offset value in both the x and y direction.
-	void processMouseEvent(float xoffset, float yoffset, bool constrain_pitch = true) {
-		xoffset *= sensitivity;
-		yoffset *= sensitivity;
-
-
-
-
-		// Make sure that when pitch is out of bounds, screen doesn't get flipped
-
-		// Update Front, Right and Up Vectors using the updated Eular angles
-		updateCamera();
-	}
-
-	float processScrollEvent(float yoffset) {
-		yoffset *= 5;
-		if (zoom >= 10.0f && zoom <= 45.0f)
-			zoom -= yoffset;
-		if (zoom <= 10.0f)
-			zoom = 10.0f;
-		if (zoom >= 45.0f)
-			zoom = 45.0f;
-		return zoom;
-	}
-
-private:
-	void updateCamera() {
-		// Calculate the new Front vector
-		//glm::vec3 front;
-		//Front = glm::normalize(front);
-		// Also re-calculate the Right and Up vector
-		Right = glm::normalize(glm::cross(Front, WorldUp));  // Normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
-		Up = glm::normalize(glm::cross(Right, Front));
-
-	}
-};
 
 
 #endif
