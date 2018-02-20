@@ -2,6 +2,7 @@
 #include "ObjectManager.h"
 #include "Button.h"
 #include "TextItem.h"
+#include "LevelEditorUI.h"
 
 class LevelEditor
 {

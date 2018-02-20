@@ -6,12 +6,14 @@ extern Camera camera;
 
 Game::Game()
 {
-	state = ACTIVATE;
+	state = LEVEL_EDITOR;
+	level_editor = new LevelEditor();
 }
 
 
 Game::~Game()
 {
+	delete level_editor;
 }
 
 void Game::Init()
@@ -34,7 +36,7 @@ void foo(){
 
 void Game::render()
 {
-	if (state == ACTIVATE) {
+	if (state == ACTIVATE || state == LEVEL_EDITOR) {
 		glm::mat4 projection;
 		projection = camera.getProjectMatrix();
 		glm::mat4 view;
@@ -112,7 +114,7 @@ void Game::render()
 
 void Game::update(float dt)
 {
-	if (state == ACTIVATE) {
+	if (state == ACTIVATE || state == LEVEL_EDITOR) {
 		while (!EventManager::update_event.empty()) { //°õ¦æevent
 			EventManager::update_event.front()->use();
 			delete EventManager::update_event.front();
@@ -129,7 +131,7 @@ void Game::update(float dt)
 
 void Game::input(Scene &sc, float dt)
 {
-	if (state == ACTIVATE) {
+	if (state == ACTIVATE || state == LEVEL_EDITOR) {
 		if (glfwGetKey(sc.window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 			glfwSetWindowShouldClose(sc.window, true);
 		if (glfwGetKey(sc.window, GLFW_KEY_W) == GLFW_PRESS)
@@ -191,8 +193,12 @@ void Game::mouseCallback(GLFWwindow * window, double xpos, double ypos)
 
 void Game::mouseButtonCallback(GLFWwindow * window, int button, int action, int mods)
 {
+	if (glfwGetKey(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE) {
+		_is_first_click = true;
+	}
+
 	if (state == ACTIVATE) {
-		if (glfwGetKey(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+		if (glfwGetKey(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && _is_first_click) {
 			for (int i = 0; i < ObjectManager::getUI().size(); ++i) {
 				if (ObjectManager::getUI().at(i)->x() > _mouse_x) {
 					break;
@@ -203,6 +209,27 @@ void Game::mouseButtonCallback(GLFWwindow * window, int button, int action, int 
 				}
 			}
 		}
+	}
+	if (state == LEVEL_EDITOR) {
+		if (glfwGetKey(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && _is_first_click) {
+			bool has_select = false;
+			for (int i = 0; i < ObjectManager::getUI().size(); ++i) {
+				if (ObjectManager::getUI().at(i)->x() > _mouse_x) {
+					break;
+				}
+				if (_mouse_x - ObjectManager::getUI().at(i)->x() < ObjectManager::getUI().at(i)->width() && _mouse_x > ObjectManager::getUI().at(i)->x() && _mouse_y - ObjectManager::getUI().at(i)->y() < ObjectManager::getUI().at(i)->height() && _mouse_y > ObjectManager::getUI().at(i)->y() && ObjectManager::getUI().at(i)->hasCallback()) {
+					level_editor->current_UI = ObjectManager::getUI().at(i);
+					has_select = true;
+				}
+			}
+			if (!has_select) {
+				level_editor->current_UI = nullptr;
+			}
+		}
+	}
+
+	if (glfwGetKey(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+		_is_first_click = false;
 	}
 }
 

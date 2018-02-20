@@ -10,6 +10,7 @@
 #include "TextItem.h"
 #include "ResourceManager.h"
 #include "Scene.h"
+#include "LevelEditor.h"
 using std::queue;
 
 
@@ -47,8 +48,12 @@ public:
 	//test for mouse button callback
 	void mouseButtonCallback(bool mouse_state);
 
+	LevelEditor *level_editor;
+
 private:
 	double _mouse_x;
 	double _mouse_y;
+
+	bool _is_first_click;
 };
 

@@ -254,6 +254,7 @@ int Physics::collisionDetect(Entity * A, Entity * B, MotionEvent<Entity*>* event
 		float r = A->rigid.getRadius();
 		dist = abs((a*x0 + b*y0 + c*z0 + d) * B->rigid.getNormalLengthInverse());//點到面的距離 
 		if (dist < r) {
+
 			glm::vec3 proj = A->rigid.data.position - normal*dist;//圓心在平面上投影點
 
 			//將平面及投影點轉換到 XY 平面，再依照座標軸比較投影點是否位於矩形內部

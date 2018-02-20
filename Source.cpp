@@ -1,4 +1,4 @@
-﻿#define SOFTWARE_VERSION "ver 0.4.2"
+﻿#define SOFTWARE_VERSION "ver 0.4.3"
 
 // GLEW ( help you using functions without retreiving functions )
 #define _WIN32_WINNT 0x0500
@@ -198,7 +198,7 @@ int main() {
 	game.textureInit();
 	game.uiInit();
 	
-	LevelEditor editor;
+	//LevelEditor editor;
 
 	Button *button = new Button(200, 200, 300, 100);
 	button->setButtonText("button");
@@ -274,7 +274,7 @@ int main() {
 		//Render::addShader("color", "./color.vs", "./color.fs");
 		//Render::addShader("color_ins", "./color_instance.vs", "./color_instance.fs");
 		//*
-		for (int i = 0; i < 1; ++i) {
+		for (int i = 0; i < 2; ++i) {
 			Entity *sphere = new Entity(1944);
 			sphere->VAO = "sphere";
 			sphere->VBO = "sphere";
