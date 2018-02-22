@@ -3,7 +3,7 @@
 #include "nstdlib.h"
 #include <ft2build.h>
 #include <map>
-#include "Render.h"
+//#include "Render.h"
 #include FT_FREETYPE_H 
 using nstd::TString;
 

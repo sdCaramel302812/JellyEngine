@@ -59,6 +59,7 @@ WallUI::WallUI(float x, float y, float z)
 	setXY(x, y);
 	setZ(z);
 	_draw_type = GL_LINES;
+	_vao = "line_vao";
 }
 
 void WallUI::setXY(float x, float y)

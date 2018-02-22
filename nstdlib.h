@@ -1,6 +1,7 @@
 #ifndef NSTDLIB_H
 #define NSTDLIB_H
 #include <vector>
+#include "Include.h"
 #include <list>
 #include <iostream>
 #include <string>
@@ -101,6 +102,7 @@ namespace nstd {
 		std::ofstream &operator<<(std::ofstream &os);
 		string wstr2str(std::wstring const & src);
 		wstring str2wstr(std::string const & src);
+		nstd::TString &number(double num);		//this function will let the data be the number
 		//size and length is same function with difference name
 		int size();
 		int length();

@@ -47,5 +47,5 @@ void TextItem::setLineWidth(float width)
 
 void TextItem::draw()
 {
-	Render::drawText(text, x(), y(), scale, glm::vec3(1.0, 1.0, 1.0), line_width, getZ());
+	//Render::drawText(text, x(), y(), scale, glm::vec3(1.0, 1.0, 1.0), line_width, getZ());
 }

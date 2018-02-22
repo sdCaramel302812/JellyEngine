@@ -4,6 +4,7 @@
 std::vector<Entity *> ObjectManager::object_list;
 AABBTree ObjectManager::aabb_tree;
 std::vector<UI *> ObjectManager::ui_list;
+std::vector<TextItem *> ObjectManager::text_list;
 
 
 ObjectManager::ObjectManager()
@@ -113,4 +114,18 @@ void ObjectManager::insertionSortForUI(std::vector<UI*> &list)
 				}
 			}
 		}
+}
+
+std::vector<TextItem*>& ObjectManager::getText()
+{
+	return text_list;
+}
+
+void ObjectManager::addText(TextItem * text_item)
+{
+	text_list.push_back(text_item);
+}
+
+void ObjectManager::removeText(TextItem * text_item)
+{
 }

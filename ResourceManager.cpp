@@ -69,3 +69,8 @@ void ResourceManager::loadResource(char * fileName)
 
 	fclose(inFile);
 }
+
+void ResourceManager::saveMap(char * fileName)
+{
+	int tab_num = 0;
+}

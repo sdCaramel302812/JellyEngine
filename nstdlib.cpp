@@ -144,6 +144,14 @@ wstring nstd::TString::str2wstr(std::string const & src)
 	return r;
 }
 
+nstd::TString & nstd::TString::number(double num)
+{
+	std::stringstream ss;
+	ss << num;
+	_data = str2wstr(ss.str());
+	return *this;
+}
+
 
 
 int nstd::TString::size()

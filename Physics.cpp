@@ -47,7 +47,7 @@ void Physics::displace(Entity * obj,float dt)
 			//std::vector<Entity *> collide_list = ObjectManager::object_list;
 			//if(obj->e_type==PLAYER)
 			//	cout << collide_list.size() << endl;
-//*
+
 			for (int i = 0; i < collide_list.size(); ++i) {
 				if (collide_list.at(i)->_id == obj->_id) {
 					continue;
@@ -153,7 +153,7 @@ void Physics::displace(Entity * obj,float dt)
 						a = normal.x;
 						b = normal.y;
 						c = normal.z;
-						//低FPS元凶	<----------------------------------------------------------------------------****//
+						//低FPS元凶	<----------------------------------------------------------------------------//
 						d = collide_list.at(i)->rigid.getNormal().at(0).w;
 
 						float x0 = obj->rigid.data.position.x;
@@ -184,10 +184,11 @@ void Physics::displace(Entity * obj,float dt)
 					//球對面碰撞反應
 				}
 			}
-//*/		
+	
 		}
 
 		//Collision
+
 
 		force_event->use();
 		dis_event->use();
@@ -203,7 +204,7 @@ void Physics::displace(Entity * obj,float dt)
 	if (obj->rigid.type == SPHERE) {
 		draw->setDrawType(GL_LINE_STRIP);
 	}
-	if (obj->shader == "texture") {
+	if (obj->shader == "texture_ins" || obj->shader == "texture") {
 		EventManager::texture_render_event.push_back(draw);
 	}
 	else if (obj->shader == "color_ins") {

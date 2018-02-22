@@ -153,7 +153,7 @@ protected:
 
 class Player :public Entity {
 public:
-	Player(int size = 0);
+	Player(glm::vec3 pos);
 };
 
 class SphereObject :public Entity {
@@ -171,26 +171,7 @@ public:
 	BackgroundObject(std::string texture, glm::vec3 left_down_back, glm::vec3 right_top_front);
 };
 
-class GroundObject :public Entity {
-public:
-	GroundObject(glm::vec3 left_down_back, glm::vec3 right_top_front);
-};
-
 class MovableObject :public Entity {
 public:
 	MovableObject(std::string texture, glm::vec3 position, glm::vec2 texCood1,glm::vec2 texCood2);//texCood 用來區分貼圖所在位置
-};
-
-#define FLOOR_HEIGHT 5
-class StairObject :public Entity {
-public:
-	//rotate = 0 : 向北上樓
-	//rotate = 1 ~ 359 : 順時針旋轉
-	//type : 樓梯種類
-	//back > front
-	//x 軸向上
-	StairObject(glm::vec3 left_down_back, glm::vec3 right_top_front, float rotate, int type);
-
-	int _lower_floor;
-	int _higher_floor;
 };

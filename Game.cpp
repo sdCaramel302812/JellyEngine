@@ -2,18 +2,32 @@
 #define SCENE_WIDTH 1280
 #define SCENE_HEIGHT 720
 
+//		debug function
+void aabbDebuger();
+void showVersion();
+
 extern Camera camera;
+
+bool is_player = false;
 
 Game::Game()
 {
 	state = LEVEL_EDITOR;
 	level_editor = new LevelEditor();
+	scene = new Scene();
+	player = new Player(glm::vec3(0, 0.5, 0));
+
+	scene->setVSync(false);
+
+
+	Init();
 }
 
 
 Game::~Game()
 {
 	delete level_editor;
+	delete scene;
 }
 
 void Game::Init()
@@ -21,13 +35,34 @@ void Game::Init()
 	srand(time(NULL));
 
 	glEnable(GL_DEPTH_TEST);
+	glActiveTexture(GL_TEXTURE0);
 
 	Render::addShader("text", "./text.vs", "./text.fs");
 	Render::addShader("texture", "./texture.vs", "./texture.fs");
 	Render::addShader("texture_ins", "./texture_instance.vs", "texture.fs");
+
+	Render::shaders.search("texture").use();
+	Render::shaders.search("texture").setInt("material.diffuse", 0);
+
+	Render::shaders.search("texture_ins").use();
+	Render::shaders.search("texture_ins").setInt("material.diffuse", 0);
+
 	Render::addShader("color", "./color.vs", "./color.fs");
 	Render::addShader("color_ins", "./color_instance.vs", "./color_instance.fs");
+
 	textInit();
+	textureInit();
+	uiInit();
+
+	//		vbo for instance		//
+	float vertices[1] = { 0 };
+	Render::addVBO(vertices, 1, "instance");
+	Render::addVBO(vertices, 1, "debuger");
+	int ppp[1] = { 0 };
+	int sss[1] = { 3 };
+	int shh[1] = { 0 };
+	Render::addVAO(ppp, sss, shh, 1, "debuger", "debuger");
+	//		vbo for instance		//
 }
 
 void foo(){
@@ -49,21 +84,39 @@ void Game::render()
 		//*************************************			實例化渲染			**************************************//
 		//*********************************可依照 texture 做 sorting 做分段實例化*********************************//
 /*		{
-			glm::mat4 *instMat;
-			glActiveTexture(GL_TEXTURE0);
-			string texture = EventManager::texture_render_event.at(0)->_target_id->texture;
-			glBindTexture(GL_TEXTURE_2D, Render::textures.search(texture));
-			instMat = new glm::mat4[EventManager::texture_render_event.size()];		
-			for (int i = 0; i < EventManager::texture_render_event.size(); ++i) {
-				glm::mat4 model;
-				model = glm::translate(model, glm::vec3(EventManager::texture_render_event.at(i)->_target_id->rigid.data.position.x, EventManager::texture_render_event.at(i)->_target_id->rigid.data.position.y, EventManager::texture_render_event.at(i)->_target_id->rigid.data.position.z));
-				model = model * EventManager::texture_render_event.at(i)->_target_id->_model_matrix;
-				instMat[i] = model;
+			if (!EventManager::texture_render_event.empty()) {
+				EventManager::eventSort(EventManager::texture_render_event);
+				glm::mat4 *instMat;
+
+				int count = 0;
+				int size = 0;
+				string texture = EventManager::texture_render_event.at(0)->_target_id->texture;
+				
+				instMat = new glm::mat4[EventManager::texture_render_event.size()];		
+				while (count < EventManager::texture_render_event.size() - 1) {
+					glBindTexture(GL_TEXTURE_2D, Render::textures.search(texture));
+					for (int i = count; i < EventManager::texture_render_event.size(); ++i) {
+						if (i == EventManager::texture_render_event.size() - 1) {
+							count = i;
+						}
+						if (EventManager::texture_render_event.at(i)->_target_id->texture != texture){
+							count = i;
+							texture = EventManager::texture_render_event.at(i)->_target_id->texture;
+							break;
+						}
+						++size;
+						glm::mat4 model;
+						model = glm::translate(model, glm::vec3(EventManager::texture_render_event.at(i)->_target_id->rigid.data.position.x, EventManager::texture_render_event.at(i)->_target_id->rigid.data.position.y, EventManager::texture_render_event.at(i)->_target_id->rigid.data.position.z));
+						model = model * EventManager::texture_render_event.at(i)->_target_id->_model_matrix;
+						instMat[i] = model;
+					}
+					Render::updateInstance(instMat, size);
+					glBindVertexArray(Render::VAOs.search("instance_texture"));
+					glDrawArraysInstanced(GL_TRIANGLES, 0, 6, size);
+					size = 0;
+				}
+				delete[]instMat;
 			}
-			Render::updateInstance(instMat, EventManager::texture_render_event.size());
-			glBindVertexArray(Render::VAOs.search("instance_texture"));
-			glDrawArraysInstanced(GL_TRIANGLES, 0, 6, EventManager::texture_render_event.size());
-			delete[]instMat;
 		}
 		//*************************************			實例化渲染			**************************************///
 		while (!EventManager::texture_render_event.empty()) {	//執行event
@@ -101,10 +154,47 @@ void Game::render()
 		////////////////////////////////////////	color shader draw		////////////////////////////////////////
 
 		////////////////////////////////////////			draw ui			////////////////////////////////////////
-		for (int i = 0; i < ObjectManager::getUI().size(); ++i) {
-			if(ObjectManager::getUI().at(i)->visable()){
-				ObjectManager::getUI().at(i)->draw();
+		(Render::shaders.search("color")).use();
+		if (!EventManager::editor_ui_event.empty()) {
+			Render::shaders.search("color").setMat4("view", view);
+			Render::shaders.search("color").setMat4("projection", projection);
+			while (!EventManager::editor_ui_event.empty()) {
+				EventManager::editor_ui_event.back()->use();
+				delete EventManager::editor_ui_event.back();
+				EventManager::editor_ui_event.pop_back();
+			}
+		}
 
+		view = glm::mat4();
+		projection= glm::ortho(0.0f, static_cast<GLfloat>(1920), 0.0f, static_cast<GLfloat>(1080), 10.0f, -10.0f);
+		if (!EventManager::draw_color_ui_event.empty()) {
+			Render::shaders.search("color").setMat4("projection", projection);
+			while (!EventManager::draw_color_ui_event.empty()) {
+				EventManager::draw_color_ui_event.back()->use();
+				delete EventManager::draw_color_ui_event.back();
+				EventManager::draw_color_ui_event.pop_back();
+			}
+		}
+
+		if (!EventManager::draw_texture_ui_event.empty()) {
+			(Render::shaders.search("texture")).use();
+			Render::shaders.search("texture").setMat4("view", view);
+			Render::shaders.search("texture").setMat4("projection", projection);
+			while (!EventManager::draw_texture_ui_event.empty()) {
+				EventManager::draw_texture_ui_event.back()->use();
+				delete EventManager::draw_texture_ui_event.back();
+				EventManager::draw_texture_ui_event.pop_back();
+			}
+		}
+
+		if (!EventManager::draw_text_event.empty()) {
+			(Render::shaders.search("text")).use();
+			Render::shaders.search("text").setMat4("projection", projection);
+			glBindVertexArray(Render::VAOs.search("text"));
+			while (!EventManager::draw_text_event.empty()) {
+				EventManager::draw_text_event.back()->use();
+				delete EventManager::draw_text_event.back();
+				EventManager::draw_text_event.pop_back();
 			}
 		}
 		////////////////////////////////////////			draw ui			////////////////////////////////////////
@@ -126,6 +216,30 @@ void Game::update(float dt)
 			Physics::displace(ObjectManager::object_list.at(i), dt);
 		}
 		ObjectManager::aabb_tree.update();
+
+		for (int i = 0; i < ObjectManager::getUI().size(); ++i) {
+			if (ObjectManager::getUI().at(i)->visable()) {
+				DrawEvent<UI *> *event = new DrawEvent<UI *>();
+				event->setTarget(ObjectManager::getUI().at(i));
+				if (ObjectManager::getUI().at(i)->editor) {
+					EventManager::editor_ui_event.push_back(event);
+				}
+				else if (ObjectManager::getUI().at(i)->_texture == "") {
+					EventManager::draw_color_ui_event.push_back(event);
+				}
+				else {
+					EventManager::draw_texture_ui_event.push_back(event);
+				}
+			}
+		}
+
+		for (int i = 0; i < ObjectManager::getText().size(); ++i) {
+			if (ObjectManager::getText().at(i)->visable()) {
+				DrawEvent<TextItem *> *event = new DrawEvent<TextItem *>();
+				event->setTarget(ObjectManager::getText().at(i));
+				EventManager::draw_text_event.push_back(event);
+			}
+		}
 	}
 }
 
@@ -272,20 +386,19 @@ void Game::textInit()
 void Game::textureInit()
 {
 	float vbo_vertex[] = {
-		-0.5f,  0.0f,  -0.5f,
-		0.5f, 0.0f, -0.5f,
-		-0.5f,  0.0f, 0.5f,
-		-0.5f, 0.0f, 0.5f,
-		0.5f,  0.0f,  -0.5f,
-		0.5f, 0.0f,  0.5f,
+		0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+		1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+		0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+		0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+		1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+		1.0f, 0.0f, 1.0f, 1.0f, 1.0f,
 	};
-	Render::addVBO(vbo_vertex, 18, "instance_texture");
-	int pos[1] = { 0 };
-	int size[1] = { 3 };
-	int shift[1] = { 0 };
-	Render::addVAO(pos, size, shift, 1, "instance_texture", "instance_texture");
-	Render::addShader("instance_texture", "./texture_instance.vs", "./texture.fs");
-	Render::addShader("texture", "./texture.vs", "./texture.fs");
+	Render::addVBO(vbo_vertex, 30, "instance_texture");
+	int pos[2] = { 0, 1 };
+	int size[2] = { 3, 2 };
+	int shift[2] = { 0, 3 };
+	Render::addVAO(pos, size, shift, 2, "instance_texture", "instance_texture");
+
 }
 
 void Game::uiInit()
@@ -298,9 +411,129 @@ void Game::uiInit()
 		1.0f, 0.0f, 0.0f,
 		1.0f, 1.0f, 0.0f,
 	};
+	float line_vbo[] = {
+		0.0f, 0.0f, 0.0f,
+		1.0f, 0.0f, 0.0f,
+	};
 	Render::addVBO(vbo_vertex, 18, "ui_vbo");
+	Render::addVBO(line_vbo, 6, "line_vbo");
 	int pos[1] = { 0 };
 	int size[1] = { 3 };
 	int shift[1] = { 0 };
 	Render::addVAO(pos, size, shift, 1, "ui_vao", "ui_vbo");
+	Render::addVAO(pos, size, shift, 1, "line_vao", "line_vbo");
+}
+
+void Game::gameLoop()
+{
+	int lastClock = clock();
+	int count = 0;
+	//////////////////////////////////////	start of the main loop	//////////////////////////////////////
+	while (!glfwWindowShouldClose(scene->window)) {
+		float current_frame = glfwGetTime();
+		dt = current_frame - last_frame;
+		last_frame = current_frame;
+		/////////////////////////////////	display fps
+		int currentClock = clock();
+		if (currentClock - lastClock < 1000) {
+			++count;
+		}
+		else {
+			lastClock = currentClock;
+			std::cerr << "fps : " << count << endl;
+			count = 0;
+		}
+		/////////////////////////////////	display fps
+
+		glClearColor(0.3, 0.3, 0.3, 1.0);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		// start to rending
+
+		input(*scene, dt);
+
+		if (is_player) {
+			player->rigid.data.velocity = camera._v;
+		}
+
+		update(dt);
+
+		if (is_player) {
+			camera.Position = player->rigid.data.position - camera.radius * camera.Front;
+			camera._v = player->rigid.data.velocity;
+		}
+		else {
+			camera.Position += camera._v * dt;
+		}
+
+		render();
+
+
+		//aabbDebuger();
+		showVersion();
+		level_editor->drawBaseLine();
+
+		// end of loop
+		while (1) {//控制FPS
+			if (clock() - currentClock > 0) {
+				break;
+			}
+		}
+		//////////////////////////////////////	end of the main loop	//////////////////////////////////////
+		glfwSwapBuffers(scene->window);
+		glfwPollEvents();
+	}
+
+
+	// glfw: terminate, clearing all previously allocated GLFW resources.
+	// ------------------------------------------------------------------
+	glfwTerminate();
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+//					debug function				//
+void aabbDebuger() {
+	//////////////////////////////////////////////////////////////////////draw aabb
+
+	glm::mat4 projection;
+	projection = glm::perspective(glm::radians(45.0f), (float)1920 / (float)1080, 0.1f, 100.0f);
+	glm::mat4 view;
+	view = camera.getViewMatrix();
+	glm::mat4 model;
+	(Render::shaders.search("color")).use();
+	Render::shaders.search("color").setMat4("view", view);
+	Render::shaders.search("color").setMat4("projection", projection);
+	Render::shaders.search("color").setMat4("model", model);
+
+	AABBNode *current = ObjectManager::aabb_tree._root;
+	std::queue<AABBNode *> que;
+	que.push(current);
+	while (!que.empty()) {
+		Render::drawAABB(current->_aabb);
+		if (!current->isLeaf()) {
+			que.push(current->_children[0]);
+			que.push(current->_children[1]);
+		}
+		current = que.front();
+		que.pop();
+	}
+
+	//////////////////////////////////////////////////////////////////////draw aabb
+}
+
+void showVersion() {
+	glm::vec3 color(0.9, 0.9f, 0.9f);
+	glm::vec2 pos(900.0f, 1030.0f);
+	TString tex(SOFTWARE_VERSION);
+	Render::drawText(tex, pos.x, pos.y, 0.7, color);
 }

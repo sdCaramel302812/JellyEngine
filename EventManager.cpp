@@ -5,6 +5,10 @@ queue<UpdateEvent<Entity *> *> EventManager::update_event;
 queue<RenderEvent<Entity *> *> EventManager::render_event;
 vector<RenderEvent<Entity *> *> EventManager::color_render_event;
 vector<RenderEvent<Entity *> *> EventManager::texture_render_event;
+vector<RenderEvent<UI *> *> EventManager::draw_texture_ui_event;
+vector<RenderEvent<UI *> *> EventManager::draw_color_ui_event;
+vector<RenderEvent<UI *> *> EventManager::editor_ui_event;
+vector<RenderEvent<TextItem *> *> EventManager::draw_text_event;
 
 EventManager::EventManager()
 {
@@ -22,7 +26,7 @@ void EventManager::eventSort(vector<RenderEvent<Entity*>*> &list)
 	for (int i = 0; i < list.size(); ++i) {
 		string texture = list.at(i)->_target_id->texture;
 		if (bucket.find(texture) == bucket.end()) {
-			bucket.insert(std::pair<string, vector<RenderEvent<Entity *>*>>());
+			bucket.insert(std::pair<string, vector<RenderEvent<Entity *>*>>(texture, vector<RenderEvent<Entity *>*>()));
 		}
 		bucket.at(texture).push_back(list.at(i));
 	}

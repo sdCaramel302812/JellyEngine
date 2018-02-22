@@ -15,6 +15,7 @@
 #include "Character.h"
 #include <map>
 #include <ft2build.h>
+#include "TextItem.h"
 #include FT_FREETYPE_H 
 #include <windows.h>
 
@@ -148,7 +149,6 @@ public:
 		
 		glBindVertexArray(VAOs.search(obj->VAO));
 		if (obj->texture != "") {
-			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, Render::textures.search(obj->texture));
 		}
 		if (obj->specular != "") {
@@ -157,7 +157,7 @@ public:
 		}
 
 		glm::mat4 model;
-		model = glm::translate(model, glm::vec3(obj->rigid.data.position.x, obj->rigid.data.position.y, obj->rigid.data.position.z));
+		model = glm::translate(model, glm::vec3(obj->rigid.data.position.x, obj->rigid.data.position.y, obj->rigid.data.position.z)) * obj->_model_matrix;
 		Render::shaders.search(obj->shader).setMat4("model", model);
 		
 		if (obj->EBO == "") {
@@ -171,57 +171,38 @@ public:
 	
 	/////////////////////////////////////////////////////////////////////////////////
 	static void draw(UI *ui) {
-		glm::mat4 view;
-		glm::mat4 projection = glm::ortho(0.0f, static_cast<GLfloat>(1920), 0.0f, static_cast<GLfloat>(1080), 0.0f, 10.0f);
 		glm::mat4 model;
 		glm::mat4 scale = glm::scale(model, glm::vec3(ui->width(), ui->height(), 1));
-		glm::mat4 translate = glm::translate(model, glm::vec3(ui->x(), ui->y(), -ui->getZ()));
+		glm::mat4 translate = glm::translate(model, glm::vec3(ui->x(), ui->y(), ui->getZ()));
 		model = translate*scale;
 
 
-		glBindVertexArray(VAOs.search("ui_vao"));
+		glBindVertexArray(VAOs.search(ui->_vao));
 		if (ui->_texture != "") {
-			shaders.search("texture").use();
-			shaders.search("texture").setMat4("projection", projection);
-			shaders.search("texture").setMat4("view", view);
 			Render::shaders.search("texture").setMat4("model", model);
-			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, Render::textures.search(ui->_texture));
 		}
 		else {
-			shaders.search("color").use();
-			shaders.search("color").setMat4("projection", projection);
-			shaders.search("color").setMat4("view", view);
 			shaders.search("color").setFloat4("color", ui->_color.x, ui->_color.y, ui->_color.z, ui->_color.w);
 			shaders.search("color").setMat4("model", model);
 		}
-
 
 		glDrawArrays(ui->_draw_type, 0, 6);
 	}
 	/////////////////////////////////////////////////////////////////////////////////
 	static void draw(UI *ui, int editor) {
-		glm::mat4 view = camera.getViewMatrix();
-		glm::mat4 projection = camera.getProjectMatrix();
 		glm::mat4 model;
 		glm::mat4 scale = glm::scale(model, glm::vec3(ui->width(), ui->height(), 1));
-		glm::mat4 translate = glm::translate(model, glm::vec3(ui->x(), ui->y(), -ui->getZ()));
+		glm::mat4 translate = glm::translate(model, glm::vec3(ui->x(), ui->y(), ui->getZ()));
 		model = translate*scale;
 
 
-		glBindVertexArray(VAOs.search("ui_vao"));
+		glBindVertexArray(VAOs.search(ui->_vao));
 		if (ui->_texture != "") {
-			shaders.search("texture").use();
-			shaders.search("texture").setMat4("projection", projection);
-			shaders.search("texture").setMat4("view", view);
 			Render::shaders.search("texture").setMat4("model", model);
-			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, Render::textures.search(ui->_texture));
 		}
 		else {
-			shaders.search("color").use();
-			shaders.search("color").setMat4("projection", projection);
-			shaders.search("color").setMat4("view", view);
 			shaders.search("color").setFloat4("color", ui->_color.x, ui->_color.y, ui->_color.z, ui->_color.w);
 			shaders.search("color").setMat4("model", model);
 		}
@@ -264,6 +245,25 @@ public:
 		glBindVertexArray(VAO);
 		glDrawArrays(GL_LINE_STRIP, 0, 18);
 		///////////////////////////
+	}
+	/////////////////////////////////////////////////////////////////////////////////
+	static void drawLine(glm::vec3 pos, float length, float radius) {	//角度
+		glm::mat4 projection = glm::ortho(0.0f, static_cast<GLfloat>(1920), 0.0f, static_cast<GLfloat>(1080), 0.0f, 10.0f);
+		glm::mat4 view;
+		glm::mat4 scale;
+		scale = glm::scale(scale, glm::vec3(length, 1, 1));
+		glm::mat4 rotate;
+		rotate = glm::rotate(rotate, glm::radians(radius), glm::vec3(0, 0, 1));
+		glm::mat4 translate;
+		translate = glm::translate(translate, pos);
+		glm::mat4 model = translate*rotate*scale;
+		glBindVertexArray(VAOs.search("line_vao"));
+		shaders.search("color").use();
+		shaders.search("color").setMat4("projection", projection);
+		shaders.search("color").setMat4("view", view);
+		shaders.search("color").setFloat4("color", 1.0f, 1.0f, 1.0f, 1.0f);
+		shaders.search("color").setMat4("model", model);
+		glDrawArrays(GL_LINES, 0, 6);
 	}
 	/////////////////////////////////////////////////////////////////////////////////
 	static void addGlyph(wchar_t c) {
@@ -324,13 +324,70 @@ public:
 		FT_Done_FreeType(ft);
 	}
 	/////////////////////////////////////////////////////////////////////////////////
+	static void draw(TextItem *text_item) {
+		float z = text_item->getZ();
+		glm::vec3 color = glm::vec3(1, 1, 1);
+		std::wstring text = text_item->text.data();
+		float scale = text_item->scale;
+		float line_width = text_item->line_width;
+		float x = text_item->x();
+		float y = text_item->y();
+		shaders.search("text").setFloat3("textColor", color.x, color.y, color.z);
+		glBindVertexArray(VAOs.search("text"));
+		
+
+		float left_x = x;
+
+		std::wstring::const_iterator c;
+		for (c = text.begin(); c != text.end(); c++)
+		{
+			if (Render::Characters.find(*c) == Render::Characters.end()) {
+				Render::addGlyph(*c);
+			}
+			Character ch = Render::Characters.at(*c);
+
+			GLfloat xpos = x + ch.Bearing.x * scale;
+			GLfloat ypos = y - (ch.Size.y - ch.Bearing.y) * scale;
+
+			GLfloat w = ch.Size.x * scale;
+			GLfloat h = ch.Size.y * scale;
+			// 对每个字符更新VBO
+			GLfloat vertices[6][5] = {
+				{ xpos,     ypos + h,   0.0, 0.0 , z },
+				{ xpos,     ypos,       0.0, 1.0 , z },
+				{ xpos + w, ypos,       1.0, 1.0 , z },
+
+				{ xpos,     ypos + h,   0.0, 0.0 , z },
+				{ xpos + w, ypos,       1.0, 1.0 , z },
+				{ xpos + w, ypos + h,   1.0, 0.0 , z }
+			};
+			// 在四边形上绘制字形纹理
+			glBindTexture(GL_TEXTURE_2D, ch.textureID);
+			// 更新VBO内存的内容
+			glBindBuffer(GL_ARRAY_BUFFER, VBOs.search("text"));
+			glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+			// 绘制四边形
+			glDrawArrays(GL_TRIANGLES, 0, 6);
+			// 更新位置到下一个字形的原点，注意单位是1/64像素
+			x += (ch.Advance >> 6) * scale; // 位偏移6个单位来获取单位为像素的值 (2^6 = 64)
+
+											//若超過限制寬度則換行
+			if (line_width != 0 && x - left_x > line_width) {
+				x = left_x;
+				y -= (ch.Advance >> 6)*scale;
+			}
+		}
+		glBindVertexArray(0);
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+	/////////////////////////////////////////////////////////////////////////////////
 	static void drawText(wstring text, float x, float y, float scale, glm::vec3 color, float line_width = 0, float z = 1) {
 		z *= -1;
 		shaders.search("text").use();
 		glm::mat4 projection = glm::ortho(0.0f, static_cast<GLfloat>(1920), 0.0f, static_cast<GLfloat>(1080), 0.0f, 10.0f);
 		shaders.search("text").setFloat3("textColor", color.x, color.y, color.z);
 		shaders.search("text").setMat4("projection", projection);
-		glActiveTexture(GL_TEXTURE0);
 		glBindVertexArray(VAOs.search("text"));
 
 		float left_x = x;
@@ -385,7 +442,6 @@ public:
 		glm::mat4 projection = glm::ortho(0.0f, static_cast<GLfloat>(1920), 0.0f, static_cast<GLfloat>(1080), 0.0f, 10.0f);
 		shaders.search("text").setFloat3("textColor", color.x, color.y, color.z);
 		shaders.search("text").setMat4("projection", projection);
-		glActiveTexture(GL_TEXTURE0);
 		glBindVertexArray(VAOs.search("text"));
 
 		wstring text = txt.data();

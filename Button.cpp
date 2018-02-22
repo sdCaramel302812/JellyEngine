@@ -12,7 +12,8 @@ Button::Button(float x, float y, float width, float height) : UI(x, y, width, he
 	button_text = new TextItem();
 	button_text->setXY(x + 20, y + (height - 50 > 0 ? (height - 50) / 2 : 0));
 	button_text->setLineWidth(width);
-	button_text->setZ(getZ() - 0.1);
+	setZ(1);
+	button_text->setZ(getZ() + 1);
 	setColor(glm::vec4(0.5, 0.5, 0.5, 0.5));
 }
 

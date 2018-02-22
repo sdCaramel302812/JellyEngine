@@ -89,7 +89,15 @@ public:
 	}
 	void use()
 	{
-		Render::draw(_target_id, _draw_type);
+		if (strncmp(typeid(_target_id).name(), "class Entity * ", 12) == 0) {
+			Render::draw(_target_id, _draw_type);
+		}
+		if (strncmp(typeid(_target_id).name(), "class UI *", 8) == 0) {
+				Render::draw(_target_id);
+		}
+		if (strncmp(typeid(_target_id).name(), "class TextItem *", 14) == 0) {
+			Render::draw(_target_id);
+		}
 
 	}
 	void setDrawType(GLenum type);

@@ -28,6 +28,7 @@
     <ClInclude Include="Event.h" />
     <ClInclude Include="EventManager.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="Include.h" />
     <ClInclude Include="LevelEditor.h" />
     <ClInclude Include="LevelEditorUI.h" />
     <ClInclude Include="Math.h" />

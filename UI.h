@@ -45,10 +45,14 @@ public:
 
 	int _id;
 
+	bool editor = false;		//if true, then use the camera projection
+
 	void setZ(float z);
 	float getZ();
 
 	string _texture = "";
+	string _vao = "ui_vao";
+
 	glm::vec4 _color = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 	GLenum _draw_type = GL_TRIANGLES;
 	void setTexture(string texture);

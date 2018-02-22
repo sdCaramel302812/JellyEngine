@@ -42,7 +42,7 @@ public:
 	float pitch;
 	float speed;
 	float sensitivity;
-	float zoom;
+	float zoom = 1;
 	float radius = 5;
 	bool _is_moving = false;
 	bool _is_jumping = false;
@@ -56,7 +56,7 @@ public:
 	int _camera_mode = 3;	// 1 : first person, 2 : 2D camera, 3 : third person
 
 	/////////////////////////////////////////////////////////////////////////////////
-	Camera(int mode = 3, glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f)) : speed(SPEED), sensitivity(SENSITIVITY), zoom(ZOOM) {
+	Camera(int mode = 3, glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f)) : speed(SPEED), sensitivity(SENSITIVITY), zoom(1) {
 		Position = position;
 		_v = glm::vec3(0.0f, 0.0f, 0.0f);
 		_camera_mode = mode;
@@ -97,9 +97,13 @@ public:
 		return glm::lookAt(Position, Position + Front, Up);
 	}
 	/////////////////////////////////////////////////////////////////////////////////
+	glm::mat4 getUIViewMatrix() {
+		return glm::lookAt(glm::vec3(), Front, Up);
+	}
+	/////////////////////////////////////////////////////////////////////////////////
 	glm::mat4 getProjectMatrix() {
 		if (_camera_mode == 2) {
-			return glm::ortho(_interval_x1, _interval_x2, _interval_y1, _interval_y2, 0.1f, 10.0f);
+			return glm::ortho(_interval_x1 * zoom, _interval_x2 * zoom, _interval_y1 * zoom, _interval_y2 * zoom, 0.1f, 5.5f);
 		}
 		else if (_camera_mode == 3) {
 			return glm::perspective(glm::radians(45.0f), (float)1920 / (float)1080, 0.1f, 100.0f);
@@ -107,7 +111,7 @@ public:
 	}
 	/////////////////////////////////////////////////////////////////////////////////
 	glm::vec4 getOrthoIntervalX1X2Y1Y2() {
-		return glm::vec4(_interval_x1, _interval_x2, _interval_y1, _interval_y2);
+		return glm::vec4(_interval_x1 * zoom, _interval_x2 * zoom, _interval_y1 * zoom, _interval_y2 * zoom);
 	}
 	/////////////////////////////////////////////////////////////////////////////////
 	// Processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)

@@ -5,6 +5,7 @@
 #include "nstdlib.h"
 #include "AABBTree.h"
 #include "UI.h"
+#include "TextItem.h"
 
 class ObjectManager
 {
@@ -23,6 +24,10 @@ public:
 	static void addUI(UI *ui);
 	static void removeUI(UI *ui);
 	static void insertionSortForUI(std::vector<UI *> &list);
+
+	static std::vector<TextItem *> &getText();
+	static void addText(TextItem *text_item);
+	static void removeText(TextItem *text_item);
 	//		UI
 
 
@@ -33,5 +38,6 @@ public:
 
 private:
 	static std::vector<UI *> ui_list;
+	static std::vector<TextItem *> text_list;
 };
 

@@ -4,7 +4,6 @@
 using namespace std;
 
 #define CONTAIN_LIMIT 0.1
-#define FLOOR_HEIGHT 5
 
 AABB::AABB()
 {
@@ -266,8 +265,18 @@ SphereObject::SphereObject(int size) : Entity(size)
 {
 }
 
-Player::Player(int size) : Entity(size)
+Player::Player(glm::vec3 pos) : Entity(6)
 {
+	rigid.setRadius(0.5);
+	rigid._mass = 50;
+	VAO = "sphere";
+	VBO = "sphere";
+	shader = "color_ins";
+	rigid.data.position = pos;
+	rigid._restitution_coeffient = 0;
+	rigid.type = SPHERE;
+	rigid._is_static = false;
+	e_type = PLAYER;
 }
 
 WallObject::WallObject(glm::vec3 point1, glm::vec3 point2) : Entity(6)
@@ -281,9 +290,9 @@ WallObject::WallObject(glm::vec3 point1, glm::vec3 point2) : Entity(6)
 	glm::vec3 ver1 = point1;
 	glm::vec3 ver2 = point2;
 	glm::vec3 ver3 = point2;
-	ver3.y += FLOOR_HEIGHT;
 	glm::vec3 ver4 = point1;
-	ver3.y += FLOOR_HEIGHT;
+	ver3.y += 5;
+	ver4.y += 5;
 	rigidVer.push_back(ver1);
 	rigidVer.push_back(ver2);
 	rigidVer.push_back(ver3);
@@ -294,37 +303,20 @@ WallObject::WallObject(glm::vec3 point1, glm::vec3 point2) : Entity(6)
 
 BackgroundObject::BackgroundObject(string texture, glm::vec3 left_down_back, glm::vec3 right_top_front) : Entity(6)
 {
-	float height = right_top_front.x - left_down_back.x;
-	float width = right_top_front.z - left_down_back.z;
+	float height = abs(right_top_front.z - left_down_back.z);
+	float width = abs(right_top_front.x - left_down_back.x);
 	this->texture = texture;
 	glm::mat4 scale;
-	glm::scale(scale, glm::vec3(height, 1, width));
+	scale = glm::scale(scale, glm::vec3(width, 1, height));
 	glm::mat4 rotate;
-	rotate = glm::rotate(rotate, glm::radians(90.0f), glm::vec3(0, 0, 1));
-	rotate = glm::rotate(rotate, atan2(height, width), glm::vec3(0, 1, 0));
+	//rotate = glm::rotate(rotate, glm::radians(90.0f), glm::vec3(0, 0, 1));
+	//rotate = glm::rotate(rotate, atan2(height, width), glm::vec3(0, 1, 0));
 	_model_matrix = rotate * scale;
 	VAO = "instance_texture";
-	rigid.data.position = glm::vec3(left_down_back.x, left_down_back.y, left_down_back.z);
-}
-
-GroundObject::GroundObject(glm::vec3 left_down_back, glm::vec3 right_top_front) : Entity(6)
-{
+	shader = "texture";
 	rigid._is_static = true;
-	_visible = false;
-	rigid._restitution_coeffient = 0.3;
-	rigid.type = RECTANGLE;
-	rigid._mass = 300000000;
-	vector<glm::vec3> rigidVer;
-	glm::vec3 ver1 = left_down_back;
-	glm::vec3 ver2 = glm::vec3(left_down_back.x, left_down_back.y, right_top_front.z);
-	glm::vec3 ver3 = right_top_front;
-	glm::vec3 ver4 = glm::vec3(right_top_front.x, right_top_front.y, left_down_back.z);
-	rigidVer.push_back(ver1);
-	rigidVer.push_back(ver2);
-	rigidVer.push_back(ver3);
-	rigidVer.push_back(ver4);
-	rigid.setVertex(rigidVer);
-	rigid.setAABB();
+	rigid.data.velocity = glm::vec3();
+	rigid.data.position = glm::vec3(left_down_back.x, left_down_back.y, left_down_back.z);
 }
 
 MovableObject::MovableObject(std::string texture, glm::vec3 position, glm::vec2 texCood1, glm::vec2 texCood2)
@@ -335,31 +327,4 @@ MovableObject::MovableObject(std::string texture, glm::vec3 position, glm::vec2 
 	this->texture = texture;
 	rigid._restitution_coeffient = 0;
 	rigid.setAABB();
-}
-
-StairObject::StairObject(glm::vec3 left_down_back, glm::vec3 right_top_front, float rotate, int type)
-{
-	rigid._is_static = true;
-	_visible = false;
-	rigid._restitution_coeffient = 0.3;
-	rigid.type = RECTANGLE;
-	rigid._mass = 300000000;
-	if (type == 1) {
-		vector<glm::vec3> rigidVer;
-		glm::vec3 ver1 = left_down_back;
-		glm::vec3 ver2 = glm::vec3(left_down_back.x, left_down_back.y, right_top_front.z);
-		glm::vec3 ver3 = right_top_front;
-		glm::vec3 ver4 = glm::vec3(right_top_front.x, right_top_front.y, left_down_back.z);
-		rigidVer.push_back(ver1);
-		rigidVer.push_back(ver2);
-		rigidVer.push_back(ver3);
-		rigidVer.push_back(ver4);
-		rigid.setVertex(rigidVer);
-		rigid.setAABB();
-		_lower_floor = left_down_back.y / FLOOR_HEIGHT;
-		_higher_floor = right_top_front.y / FLOOR_HEIGHT;
-	}
-	else if (type == 2) {
-
-	}
 }

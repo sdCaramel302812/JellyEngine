@@ -25,6 +25,10 @@ public:
 
 	static void loadResource(char *fileName);
 
+	static void loadMap(char *fileName);
+	static void loadMap(char *fileName, int editor);
+	static void saveMap(char *fileName);
+
 private:
 	static string _path_name;
 	static string _file_name;
