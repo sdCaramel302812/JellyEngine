@@ -204,10 +204,10 @@ void Physics::displace(Entity * obj,float dt)
 	if (obj->rigid.type == SPHERE) {
 		draw->setDrawType(GL_LINE_STRIP);
 	}
-	if (obj->shader == "texture_ins" || obj->shader == "texture") {
+	if (obj->shader == "texture_ins" || obj->shader == "texture" && obj->isVisible()) {
 		EventManager::texture_render_event.push_back(draw);
 	}
-	else if (obj->shader == "color_ins") {
+	else if (obj->shader == "color_ins" && obj->isVisible()) {
 		EventManager::color_render_event.push_back(draw);
 	}
 	//View Frustum Culling

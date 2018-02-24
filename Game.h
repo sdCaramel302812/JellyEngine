@@ -11,6 +11,7 @@
 #include "ResourceManager.h"
 #include "Scene.h"
 #include "LevelEditor.h"
+#include "LevelEditorUI.h"
 #include "Define.h"
 using std::queue;
 

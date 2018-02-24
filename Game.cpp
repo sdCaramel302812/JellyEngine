@@ -36,6 +36,7 @@ void Game::Init()
 
 	glEnable(GL_DEPTH_TEST);
 	glActiveTexture(GL_TEXTURE0);
+	glLineWidth(2.5);
 
 	Render::addShader("text", "./text.vs", "./text.fs");
 	Render::addShader("texture", "./texture.vs", "./texture.fs");
@@ -159,7 +160,7 @@ void Game::render()
 			Render::shaders.search("color").setMat4("view", view);
 			Render::shaders.search("color").setMat4("projection", projection);
 			while (!EventManager::editor_ui_event.empty()) {
-				EventManager::editor_ui_event.back()->use();
+				EventManager::editor_ui_event.back()->_target_id->draw();
 				delete EventManager::editor_ui_event.back();
 				EventManager::editor_ui_event.pop_back();
 			}
@@ -168,6 +169,7 @@ void Game::render()
 		view = glm::mat4();
 		projection= glm::ortho(0.0f, static_cast<GLfloat>(1920), 0.0f, static_cast<GLfloat>(1080), 10.0f, -10.0f);
 		if (!EventManager::draw_color_ui_event.empty()) {
+			Render::shaders.search("color").setMat4("view", view);
 			Render::shaders.search("color").setMat4("projection", projection);
 			while (!EventManager::draw_color_ui_event.empty()) {
 				EventManager::draw_color_ui_event.back()->use();
@@ -221,7 +223,7 @@ void Game::update(float dt)
 			if (ObjectManager::getUI().at(i)->visable()) {
 				DrawEvent<UI *> *event = new DrawEvent<UI *>();
 				event->setTarget(ObjectManager::getUI().at(i));
-				if (ObjectManager::getUI().at(i)->editor) {
+				if (ObjectManager::getUI().at(i)->_editor) {
 					EventManager::editor_ui_event.push_back(event);
 				}
 				else if (ObjectManager::getUI().at(i)->_texture == "") {
@@ -296,55 +298,102 @@ void Game::mouseCallback(GLFWwindow * window, double xpos, double ypos)
 		if (ObjectManager::getUI().at(i)->x() > _mouse_x) {
 		//	break;
 		}
-		if (_mouse_x - ObjectManager::getUI().at(i)->x() < ObjectManager::getUI().at(i)->width() && _mouse_x > ObjectManager::getUI().at(i)->x() && _mouse_y - ObjectManager::getUI().at(i)->y() < ObjectManager::getUI().at(i)->height() && _mouse_y > ObjectManager::getUI().at(i)->y() && ObjectManager::getUI().at(i)->hasHover()) {
+		float left = (ObjectManager::getUI().at(i)->width() > 0) ? ObjectManager::getUI().at(i)->x() : ObjectManager::getUI().at(i)->x() + ObjectManager::getUI().at(i)->width();
+		float right = (ObjectManager::getUI().at(i)->width() > 0) ? ObjectManager::getUI().at(i)->x() + ObjectManager::getUI().at(i)->width() : ObjectManager::getUI().at(i)->x();
+		float top = (ObjectManager::getUI().at(i)->height() > 0) ? ObjectManager::getUI().at(i)->y() + ObjectManager::getUI().at(i)->height() : ObjectManager::getUI().at(i)->y();
+		float down = (ObjectManager::getUI().at(i)->height() > 0) ? ObjectManager::getUI().at(i)->y() : ObjectManager::getUI().at(i)->y() + ObjectManager::getUI().at(i)->height();
+		if (_mouse_x < right + 10 && _mouse_x > left - 10 && _mouse_y < top + 10 && _mouse_y > down - 10 && ObjectManager::getUI().at(i)->hasHover()) {
 			ObjectManager::getUI().at(i)->hoverIn();
 		}
 		else if(ObjectManager::getUI().at(i)->hasHover()){
 			ObjectManager::getUI().at(i)->hoverOut();
 		}
 	}
+	if (state == LEVEL_EDITOR) {
+		if (level_editor->_is_setting && level_editor->state == SET_WALL) {
+			level_editor->current_UI->setPoint2(level_editor->mouse2map(_mouse_x, _mouse_y));
+		}
+	}
 }
 
 void Game::mouseButtonCallback(GLFWwindow * window, int button, int action, int mods)
 {
-	if (glfwGetKey(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE) {
-		_is_first_click = true;
-	}
-
 	if (state == ACTIVATE) {
-		if (glfwGetKey(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && _is_first_click) {
+		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+			//		ui callback
 			for (int i = 0; i < ObjectManager::getUI().size(); ++i) {
 				if (ObjectManager::getUI().at(i)->x() > _mouse_x) {
-					break;
+				//	break;
 				}
-				if (_mouse_x - ObjectManager::getUI().at(i)->x() < ObjectManager::getUI().at(i)->width() && _mouse_x > ObjectManager::getUI().at(i)->x() && _mouse_y - ObjectManager::getUI().at(i)->y() < ObjectManager::getUI().at(i)->height() && _mouse_y > ObjectManager::getUI().at(i)->y() && ObjectManager::getUI().at(i)->hasCallback()) {
+				float left = (ObjectManager::getUI().at(i)->width() > 0) ? ObjectManager::getUI().at(i)->x() : ObjectManager::getUI().at(i)->x() + ObjectManager::getUI().at(i)->width();
+				float right = (ObjectManager::getUI().at(i)->width() > 0) ? ObjectManager::getUI().at(i)->x() + ObjectManager::getUI().at(i)->width() : ObjectManager::getUI().at(i)->x();
+				float top = (ObjectManager::getUI().at(i)->height() > 0) ? ObjectManager::getUI().at(i)->y() + ObjectManager::getUI().at(i)->height() : ObjectManager::getUI().at(i)->y();
+				float down = (ObjectManager::getUI().at(i)->height() > 0) ? ObjectManager::getUI().at(i)->y() : ObjectManager::getUI().at(i)->y() + ObjectManager::getUI().at(i)->height();
+				if (_mouse_x < right + 10 && _mouse_x > left - 10 && _mouse_y < top + 10 && _mouse_y > down - 10 && ObjectManager::getUI().at(i)->hasCallback()) {
 					ObjectManager::getUI().at(i)->callback();
 					cout << "call" << endl;
 				}
 			}
+			//		ui callback
 		}
 	}
 	if (state == LEVEL_EDITOR) {
-		if (glfwGetKey(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && _is_first_click) {
+		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
 			bool has_select = false;
+			bool is_button = false;
+			//		ui callback
 			for (int i = 0; i < ObjectManager::getUI().size(); ++i) {
 				if (ObjectManager::getUI().at(i)->x() > _mouse_x) {
 					break;
 				}
-				if (_mouse_x - ObjectManager::getUI().at(i)->x() < ObjectManager::getUI().at(i)->width() && _mouse_x > ObjectManager::getUI().at(i)->x() && _mouse_y - ObjectManager::getUI().at(i)->y() < ObjectManager::getUI().at(i)->height() && _mouse_y > ObjectManager::getUI().at(i)->y() && ObjectManager::getUI().at(i)->hasCallback()) {
+				float left = (ObjectManager::getUI().at(i)->width() > 0) ? ObjectManager::getUI().at(i)->x() : ObjectManager::getUI().at(i)->x() + ObjectManager::getUI().at(i)->width();
+				float right = (ObjectManager::getUI().at(i)->width() > 0) ? ObjectManager::getUI().at(i)->x() + ObjectManager::getUI().at(i)->width() : ObjectManager::getUI().at(i)->x();
+				float top = (ObjectManager::getUI().at(i)->height() > 0) ? ObjectManager::getUI().at(i)->y() + ObjectManager::getUI().at(i)->height() : ObjectManager::getUI().at(i)->y();
+				float down = (ObjectManager::getUI().at(i)->height() > 0) ? ObjectManager::getUI().at(i)->y() : ObjectManager::getUI().at(i)->y() + ObjectManager::getUI().at(i)->height();
+				if (_mouse_x < right + 10 && _mouse_x > left - 10 && _mouse_y < top + 10 && _mouse_y > down - 10 && ObjectManager::getUI().at(i)->hasCallback()) {
+					ObjectManager::getUI().at(i)->callback();
+					is_button = true;
+				}
+				else if (_mouse_x < right + 10 && _mouse_x > left - 10 && _mouse_y < top + 10 && _mouse_y > down - 10 && !ObjectManager::getUI().at(i)->hasCallback()) {
 					level_editor->current_UI = ObjectManager::getUI().at(i);
 					has_select = true;
 				}
 			}
+			//		ui callback
 			if (!has_select) {
 				level_editor->current_UI = nullptr;
+			}
+			if (level_editor->state == SET_WALL && !is_button) {
+				if (!level_editor->_is_setting) {
+					WallUI *ui = new WallUI(level_editor->mouse2map(_mouse_x, _mouse_y));
+					level_editor->_is_setting = true;
+					level_editor->current_UI = ui;
+					ObjectManager::addUI(ui);
+				}
+			}
+		}
+		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
+			level_editor->_is_setting = false;
+			level_editor->current_UI = nullptr;
+		}
+		if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
+			level_editor->state = SET_NOTHING;
+			cout << "set nothing" << endl;
+			
+		}
+		if (button == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_PRESS) {
+			for (int i = 0; i < ObjectManager::getUI().size(); ++i) {
+				float left = (ObjectManager::getUI().at(i)->width() > 0) ? ObjectManager::getUI().at(i)->x() : ObjectManager::getUI().at(i)->x() + ObjectManager::getUI().at(i)->width();
+				float right = (ObjectManager::getUI().at(i)->width() > 0) ? ObjectManager::getUI().at(i)->x() + ObjectManager::getUI().at(i)->width() : ObjectManager::getUI().at(i)->x();
+				float top = (ObjectManager::getUI().at(i)->height() > 0) ? ObjectManager::getUI().at(i)->y() + ObjectManager::getUI().at(i)->height() : ObjectManager::getUI().at(i)->y();
+				float down = (ObjectManager::getUI().at(i)->height() > 0) ? ObjectManager::getUI().at(i)->y() : ObjectManager::getUI().at(i)->y() + ObjectManager::getUI().at(i)->height();
+				if (_mouse_x < right + 10 && _mouse_x > left - 10 && _mouse_y < top + 10 && _mouse_y > down - 10 && !ObjectManager::getUI().at(i)->hasCallback()) {
+					ObjectManager::removeUI(ObjectManager::getUI().at(i));
+				}
 			}
 		}
 	}
 
-	if (glfwGetKey(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
-		_is_first_click = false;
-	}
 }
 
 void Game::mouseButtonCallback(bool mouse_state)
@@ -354,7 +403,11 @@ void Game::mouseButtonCallback(bool mouse_state)
 			if (ObjectManager::getUI().at(i)->x() > _mouse_x) {
 				break;
 			}
-			if (_mouse_x - ObjectManager::getUI().at(i)->x() < ObjectManager::getUI().at(i)->width() && _mouse_x > ObjectManager::getUI().at(i)->x() && _mouse_y - ObjectManager::getUI().at(i)->y() < ObjectManager::getUI().at(i)->height() && _mouse_y > ObjectManager::getUI().at(i)->y() && ObjectManager::getUI().at(i)->hasCallback()) {
+			float left = (ObjectManager::getUI().at(i)->width() > 0) ? ObjectManager::getUI().at(i)->x() : ObjectManager::getUI().at(i)->x() + ObjectManager::getUI().at(i)->width();
+			float right = (ObjectManager::getUI().at(i)->width() > 0) ? ObjectManager::getUI().at(i)->x() + ObjectManager::getUI().at(i)->width() : ObjectManager::getUI().at(i)->x();
+			float top = (ObjectManager::getUI().at(i)->height() > 0) ? ObjectManager::getUI().at(i)->y() + ObjectManager::getUI().at(i)->height() : ObjectManager::getUI().at(i)->y();
+			float down = (ObjectManager::getUI().at(i)->height() > 0) ? ObjectManager::getUI().at(i)->y() : ObjectManager::getUI().at(i)->y() + ObjectManager::getUI().at(i)->height();
+			if (_mouse_x < right + 10 && _mouse_x > left - 10 && _mouse_y < top + 10 && _mouse_y > down - 10 && ObjectManager::getUI().at(i)->hasCallback()) {
 				ObjectManager::getUI().at(i)->callback();
 			}
 		}

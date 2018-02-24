@@ -92,6 +92,10 @@ int Entity::size()
 	return vertex_size;
 }
 
+void Entity::setHeightWidth(float height, float width)
+{
+}
+
 bool Entity::isVisible()
 {
 	return _visible;
@@ -317,6 +321,12 @@ BackgroundObject::BackgroundObject(string texture, glm::vec3 left_down_back, glm
 	rigid._is_static = true;
 	rigid.data.velocity = glm::vec3();
 	rigid.data.position = glm::vec3(left_down_back.x, left_down_back.y, left_down_back.z);
+}
+
+void BackgroundObject::setHeightWidth(float height, float width)
+{
+	glm::mat4 scale = glm::scale(glm::mat4(), glm::vec3(width, 1, height));
+	_model_matrix = scale;
 }
 
 MovableObject::MovableObject(std::string texture, glm::vec3 position, glm::vec2 texCood1, glm::vec2 texCood2)

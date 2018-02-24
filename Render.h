@@ -199,6 +199,7 @@ public:
 
 		glBindVertexArray(VAOs.search(ui->_vao));
 		if (ui->_texture != "") {
+			//Render::shaders.search("texture").use();
 			Render::shaders.search("texture").setMat4("model", model);
 			glBindTexture(GL_TEXTURE_2D, Render::textures.search(ui->_texture));
 		}
@@ -247,7 +248,7 @@ public:
 		///////////////////////////
 	}
 	/////////////////////////////////////////////////////////////////////////////////
-	static void drawLine(glm::vec3 pos, float length, float radius) {	//角度
+	static void drawLine(glm::vec3 pos, float length, float radius, glm::vec4 color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)) {	//角度
 		glm::mat4 projection = glm::ortho(0.0f, static_cast<GLfloat>(1920), 0.0f, static_cast<GLfloat>(1080), 0.0f, 10.0f);
 		glm::mat4 view;
 		glm::mat4 scale;
@@ -261,9 +262,23 @@ public:
 		shaders.search("color").use();
 		shaders.search("color").setMat4("projection", projection);
 		shaders.search("color").setMat4("view", view);
-		shaders.search("color").setFloat4("color", 1.0f, 1.0f, 1.0f, 1.0f);
+		shaders.search("color").setFloat4("color", color.x, color.y, color.z, color.w);
 		shaders.search("color").setMat4("model", model);
-		glDrawArrays(GL_LINES, 0, 6);
+		glDrawArrays(GL_LINES, 0, 2);
+	}
+	static void drawLine(glm::vec3 pos, float length, float radius, glm::vec4 color, int editor) {	//弧度
+		glm::mat4 scale;
+		scale = glm::scale(scale, glm::vec3(length, 1, 1));
+		glm::mat4 rotate;
+		rotate = glm::rotate(rotate, radius, glm::vec3(0, 1, 0));
+		rotate = glm::rotate(rotate, glm::radians(-90.0f), glm::vec3(0, 1, 0));
+		glm::mat4 translate;
+		translate = glm::translate(translate, pos);
+		glm::mat4 model = translate*rotate*scale;
+		glBindVertexArray(VAOs.search("line_vao"));
+		shaders.search("color").setFloat4("color", color.x, color.y, color.z, color.w);
+		shaders.search("color").setMat4("model", model);
+		glDrawArrays(GL_LINES, 0, 2);
 	}
 	/////////////////////////////////////////////////////////////////////////////////
 	static void addGlyph(wchar_t c) {

@@ -135,6 +135,8 @@ public:
 
 	AABBNode *_aabb_node = nullptr;
 
+	virtual void setHeightWidth(float height, float width);		//for editor
+
 	bool isVisible();
 	void setVisible(bool value);
 	void setTrigger(bool value);
@@ -169,6 +171,8 @@ public:
 class BackgroundObject :public Entity {
 public:
 	BackgroundObject(std::string texture, glm::vec3 left_down_back, glm::vec3 right_top_front);
+
+	virtual void setHeightWidth(float height, float width);
 };
 
 class MovableObject :public Entity {

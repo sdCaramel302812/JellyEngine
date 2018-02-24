@@ -7,6 +7,14 @@
 
 extern Camera camera;
 
+enum EditorState {
+	SET_NOTHING,
+	SET_WALL,
+	SET_BACKGROUND,
+
+};
+
+
 class LevelEditor
 {
 public:
@@ -24,7 +32,11 @@ public:
 
 	void drawBaseLine();
 
-	glm::vec2 mouse2map(float x, float y);
+	glm::vec3 mouse2map(float x, float y);
+
+	EditorState state = SET_NOTHING;
+
+	bool _is_setting = false;	//is setting the position for map
 
 private:
 	bool _visable = true;

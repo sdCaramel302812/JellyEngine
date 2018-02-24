@@ -16,6 +16,16 @@ LevelEditor::LevelEditor()
 	_wall_button->setButtonText(TString("wall"));
 	_background_button->setButtonText(TString("background"));
 
+	_wall_button->setCallback([=]() {
+		state = SET_WALL;
+		cout << "set wall" << endl;
+	});
+
+	_background_button->setCallback([=]() {
+		state = SET_BACKGROUND;
+		cout << "set background" << endl;
+	});
+
 	ObjectManager::addUI(_save_button);
 	ObjectManager::addText(_save_button->button_text);
 	ObjectManager::addUI(_load_button);
@@ -54,14 +64,23 @@ void LevelEditor::drawBaseLine()
 	float ypos = 540 * (camera.getOrthoIntervalX1X2Y1Y2().w - camera.getOrthoIntervalX1X2Y1Y2().z) / 1080 + camera.getOrthoIntervalX1X2Y1Y2().z;
 	glm::vec4 pos = glm::vec4(ypos, 0, xpos, 1);
 	pos = glm::translate(glm::mat4(),camera.Position)*pos;
-	Render::drawText(TString().number(pos.z) + "\t" + TString().number(pos.x), 120, 120, 0.7, glm::vec3(1.0, 1.0, 1.0));
+	if (state == SET_NOTHING) {
+		Render::drawText(TString().number(pos.z) + "\t" + TString().number(pos.x), 120, 120, 0.7, glm::vec3(1.0, 1.0, 1.0));
+	}
+	if (state == SET_WALL) {
+		Render::drawText(TString().number(pos.z) + "\t" + TString().number(pos.x) + "WALL", 120, 120, 0.7, glm::vec3(1.0, 1.0, 1.0));
+	}
+	if (state == SET_BACKGROUND) {
+		Render::drawText(TString().number(pos.z) + "\t" + TString().number(pos.x) + "BACKGROUND", 120, 120, 0.7, glm::vec3(1.0, 1.0, 1.0));
+	}
 }
 
-glm::vec2 LevelEditor::mouse2map(float x, float y)
+glm::vec3 LevelEditor::mouse2map(float x, float y)	//將 UI 坐標系轉為世界坐標系，UI 坐標系的 X Y 分別對應世界坐標系的 Z X 
 {
 	float xpos = x * (camera.getOrthoIntervalX1X2Y1Y2().y - camera.getOrthoIntervalX1X2Y1Y2().x) / 1920 + camera.getOrthoIntervalX1X2Y1Y2().x;
 	float ypos = y * (camera.getOrthoIntervalX1X2Y1Y2().w - camera.getOrthoIntervalX1X2Y1Y2().z) / 1080 + camera.getOrthoIntervalX1X2Y1Y2().z;
 	glm::vec4 pos = glm::vec4(ypos, 0, xpos, 1);
 	pos = glm::translate(glm::mat4(), camera.Position)*pos;
-	return glm::vec2(pos.x, pos.z);
+	pos.y -= 5;
+	return pos;
 }

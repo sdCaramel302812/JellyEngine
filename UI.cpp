@@ -59,6 +59,14 @@ void UI::setWidth(float width)
 	_height_width.y = width;
 }
 
+void UI::setPoint1(glm::vec3 point)
+{
+}
+
+void UI::setPoint2(glm::vec3 point)
+{
+}
+
 void UI::setCallback(const CALL_BACK & callback)
 {
 	_callback_function = callback;
@@ -159,6 +167,16 @@ void UI::setColor(float r, float g, float b, float a)
 void UI::setDrawType(GLenum type)
 {
 	_draw_type = type;
+}
+
+bool UI::selected()
+{
+	return _is_selected;
+}
+
+void UI::setSelect(bool value)
+{
+	_is_selected = value;
 }
 
 int UI::_ui_num = 0;

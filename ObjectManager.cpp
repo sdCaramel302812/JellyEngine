@@ -47,6 +47,13 @@ void ObjectManager::addUI(UI * ui)
 
 void ObjectManager::removeUI(UI * ui)
 {
+	for (std::vector<UI *>::iterator itr = ui_list.begin(); itr != ui_list.end(); ++itr) {
+		if (*itr == ui) {
+			ui_list.erase(itr);
+			break;
+		}
+	}
+	delete ui;
 }
 
 void ObjectManager::qSort(std::vector<Entity*> list, bool _is_x)
@@ -114,6 +121,7 @@ void ObjectManager::insertionSortForUI(std::vector<UI*> &list)
 				}
 			}
 		}
+		list = sorted_list;
 }
 
 std::vector<TextItem*>& ObjectManager::getText()

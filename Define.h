@@ -1,6 +1,6 @@
 #pragma once
 
-#define SOFTWARE_VERSION "ver 0.4.4"
+#define SOFTWARE_VERSION "ver 0.4.5"
 
 //	Windows
 #define _WIN32_WINNT 0x0500

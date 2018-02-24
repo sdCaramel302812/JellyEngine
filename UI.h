@@ -20,13 +20,16 @@ public:
 	UI();
 	UI(float x, float y, float width, float height);
 	~UI();
-	float x();
-	float y();
-	float height();
-	float width();
+	virtual float x();
+	virtual float y();
+	virtual float height();
+	virtual float width();
 	virtual void setXY(float x, float y);
 	virtual void setHeight(float height);
 	virtual void setWidth(float width);
+
+	virtual void setPoint1(glm::vec3 point);
+	virtual void setPoint2(glm::vec3 point);
 
 	void setCallback(const CALL_BACK &callback);
 	virtual void callback();
@@ -45,7 +48,7 @@ public:
 
 	int _id;
 
-	bool editor = false;		//if true, then use the camera projection
+	bool _editor = false;		//if true, then use the camera projection
 
 	void setZ(float z);
 	float getZ();
@@ -60,8 +63,12 @@ public:
 	void setColor(float r, float g, float b, float a);
 	void setDrawType(GLenum type);
 
+	bool selected();
+	virtual void setSelect(bool value);
+
 protected:
 	bool _visable = true;
+	bool _is_selected = false;
 	float _z_value = 0;
 	CALL_BACK _callback_function;
 	HOVER_CALL_BACK _hover_in;
