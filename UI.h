@@ -41,10 +41,15 @@ public:
 	virtual void hoverOut();
 	bool hasHover();
 
+	virtual void wheelEvent(float yoffset);
+	bool hasWheelEvent();
+
 	virtual void draw();
 
 	bool visable();
-	void setVisable(bool value);
+	virtual void setVisable(bool value);
+	bool enable();
+	virtual void setEnable(bool value);
 
 	int _id;
 
@@ -68,6 +73,7 @@ public:
 
 protected:
 	bool _visable = true;
+	bool _enable = true;
 	bool _is_selected = false;
 	float _z_value = 0;
 	CALL_BACK _callback_function;
@@ -75,6 +81,7 @@ protected:
 	HOVER_CALL_BACK _hover_out;
 	bool _has_hover = false;
 	bool _has_callback = false;
+	bool _has_wheel_event = false;
 	glm::vec2 _position;
 	glm::vec2 _height_width;
 	static int createID();

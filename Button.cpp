@@ -63,6 +63,13 @@ void Button::hoverOut()
 	setColor(glm::vec4(0.5, 0.5, 0.5, 0.5));
 }
 
+void Button::setXY(float x, float y)
+{
+	_position.x = x;
+	_position.y = y;
+	button_text->setXY(x + 20, y + (this->height() - 50 > 0 ? (this->height() - 50) / 2 : 0));
+}
+
 wstring & Button::getText()
 {
 	return button_text->text.data();

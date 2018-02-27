@@ -307,15 +307,18 @@ WallObject::WallObject(glm::vec3 point1, glm::vec3 point2) : Entity(6)
 
 BackgroundObject::BackgroundObject(string texture, glm::vec3 left_down_back, glm::vec3 right_top_front) : Entity(6)
 {
-	float height = abs(right_top_front.z - left_down_back.z);
-	float width = abs(right_top_front.x - left_down_back.x);
+	float height = abs(right_top_front.x - left_down_back.x);
+	float width = abs(right_top_front.z - left_down_back.z);
+	_height = height;
+	_width = width;
 	this->texture = texture;
 	glm::mat4 scale;
-	scale = glm::scale(scale, glm::vec3(width, 1, height));
+	scale = glm::scale(scale, glm::vec3(height, 1, width));
 	glm::mat4 rotate;
 	//rotate = glm::rotate(rotate, glm::radians(90.0f), glm::vec3(0, 0, 1));
 	//rotate = glm::rotate(rotate, atan2(height, width), glm::vec3(0, 1, 0));
 	_model_matrix = rotate * scale;
+	e_type = BACKGROUND_ENTITY;
 	VAO = "instance_texture";
 	shader = "texture";
 	rigid._is_static = true;
@@ -325,7 +328,9 @@ BackgroundObject::BackgroundObject(string texture, glm::vec3 left_down_back, glm
 
 void BackgroundObject::setHeightWidth(float height, float width)
 {
-	glm::mat4 scale = glm::scale(glm::mat4(), glm::vec3(width, 1, height));
+	glm::mat4 scale = glm::scale(glm::mat4(), glm::vec3(height, 1, width));
+	_height = height;
+	_width = width;
 	_model_matrix = scale;
 }
 

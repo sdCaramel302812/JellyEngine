@@ -29,7 +29,10 @@ public:
 	static void loadMap(char *fileName, int editor);
 	static void saveMap(char *fileName);
 
+	static vector<string> &getImageList();
+
 private:
+	static vector<string> _image_list;
 	static string _path_name;
 	static string _file_name;
 };

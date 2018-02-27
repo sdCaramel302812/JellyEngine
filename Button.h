@@ -27,6 +27,8 @@ public:
 	virtual void hoverIn();
 	virtual void hoverOut();
 
+	virtual void setXY(float x, float y);
+
 	wstring &getText();
 	TextItem &getTextItem();
 

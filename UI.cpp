@@ -125,6 +125,15 @@ bool UI::hasHover()
 	return _has_hover;
 }
 
+void UI::wheelEvent(float yoffset)
+{
+}
+
+bool UI::hasWheelEvent()
+{
+	return _has_wheel_event;
+}
+
 void UI::draw()
 {
 }
@@ -137,6 +146,16 @@ bool UI::visable()
 void UI::setVisable(bool value)
 {
 	_visable = value;
+}
+
+bool UI::enable()
+{
+	return _enable;
+}
+
+void UI::setEnable(bool value)
+{
+	_enable = value;
 }
 
 void UI::setZ(float z)

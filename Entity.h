@@ -40,7 +40,7 @@ enum EntityType {
 	NPC,
 	ENEMY,
 	BULLET,
-	BACK_GROUND,		//只存取背景圖，不碰撞
+	BACKGROUND_ENTITY,		//只存取背景圖，不碰撞
 	GROUND,				//只包含地板碰撞箱，不繪製
 	WALL,				//只包含牆壁碰撞箱，不繪製
 	EVENT_COLLIDER,		//事件偵測器
@@ -129,6 +129,8 @@ public:
 	int size();
 
 	glm::mat4 _model_matrix;//rotate * scale
+	float _height;
+	float _width;
 
 	int _id;
 	EntityType e_type;

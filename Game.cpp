@@ -21,6 +21,7 @@ Game::Game()
 
 
 	Init();
+	level_editor->setBackgroundList();
 }
 
 
@@ -50,6 +51,8 @@ void Game::Init()
 
 	Render::addShader("color", "./color.vs", "./color.fs");
 	Render::addShader("color_ins", "./color_instance.vs", "./color_instance.fs");
+
+	ResourceManager::loadResource("./resource.rec");
 
 	textInit();
 	textureInit();
@@ -302,7 +305,7 @@ void Game::mouseCallback(GLFWwindow * window, double xpos, double ypos)
 		float right = (ObjectManager::getUI().at(i)->width() > 0) ? ObjectManager::getUI().at(i)->x() + ObjectManager::getUI().at(i)->width() : ObjectManager::getUI().at(i)->x();
 		float top = (ObjectManager::getUI().at(i)->height() > 0) ? ObjectManager::getUI().at(i)->y() + ObjectManager::getUI().at(i)->height() : ObjectManager::getUI().at(i)->y();
 		float down = (ObjectManager::getUI().at(i)->height() > 0) ? ObjectManager::getUI().at(i)->y() : ObjectManager::getUI().at(i)->y() + ObjectManager::getUI().at(i)->height();
-		if (_mouse_x < right + 10 && _mouse_x > left - 10 && _mouse_y < top + 10 && _mouse_y > down - 10 && ObjectManager::getUI().at(i)->hasHover()) {
+		if (_mouse_x < right + 10 && _mouse_x > left - 10 && _mouse_y < top + 10 && _mouse_y > down - 10 && ObjectManager::getUI().at(i)->hasHover() && ObjectManager::getUI().at(i)->visable()) {
 			ObjectManager::getUI().at(i)->hoverIn();
 		}
 		else if(ObjectManager::getUI().at(i)->hasHover()){
@@ -312,6 +315,27 @@ void Game::mouseCallback(GLFWwindow * window, double xpos, double ypos)
 	if (state == LEVEL_EDITOR) {
 		if (level_editor->_is_setting && level_editor->state == SET_WALL) {
 			level_editor->current_UI->setPoint2(level_editor->mouse2map(_mouse_x, _mouse_y));
+		}
+		if (level_editor->_is_setting && level_editor->state == SET_BACKGROUND_SIZE) {
+			glm::vec3 map_pos = level_editor->mouse2map(_mouse_x, _mouse_y);
+			if (abs(map_pos.x - level_editor->current_entity->rigid.data.position.x) < 1) {
+				float dx = map_pos.x - level_editor->current_entity->rigid.data.position.x;
+				level_editor->current_entity->rigid.data.position.x = map_pos.x;
+				level_editor->current_entity->setHeightWidth(level_editor->current_entity->_height - dx, level_editor->current_entity->_width);
+			}
+			if (abs(map_pos.z - level_editor->current_entity->rigid.data.position.z) < 1) {
+				float dz = map_pos.z - level_editor->current_entity->rigid.data.position.z;
+				level_editor->current_entity->rigid.data.position.z = map_pos.z;
+				level_editor->current_entity->setHeightWidth(level_editor->current_entity->_height, level_editor->current_entity->_width - dz);
+			}
+			if (abs(map_pos.x - level_editor->current_entity->rigid.data.position.x - level_editor->current_entity->_height) < 1) {
+				float dx = map_pos.x - level_editor->current_entity->rigid.data.position.x - level_editor->current_entity->_height;
+				level_editor->current_entity->setHeightWidth(level_editor->current_entity->_height + dx, level_editor->current_entity->_width);
+			}
+			if (abs(map_pos.z - level_editor->current_entity->rigid.data.position.z - level_editor->current_entity->_width) < 1) {
+				float dz = map_pos.z - level_editor->current_entity->rigid.data.position.z - level_editor->current_entity->_width;
+				level_editor->current_entity->setHeightWidth(level_editor->current_entity->_height, level_editor->current_entity->_width + dz);
+			}
 		}
 	}
 }
@@ -329,7 +353,7 @@ void Game::mouseButtonCallback(GLFWwindow * window, int button, int action, int 
 				float right = (ObjectManager::getUI().at(i)->width() > 0) ? ObjectManager::getUI().at(i)->x() + ObjectManager::getUI().at(i)->width() : ObjectManager::getUI().at(i)->x();
 				float top = (ObjectManager::getUI().at(i)->height() > 0) ? ObjectManager::getUI().at(i)->y() + ObjectManager::getUI().at(i)->height() : ObjectManager::getUI().at(i)->y();
 				float down = (ObjectManager::getUI().at(i)->height() > 0) ? ObjectManager::getUI().at(i)->y() : ObjectManager::getUI().at(i)->y() + ObjectManager::getUI().at(i)->height();
-				if (_mouse_x < right + 10 && _mouse_x > left - 10 && _mouse_y < top + 10 && _mouse_y > down - 10 && ObjectManager::getUI().at(i)->hasCallback()) {
+				if (_mouse_x < right + 10 && _mouse_x > left - 10 && _mouse_y < top + 10 && _mouse_y > down - 10 && ObjectManager::getUI().at(i)->hasCallback() && ObjectManager::getUI().at(i)->visable()) {
 					ObjectManager::getUI().at(i)->callback();
 					cout << "call" << endl;
 				}
@@ -350,11 +374,11 @@ void Game::mouseButtonCallback(GLFWwindow * window, int button, int action, int 
 				float right = (ObjectManager::getUI().at(i)->width() > 0) ? ObjectManager::getUI().at(i)->x() + ObjectManager::getUI().at(i)->width() : ObjectManager::getUI().at(i)->x();
 				float top = (ObjectManager::getUI().at(i)->height() > 0) ? ObjectManager::getUI().at(i)->y() + ObjectManager::getUI().at(i)->height() : ObjectManager::getUI().at(i)->y();
 				float down = (ObjectManager::getUI().at(i)->height() > 0) ? ObjectManager::getUI().at(i)->y() : ObjectManager::getUI().at(i)->y() + ObjectManager::getUI().at(i)->height();
-				if (_mouse_x < right + 10 && _mouse_x > left - 10 && _mouse_y < top + 10 && _mouse_y > down - 10 && ObjectManager::getUI().at(i)->hasCallback()) {
+				if (_mouse_x < right + 10 && _mouse_x > left - 10 && _mouse_y < top + 10 && _mouse_y > down - 10 && ObjectManager::getUI().at(i)->hasCallback() && ObjectManager::getUI().at(i)->visable()) {
 					ObjectManager::getUI().at(i)->callback();
 					is_button = true;
 				}
-				else if (_mouse_x < right + 10 && _mouse_x > left - 10 && _mouse_y < top + 10 && _mouse_y > down - 10 && !ObjectManager::getUI().at(i)->hasCallback()) {
+				else if (_mouse_x < right + 10 && _mouse_x > left - 10 && _mouse_y < top + 10 && _mouse_y > down - 10 && !ObjectManager::getUI().at(i)->hasCallback() && ObjectManager::getUI().at(i)->visable()) {
 					level_editor->current_UI = ObjectManager::getUI().at(i);
 					has_select = true;
 				}
@@ -371,13 +395,43 @@ void Game::mouseButtonCallback(GLFWwindow * window, int button, int action, int 
 					ObjectManager::addUI(ui);
 				}
 			}
+			if (level_editor->state == SET_BACKGROUND && !is_button) {
+				if (!level_editor->_is_setting) {
+					BackgroundObject *background = new BackgroundObject(level_editor->_current_texture, level_editor->mouse2map(_mouse_x, _mouse_y) - glm::vec3(5, 0, 5), level_editor->mouse2map(_mouse_x, _mouse_y) + glm::vec3(5, 0, 5));
+					level_editor->state = SET_NOTHING;
+					ObjectManager::addEntity(background);
+				}
+			}
+			if (level_editor->state == SET_BACKGROUND_SIZE && !is_button) {
+				glm::vec3 map_pos = level_editor->mouse2map(_mouse_x, _mouse_y);
+				for (int i = 0; i < ObjectManager::object_list.size(); ++i) {
+					if (ObjectManager::object_list.at(i)->e_type == BACKGROUND_ENTITY) {
+						if (map_pos.x > ObjectManager::object_list.at(i)->rigid.data.position.x&&map_pos.z > ObjectManager::object_list.at(i)->rigid.data.position.z&&map_pos.x < ObjectManager::object_list.at(i)->rigid.data.position.x + ObjectManager::object_list.at(i)->_height&&map_pos.z < ObjectManager::object_list.at(i)->rigid.data.position.z + ObjectManager::object_list.at(i)->_width) {
+							level_editor->current_entity = ObjectManager::object_list.at(i);
+							level_editor->_is_setting = true;
+						}
+					}
+				}
+			}
+			if (level_editor->state == DELETE_BACKGROUND && !is_button) {
+				glm::vec3 map_pos = level_editor->mouse2map(_mouse_x, _mouse_y);
+				for (int i = 0; i < ObjectManager::object_list.size(); ++i) {
+					if (ObjectManager::object_list.at(i)->e_type == BACKGROUND_ENTITY) {
+						if (map_pos.x > ObjectManager::object_list.at(i)->rigid.data.position.x&&map_pos.z > ObjectManager::object_list.at(i)->rigid.data.position.z&&map_pos.x < ObjectManager::object_list.at(i)->rigid.data.position.x + ObjectManager::object_list.at(i)->_height&&map_pos.z < ObjectManager::object_list.at(i)->rigid.data.position.z + ObjectManager::object_list.at(i)->_width) {
+							ObjectManager::removeEntity(ObjectManager::object_list.at(i));
+						}
+					}
+				}
+			}
 		}
 		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
 			level_editor->_is_setting = false;
 			level_editor->current_UI = nullptr;
+			level_editor->current_entity = nullptr;
 		}
 		if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
 			level_editor->state = SET_NOTHING;
+			level_editor->_background_list->setVisable(false);
 			cout << "set nothing" << endl;
 			
 		}
@@ -387,13 +441,28 @@ void Game::mouseButtonCallback(GLFWwindow * window, int button, int action, int 
 				float right = (ObjectManager::getUI().at(i)->width() > 0) ? ObjectManager::getUI().at(i)->x() + ObjectManager::getUI().at(i)->width() : ObjectManager::getUI().at(i)->x();
 				float top = (ObjectManager::getUI().at(i)->height() > 0) ? ObjectManager::getUI().at(i)->y() + ObjectManager::getUI().at(i)->height() : ObjectManager::getUI().at(i)->y();
 				float down = (ObjectManager::getUI().at(i)->height() > 0) ? ObjectManager::getUI().at(i)->y() : ObjectManager::getUI().at(i)->y() + ObjectManager::getUI().at(i)->height();
-				if (_mouse_x < right + 10 && _mouse_x > left - 10 && _mouse_y < top + 10 && _mouse_y > down - 10 && !ObjectManager::getUI().at(i)->hasCallback()) {
+				if (_mouse_x < right + 10 && _mouse_x > left - 10 && _mouse_y < top + 10 && _mouse_y > down - 10 && !ObjectManager::getUI().at(i)->hasCallback() && ObjectManager::getUI().at(i)->visable()) {
 					ObjectManager::removeUI(ObjectManager::getUI().at(i));
 				}
 			}
 		}
 	}
 
+}
+
+bool Game::scrollCallback(GLFWwindow * window, double xoffset, double yoffset)
+{
+	for (int i = 0; i < ObjectManager::getUI().size(); ++i) {
+		float left = (ObjectManager::getUI().at(i)->width() > 0) ? ObjectManager::getUI().at(i)->x() : ObjectManager::getUI().at(i)->x() + ObjectManager::getUI().at(i)->width();
+		float right = (ObjectManager::getUI().at(i)->width() > 0) ? ObjectManager::getUI().at(i)->x() + ObjectManager::getUI().at(i)->width() : ObjectManager::getUI().at(i)->x();
+		float top = (ObjectManager::getUI().at(i)->height() > 0) ? ObjectManager::getUI().at(i)->y() + ObjectManager::getUI().at(i)->height() : ObjectManager::getUI().at(i)->y();
+		float down = (ObjectManager::getUI().at(i)->height() > 0) ? ObjectManager::getUI().at(i)->y() : ObjectManager::getUI().at(i)->y() + ObjectManager::getUI().at(i)->height();
+		if (ObjectManager::getUI().at(i)->hasWheelEvent() && left < _mouse_x && right > _mouse_x && top > _mouse_y && down < _mouse_y && ObjectManager::getUI().at(i)->enable()) {
+			ObjectManager::getUI().at(i)->wheelEvent(yoffset);
+			return true;
+		}
+	}
+	return false;
 }
 
 void Game::mouseButtonCallback(bool mouse_state)
@@ -407,7 +476,7 @@ void Game::mouseButtonCallback(bool mouse_state)
 			float right = (ObjectManager::getUI().at(i)->width() > 0) ? ObjectManager::getUI().at(i)->x() + ObjectManager::getUI().at(i)->width() : ObjectManager::getUI().at(i)->x();
 			float top = (ObjectManager::getUI().at(i)->height() > 0) ? ObjectManager::getUI().at(i)->y() + ObjectManager::getUI().at(i)->height() : ObjectManager::getUI().at(i)->y();
 			float down = (ObjectManager::getUI().at(i)->height() > 0) ? ObjectManager::getUI().at(i)->y() : ObjectManager::getUI().at(i)->y() + ObjectManager::getUI().at(i)->height();
-			if (_mouse_x < right + 10 && _mouse_x > left - 10 && _mouse_y < top + 10 && _mouse_y > down - 10 && ObjectManager::getUI().at(i)->hasCallback()) {
+			if (_mouse_x < right + 10 && _mouse_x > left - 10 && _mouse_y < top + 10 && _mouse_y > down - 10 && ObjectManager::getUI().at(i)->hasCallback() && ObjectManager::getUI().at(i)->visable()) {
 				ObjectManager::getUI().at(i)->callback();
 			}
 		}
@@ -517,7 +586,6 @@ void Game::gameLoop()
 		else {
 			camera.Position += camera._v * dt;
 		}
-
 		render();
 
 

@@ -13,6 +13,7 @@
 #include "LevelEditor.h"
 #include "LevelEditorUI.h"
 #include "Define.h"
+#include "ScrollList.h"
 using std::queue;
 
 
@@ -44,6 +45,7 @@ public:
 	void input(Scene &sc, float dt);
 	void mouseCallback(GLFWwindow* window, double xpos, double ypos);
 	void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
+	bool scrollCallback(GLFWwindow* window, double xoffset, double yoffset);		//回傳是否有執行 wheel event
 
 	//test for mouse button callback
 	void mouseButtonCallback(bool mouse_state);
