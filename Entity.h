@@ -27,7 +27,8 @@ enum RigidType {
 	TRIANGLE,			//三角形
 	RECTANGLE,			//矩形			//僅作為靜態物體使用
 	CIRCLE,				//圓形
-	GROUND_COLLIDER,				//網格
+	GROUND_COLLIDER,	//網格
+	PLATFORM,			//2D地面
 	CUBE,				//立方體
 	SPHERE,				//球
 	CYLINDER,			//圓柱
@@ -40,7 +41,7 @@ enum EntityType {
 	NPC,
 	ENEMY,
 	BULLET,
-	BACKGROUND_ENTITY,		//只存取背景圖，不碰撞
+	BACKGROUND_ENTITY,	//只存取背景圖，不碰撞
 	GROUND,				//只包含地板碰撞箱，不繪製
 	WALL,				//只包含牆壁碰撞箱，不繪製
 	EVENT_COLLIDER,		//事件偵測器
@@ -54,8 +55,6 @@ public:
 	glm::vec3 position;
 
 };
-
-//如果超出 AABB 樹的容許值則重新插入
 
 
 
@@ -129,6 +128,7 @@ public:
 	int size();
 
 	glm::mat4 _model_matrix;//rotate * scale
+	glm::vec4 _texture_cood;
 	float _height;
 	float _width;
 
@@ -175,6 +175,11 @@ public:
 	BackgroundObject(std::string texture, glm::vec3 left_down_back, glm::vec3 right_top_front);
 
 	virtual void setHeightWidth(float height, float width);
+};
+
+class PlatformObject :public Entity {
+public:
+	PlatformObject();
 };
 
 class MovableObject :public Entity {

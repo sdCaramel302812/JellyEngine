@@ -5,7 +5,6 @@
 #include <map>
 //#include "Render.h"
 #include FT_FREETYPE_H 
-using nstd::TString;
 
 
 class TextItem : public UI

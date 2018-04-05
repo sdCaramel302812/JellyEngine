@@ -24,6 +24,7 @@ ScrollList::ScrollList(float x, float y, float width, float height) :UI(x, y, wi
 void ScrollList::setItemHeight(float height)
 {
 	_item_height = height;
+	_scroll_speed = height;
 }
 
 void ScrollList::addItem(string button_name)
@@ -42,7 +43,7 @@ void ScrollList::addItem(string button_name)
 void ScrollList::addItem(string button_name, CALL_BACK function)
 {
 	Button *button = new Button(this->x(), this->y() + this->height() - _item_height*(_item_list.size() + 1), this->width(), _item_height);
-	button->setButtonText(button_name);
+	button->setButtonText(button_name, 36);
 	button->setCallback(function);
 	_item_list.push_back(button);
 	if (button->y() < this->y()) {

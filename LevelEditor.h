@@ -16,6 +16,7 @@ enum EditorState {
 	SET_BACKGROUND,
 	SET_BACKGROUND_SIZE,
 	DELETE_BACKGROUND,
+	SET_FILE_NAME,
 };
 
 
@@ -29,6 +30,7 @@ public:
 	bool visable();
 
 	string _current_texture;
+	string _map_name;
 
 	UI *current_UI = nullptr;
 	Entity *current_entity = nullptr;
@@ -37,12 +39,16 @@ public:
 	Button *_wall_button;
 	Button *_background_button;
 	Button *_background_option_button;
+	Button *_set_file_name_button;
+	TextItem *_file_name;
 	ScrollList *_background_list;
+	ScrollList *_map_list;
 
 	void drawBaseLine();
 	void setFontSize(int size);
 
 	void setBackgroundList();
+	void setMapList();
 
 	glm::vec3 mouse2map(float x, float y);
 

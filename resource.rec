@@ -1,4 +1,6 @@
 <Path name = "./">
 	<Image name = "background.jpg" />
   <Image name = "wall.jpg" />
+  <Image name = "container.jpg" />
+  <Image name = "walking.png" />
 </Path>

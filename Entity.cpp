@@ -317,7 +317,8 @@ BackgroundObject::BackgroundObject(string texture, glm::vec3 left_down_back, glm
 	glm::mat4 rotate;
 	//rotate = glm::rotate(rotate, glm::radians(90.0f), glm::vec3(0, 0, 1));
 	//rotate = glm::rotate(rotate, atan2(height, width), glm::vec3(0, 1, 0));
-	_model_matrix = rotate * scale;
+	_model_matrix = scale;
+	_texture_cood = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
 	e_type = BACKGROUND_ENTITY;
 	VAO = "instance_texture";
 	shader = "texture";
@@ -342,4 +343,8 @@ MovableObject::MovableObject(std::string texture, glm::vec3 position, glm::vec2 
 	this->texture = texture;
 	rigid._restitution_coeffient = 0;
 	rigid.setAABB();
+}
+
+PlatformObject::PlatformObject()
+{
 }

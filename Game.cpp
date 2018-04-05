@@ -22,6 +22,7 @@ Game::Game()
 
 	Init();
 	level_editor->setBackgroundList();
+	level_editor->setMapList();
 }
 
 
@@ -53,10 +54,7 @@ void Game::Init()
 	Render::addShader("color_ins", "./color_instance.vs", "./color_instance.fs");
 
 	ResourceManager::loadResource("./resource.rec");
-
-	textInit();
-	textureInit();
-	uiInit();
+	ResourceManager::loadMapList("./");
 
 	//		vbo for instance		//
 	float vertices[1] = { 0 };
@@ -67,6 +65,13 @@ void Game::Init()
 	int shh[1] = { 0 };
 	Render::addVAO(ppp, sss, shh, 1, "debuger", "debuger");
 	//		vbo for instance		//
+	
+	
+	textInit();
+	textureInit();
+	uiInit();
+
+	
 }
 
 void foo(){
@@ -82,49 +87,58 @@ void Game::render()
 		view = camera.getViewMatrix();
 
 		////////////////////////////////////////	texture shader draw		////////////////////////////////////////
-		(Render::shaders.search("texture")).use();
-		Render::shaders.search("texture").setMat4("view", view);
-		Render::shaders.search("texture").setMat4("projection", projection);
+		(Render::shaders.search("texture_ins")).use();
+		Render::shaders.search("texture_ins").setMat4("view", view);
+		Render::shaders.search("texture_ins").setMat4("projection", projection);
 		//*************************************			實例化渲染			**************************************//
 		//*********************************可依照 texture 做 sorting 做分段實例化*********************************//
-/*		{
+		{
 			if (!EventManager::texture_render_event.empty()) {
 				EventManager::eventSort(EventManager::texture_render_event);
-				glm::mat4 *instMat;
-
+				glm::vec4 *instMat;
+				glBindVertexArray(Render::VAOs.search("instance_texture"));		//等貼圖問題解決後嘗試移到迴圈外
+//
 				int count = 0;
 				int size = 0;
 				string texture = EventManager::texture_render_event.at(0)->_target_id->texture;
 				
-				instMat = new glm::mat4[EventManager::texture_render_event.size()];		
-				while (count < EventManager::texture_render_event.size() - 1) {
+				instMat = new glm::vec4[EventManager::texture_render_event.size() * 5];		
+				bool _time_to_stop = false;
+				do {
 					glBindTexture(GL_TEXTURE_2D, Render::textures.search(texture));
-					for (int i = count; i < EventManager::texture_render_event.size(); ++i) {
+ 					for (int i = count; i < EventManager::texture_render_event.size(); ++i) {
 						if (i == EventManager::texture_render_event.size() - 1) {
 							count = i;
+							_time_to_stop = true;
 						}
 						if (EventManager::texture_render_event.at(i)->_target_id->texture != texture){
 							count = i;
 							texture = EventManager::texture_render_event.at(i)->_target_id->texture;
+							_time_to_stop = false;
 							break;
 						}
-						++size;
+						
 						glm::mat4 model;
 						model = glm::translate(model, glm::vec3(EventManager::texture_render_event.at(i)->_target_id->rigid.data.position.x, EventManager::texture_render_event.at(i)->_target_id->rigid.data.position.y, EventManager::texture_render_event.at(i)->_target_id->rigid.data.position.z));
 						model = model * EventManager::texture_render_event.at(i)->_target_id->_model_matrix;
-						instMat[i] = model;
+						instMat[size * 5] = EventManager::texture_render_event.at(i)->_target_id->_texture_cood;
+						instMat[size * 5 + 1] = model[0];
+						instMat[size * 5 + 2] = model[1];
+						instMat[size * 5 + 3] = model[2];
+						instMat[size * 5 + 4] = model[3];
+						++size;
 					}
 					Render::updateInstance(instMat, size);
-					glBindVertexArray(Render::VAOs.search("instance_texture"));
+					
 					glDrawArraysInstanced(GL_TRIANGLES, 0, 6, size);
 					size = 0;
-				}
+				} while (count < EventManager::texture_render_event.size() - 1 || !_time_to_stop);
 				delete[]instMat;
 			}
 		}
-		//*************************************			實例化渲染			**************************************///
+		//*************************************			實例化渲染			**************************************//
 		while (!EventManager::texture_render_event.empty()) {	//執行event
-			EventManager::texture_render_event.back()->use();
+			//EventManager::texture_render_event.back()->use();
 			delete EventManager::texture_render_event.back();
 			EventManager::texture_render_event.pop_back();
 		}
@@ -217,7 +231,7 @@ void Game::update(float dt)
 		}
 
 		for (int i = 0; i < ObjectManager::object_list.size(); ++i) {
-			//if distance to player to far, don't do the displace//<----------------------some day will finish
+			//if distance to player too far, don't do the displace//<----------------------some day will finish
 			Physics::displace(ObjectManager::object_list.at(i), dt);
 		}
 		ObjectManager::aabb_tree.update();
@@ -251,6 +265,14 @@ void Game::update(float dt)
 void Game::input(Scene &sc, float dt)
 {
 	if (state == ACTIVATE || state == LEVEL_EDITOR) {
+		if (level_editor->state == SET_FILE_NAME) {
+			textInput(sc, level_editor->_map_name);
+			level_editor->_file_name->setText(level_editor->_map_name);
+			if (glfwGetKey(sc.window, GLFW_KEY_ENTER) == GLFW_PRESS) {
+				level_editor->state = SET_NOTHING;
+			}
+			return;
+		}
 		if (glfwGetKey(sc.window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 			glfwSetWindowShouldClose(sc.window, true);
 		if (glfwGetKey(sc.window, GLFW_KEY_W) == GLFW_PRESS)
@@ -269,13 +291,19 @@ void Game::input(Scene &sc, float dt)
 			camera.processKeyboard(SPACE, dt);
 		if (glfwGetKey(sc.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
 			camera.processKeyboard(SHIFT, dt);
-		if (glfwGetKey(sc.window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) {
+		if (glfwGetKey(sc.window, GLFW_KEY_BACKSPACE) == GLFW_PRESS) {
 			if (sc.isFullScreen()) {
 				sc.setFullScreen(false);
 			}
 			else {
 				sc.setFullScreen(true);
 			}
+		}
+		if (glfwGetKey(sc.window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS && glfwGetKey(sc.window, GLFW_KEY_S) == GLFW_PRESS) {
+			string map_name = "./";
+			map_name.append(level_editor->_map_name);
+			map_name.append(".level");
+			ResourceManager::saveMap(map_name);
 		}
 		if (glfwGetKey(sc.window, GLFW_KEY_TAB) == GLFW_PRESS) {
 			//if (is_player) {
@@ -290,13 +318,15 @@ void Game::input(Scene &sc, float dt)
 
 void Game::mouseCallback(GLFWwindow * window, double xpos, double ypos)
 {
+	//將螢幕座標轉為投影座標
 	_mouse_x = xpos;
 	_mouse_y = SCENE_HEIGHT - ypos;
 	_mouse_x /= SCENE_WIDTH;
 	_mouse_y /= SCENE_HEIGHT;
 	_mouse_x *= 1920;
 	_mouse_y *= 1080;
-	//cout << _mouse_x << "\t" << _mouse_y << endl;
+
+	//				hover event				//
 	for (int i = 0; i < ObjectManager::getUI().size(); ++i) {
 		if (ObjectManager::getUI().at(i)->x() > _mouse_x) {
 		//	break;
@@ -312,6 +342,7 @@ void Game::mouseCallback(GLFWwindow * window, double xpos, double ypos)
 			ObjectManager::getUI().at(i)->hoverOut();
 		}
 	}
+	//				hover event				//
 	if (state == LEVEL_EDITOR) {
 		if (level_editor->_is_setting && level_editor->state == SET_WALL) {
 			level_editor->current_UI->setPoint2(level_editor->mouse2map(_mouse_x, _mouse_y));
@@ -452,6 +483,7 @@ void Game::mouseButtonCallback(GLFWwindow * window, int button, int action, int 
 
 bool Game::scrollCallback(GLFWwindow * window, double xoffset, double yoffset)
 {
+	//		檢查是否有 UI 有滾輪事件，如果有則回傳 true
 	for (int i = 0; i < ObjectManager::getUI().size(); ++i) {
 		float left = (ObjectManager::getUI().at(i)->width() > 0) ? ObjectManager::getUI().at(i)->x() : ObjectManager::getUI().at(i)->x() + ObjectManager::getUI().at(i)->width();
 		float right = (ObjectManager::getUI().at(i)->width() > 0) ? ObjectManager::getUI().at(i)->x() + ObjectManager::getUI().at(i)->width() : ObjectManager::getUI().at(i)->x();
@@ -465,23 +497,600 @@ bool Game::scrollCallback(GLFWwindow * window, double xoffset, double yoffset)
 	return false;
 }
 
-void Game::mouseButtonCallback(bool mouse_state)
+void Game::textInput(Scene &sc, TString & text)
 {
-	if (mouse_state) {
-		for (int i = 0; i < ObjectManager::getUI().size(); ++i) {
-			if (ObjectManager::getUI().at(i)->x() > _mouse_x) {
-				break;
-			}
-			float left = (ObjectManager::getUI().at(i)->width() > 0) ? ObjectManager::getUI().at(i)->x() : ObjectManager::getUI().at(i)->x() + ObjectManager::getUI().at(i)->width();
-			float right = (ObjectManager::getUI().at(i)->width() > 0) ? ObjectManager::getUI().at(i)->x() + ObjectManager::getUI().at(i)->width() : ObjectManager::getUI().at(i)->x();
-			float top = (ObjectManager::getUI().at(i)->height() > 0) ? ObjectManager::getUI().at(i)->y() + ObjectManager::getUI().at(i)->height() : ObjectManager::getUI().at(i)->y();
-			float down = (ObjectManager::getUI().at(i)->height() > 0) ? ObjectManager::getUI().at(i)->y() : ObjectManager::getUI().at(i)->y() + ObjectManager::getUI().at(i)->height();
-			if (_mouse_x < right + 10 && _mouse_x > left - 10 && _mouse_y < top + 10 && _mouse_y > down - 10 && ObjectManager::getUI().at(i)->hasCallback() && ObjectManager::getUI().at(i)->visable()) {
-				ObjectManager::getUI().at(i)->callback();
-			}
+	int current_press = clock();
+	if (glfwGetKey(sc.window, GLFW_KEY_1) == GLFW_PRESS && current_press - _last_press > 150) {
+		text.append(string("1"));
+
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_2) == GLFW_PRESS && current_press - _last_press > 150) {
+		text.append(string("2"));
+
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_3) == GLFW_PRESS && current_press - _last_press > 150) {
+		text.append(string("3"));
+
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_4) == GLFW_PRESS && current_press - _last_press > 150) {
+		text.append(string("4"));
+
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_5) == GLFW_PRESS && current_press - _last_press > 150) {
+
+		text.append(string("5"));
+
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_6) == GLFW_PRESS && current_press - _last_press > 150) {
+		text.append(string("6"));
+
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_7) == GLFW_PRESS && current_press - _last_press > 150) {
+
+		text.append(string("7"));
+
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_8) == GLFW_PRESS && current_press - _last_press > 150) {
+		text.append(string("8"));
+
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_9) == GLFW_PRESS && current_press - _last_press > 150) {
+		text.append(string("9"));
+
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_0) == GLFW_PRESS && current_press - _last_press > 150) {
+		text.append(string("0"));
+
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_A) == GLFW_PRESS && current_press - _last_press > 100) {
+		if (glfwGetKey(sc.window, GLFW_KEY_CAPS_LOCK) == GLFW_PRESS || glfwGetKey(sc.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+			text.append(TString("A"));
 		}
+		else {
+			text.append(TString("a"));
+		}
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_B) == GLFW_PRESS && current_press - _last_press > 100) {
+		if (glfwGetKey(sc.window, GLFW_KEY_CAPS_LOCK) == GLFW_PRESS || glfwGetKey(sc.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+			text.append(TString("B"));
+		}
+		else {
+			text.append(TString("b"));
+		}
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_C) == GLFW_PRESS && current_press - _last_press > 100) {
+		if (glfwGetKey(sc.window, GLFW_KEY_CAPS_LOCK) == GLFW_PRESS || glfwGetKey(sc.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+			text.append(TString("C"));
+		}
+		else {
+			text.append(TString("c"));
+		}
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_D) == GLFW_PRESS && current_press - _last_press > 100) {
+		if (glfwGetKey(sc.window, GLFW_KEY_CAPS_LOCK) == GLFW_PRESS || glfwGetKey(sc.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+			text.append(TString("D"));
+		}
+		else {
+			text.append(TString("d"));
+		}
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_E) == GLFW_PRESS && current_press - _last_press > 100) {
+		if (glfwGetKey(sc.window, GLFW_KEY_CAPS_LOCK) == GLFW_PRESS || glfwGetKey(sc.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+			text.append(TString("E"));
+		}
+		else {
+			text.append(TString("e"));
+		}
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_F) == GLFW_PRESS && current_press - _last_press > 100) {
+		if (glfwGetKey(sc.window, GLFW_KEY_CAPS_LOCK) == GLFW_PRESS || glfwGetKey(sc.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+			text.append(TString("F"));
+		}
+		else {
+			text.append(TString("f"));
+		}
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_G) == GLFW_PRESS && current_press - _last_press > 100) {
+		if (glfwGetKey(sc.window, GLFW_KEY_CAPS_LOCK) == GLFW_PRESS || glfwGetKey(sc.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+			text.append(TString("G"));
+		}
+		else {
+			text.append(TString("g"));
+		}
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_H) == GLFW_PRESS && current_press - _last_press > 100) {
+		if (glfwGetKey(sc.window, GLFW_KEY_CAPS_LOCK) == GLFW_PRESS || glfwGetKey(sc.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+			text.append(TString("H"));
+		}
+		else {
+			text.append(TString("h"));
+		}
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_I) == GLFW_PRESS && current_press - _last_press > 100) {
+		if (glfwGetKey(sc.window, GLFW_KEY_CAPS_LOCK) == GLFW_PRESS || glfwGetKey(sc.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+			text.append(TString("I"));
+		}
+		else {
+			text.append(TString("i"));
+		}
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_J) == GLFW_PRESS && current_press - _last_press > 100) {
+		if (glfwGetKey(sc.window, GLFW_KEY_CAPS_LOCK) == GLFW_PRESS || glfwGetKey(sc.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+			text.append(TString("J"));
+		}
+		else {
+			text.append(TString("j"));
+		}
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_K) == GLFW_PRESS && current_press - _last_press > 100) {
+		if (glfwGetKey(sc.window, GLFW_KEY_CAPS_LOCK) == GLFW_PRESS || glfwGetKey(sc.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+			text.append(TString("K"));
+		}
+		else {
+			text.append(TString("k"));
+		}
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_L) == GLFW_PRESS && current_press - _last_press > 100) {
+		if (glfwGetKey(sc.window, GLFW_KEY_CAPS_LOCK) == GLFW_PRESS || glfwGetKey(sc.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+			text.append(TString("L"));
+		}
+		else {
+			text.append(TString("l"));
+		}
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_M) == GLFW_PRESS && current_press - _last_press > 100) {
+		if (glfwGetKey(sc.window, GLFW_KEY_CAPS_LOCK) == GLFW_PRESS || glfwGetKey(sc.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+			text.append(TString("M"));
+		}
+		else {
+			text.append(TString("m"));
+		}
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_N) == GLFW_PRESS && current_press - _last_press > 100) {
+		if (glfwGetKey(sc.window, GLFW_KEY_CAPS_LOCK) == GLFW_PRESS || glfwGetKey(sc.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+			text.append(TString("N"));
+		}
+		else {
+			text.append(TString("n"));
+		}
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_O) == GLFW_PRESS && current_press - _last_press > 100) {
+		if (glfwGetKey(sc.window, GLFW_KEY_CAPS_LOCK) == GLFW_PRESS || glfwGetKey(sc.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+			text.append(TString("O"));
+		}
+		else {
+			text.append(TString("o"));
+		}
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_P) == GLFW_PRESS && current_press - _last_press > 100) {
+		if (glfwGetKey(sc.window, GLFW_KEY_CAPS_LOCK) == GLFW_PRESS || glfwGetKey(sc.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+			text.append(TString("P"));
+		}
+		else {
+			text.append(TString("p"));
+		}
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_Q) == GLFW_PRESS && current_press - _last_press > 100) {
+		if (glfwGetKey(sc.window, GLFW_KEY_CAPS_LOCK) == GLFW_PRESS || glfwGetKey(sc.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+			text.append(TString("Q"));
+		}
+		else {
+			text.append(TString("q"));
+		}
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_R) == GLFW_PRESS && current_press - _last_press > 100) {
+		if (glfwGetKey(sc.window, GLFW_KEY_CAPS_LOCK) == GLFW_PRESS || glfwGetKey(sc.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+			text.append(TString("R"));
+		}
+		else {
+			text.append(TString("r"));
+		}
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_S) == GLFW_PRESS && current_press - _last_press > 100) {
+		if (glfwGetKey(sc.window, GLFW_KEY_CAPS_LOCK) == GLFW_PRESS || glfwGetKey(sc.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+			text.append(TString("S"));
+		}
+		else {
+			text.append(TString("s"));
+		}
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_T) == GLFW_PRESS && current_press - _last_press > 100) {
+		if (glfwGetKey(sc.window, GLFW_KEY_CAPS_LOCK) == GLFW_PRESS || glfwGetKey(sc.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+			text.append(TString("T"));
+		}
+		else {
+			text.append(TString("t"));
+		}
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_U) == GLFW_PRESS && current_press - _last_press > 100) {
+		if (glfwGetKey(sc.window, GLFW_KEY_CAPS_LOCK) == GLFW_PRESS || glfwGetKey(sc.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+			text.append(TString("U"));
+		}
+		else {
+			text.append(TString("u"));
+		}
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_V) == GLFW_PRESS && current_press - _last_press > 100) {
+		if (glfwGetKey(sc.window, GLFW_KEY_CAPS_LOCK) == GLFW_PRESS || glfwGetKey(sc.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+			text.append(TString("V"));
+		}
+		else {
+			text.append(TString("v"));
+		}
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_W) == GLFW_PRESS && current_press - _last_press > 100) {
+		if (glfwGetKey(sc.window, GLFW_KEY_CAPS_LOCK) == GLFW_PRESS || glfwGetKey(sc.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+			text.append(TString("W"));
+		}
+		else {
+			text.append(TString("w"));
+		}
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_X) == GLFW_PRESS && current_press - _last_press > 100) {
+		if (glfwGetKey(sc.window, GLFW_KEY_CAPS_LOCK) == GLFW_PRESS || glfwGetKey(sc.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+			text.append(TString("X"));
+		}
+		else {
+			text.append(TString("x"));
+		}
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_Y) == GLFW_PRESS && current_press - _last_press > 100) {
+		if (glfwGetKey(sc.window, GLFW_KEY_CAPS_LOCK) == GLFW_PRESS || glfwGetKey(sc.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+			text.append(TString("Y"));
+		}
+		else {
+			text.append(TString("y"));
+		}
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_Z) == GLFW_PRESS && current_press - _last_press > 100) {
+		if (glfwGetKey(sc.window, GLFW_KEY_CAPS_LOCK) == GLFW_PRESS || glfwGetKey(sc.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+			text.append(TString("Z"));
+		}
+		else {
+			text.append(TString("z"));
+		}
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_BACKSPACE) == GLFW_PRESS && current_press - _last_press > 50) {
+		if (!text.data().empty()) {
+			text.data().pop_back();
+		}
+		_last_press = current_press;
 	}
 }
+
+void Game::textInput(Scene & sc, string & text)
+{
+	int current_press = clock();
+	if (glfwGetKey(sc.window, GLFW_KEY_1) == GLFW_PRESS && current_press - _last_press > 150) {
+		text.append("1");
+
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_2) == GLFW_PRESS && current_press - _last_press > 150) {
+		text.append("2");
+
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_3) == GLFW_PRESS && current_press - _last_press > 150) {
+		text.append("3");
+
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_4) == GLFW_PRESS && current_press - _last_press > 150) {
+		text.append("4");
+
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_5) == GLFW_PRESS && current_press - _last_press > 150) {
+
+		text.append("5");
+
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_6) == GLFW_PRESS && current_press - _last_press > 150) {
+		text.append("6");
+
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_7) == GLFW_PRESS && current_press - _last_press > 150) {
+
+		text.append("7");
+
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_8) == GLFW_PRESS && current_press - _last_press > 150) {
+		text.append("8");
+
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_9) == GLFW_PRESS && current_press - _last_press > 150) {
+		text.append("9");
+
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_0) == GLFW_PRESS && current_press - _last_press > 150) {
+		text.append("0");
+
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_A) == GLFW_PRESS && current_press - _last_press > 150) {
+		if (glfwGetKey(sc.window, GLFW_KEY_CAPS_LOCK) == GLFW_PRESS || glfwGetKey(sc.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+			text.append("A");
+		}
+		else {
+			text.append("a");
+		}
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_B) == GLFW_PRESS && current_press - _last_press > 150) {
+		if (glfwGetKey(sc.window, GLFW_KEY_CAPS_LOCK) == GLFW_PRESS || glfwGetKey(sc.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+			text.append("B");
+		}
+		else {
+			text.append("b");
+		}
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_C) == GLFW_PRESS && current_press - _last_press > 150) {
+		if (glfwGetKey(sc.window, GLFW_KEY_CAPS_LOCK) == GLFW_PRESS || glfwGetKey(sc.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+			text.append("C");
+		}
+		else {
+			text.append("c");
+		}
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_D) == GLFW_PRESS && current_press - _last_press > 150) {
+		if (glfwGetKey(sc.window, GLFW_KEY_CAPS_LOCK) == GLFW_PRESS || glfwGetKey(sc.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+			text.append("D");
+		}
+		else {
+			text.append("d");
+		}
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_E) == GLFW_PRESS && current_press - _last_press > 150) {
+		if (glfwGetKey(sc.window, GLFW_KEY_CAPS_LOCK) == GLFW_PRESS || glfwGetKey(sc.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+			text.append("E");
+		}
+		else {
+			text.append("e");
+		}
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_F) == GLFW_PRESS && current_press - _last_press > 150) {
+		if (glfwGetKey(sc.window, GLFW_KEY_CAPS_LOCK) == GLFW_PRESS || glfwGetKey(sc.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+			text.append("F");
+		}
+		else {
+			text.append("f");
+		}
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_G) == GLFW_PRESS && current_press - _last_press > 150) {
+		if (glfwGetKey(sc.window, GLFW_KEY_CAPS_LOCK) == GLFW_PRESS || glfwGetKey(sc.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+			text.append("G");
+		}
+		else {
+			text.append("g");
+		}
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_H) == GLFW_PRESS && current_press - _last_press > 150) {
+		if (glfwGetKey(sc.window, GLFW_KEY_CAPS_LOCK) == GLFW_PRESS || glfwGetKey(sc.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+			text.append("H");
+		}
+		else {
+			text.append("h");
+		}
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_I) == GLFW_PRESS && current_press - _last_press > 150) {
+		if (glfwGetKey(sc.window, GLFW_KEY_CAPS_LOCK) == GLFW_PRESS || glfwGetKey(sc.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+			text.append("I");
+		}
+		else {
+			text.append("i");
+		}
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_J) == GLFW_PRESS && current_press - _last_press > 150) {
+		if (glfwGetKey(sc.window, GLFW_KEY_CAPS_LOCK) == GLFW_PRESS || glfwGetKey(sc.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+			text.append("J");
+		}
+		else {
+			text.append("j");
+		}
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_K) == GLFW_PRESS && current_press - _last_press > 150) {
+		if (glfwGetKey(sc.window, GLFW_KEY_CAPS_LOCK) == GLFW_PRESS || glfwGetKey(sc.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+			text.append("K");
+		}
+		else {
+			text.append("k");
+		}
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_L) == GLFW_PRESS && current_press - _last_press > 150) {
+		if (glfwGetKey(sc.window, GLFW_KEY_CAPS_LOCK) == GLFW_PRESS || glfwGetKey(sc.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+			text.append("L");
+		}
+		else {
+			text.append("l");
+		}
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_M) == GLFW_PRESS && current_press - _last_press > 150) {
+		if (glfwGetKey(sc.window, GLFW_KEY_CAPS_LOCK) == GLFW_PRESS || glfwGetKey(sc.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+			text.append("M");
+		}
+		else {
+			text.append("m");
+		}
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_N) == GLFW_PRESS && current_press - _last_press > 150) {
+		if (glfwGetKey(sc.window, GLFW_KEY_CAPS_LOCK) == GLFW_PRESS || glfwGetKey(sc.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+			text.append("N");
+		}
+		else {
+			text.append("n");
+		}
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_O) == GLFW_PRESS && current_press - _last_press > 150) {
+		if (glfwGetKey(sc.window, GLFW_KEY_CAPS_LOCK) == GLFW_PRESS || glfwGetKey(sc.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+			text.append("O");
+		}
+		else {
+			text.append("o");
+		}
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_P) == GLFW_PRESS && current_press - _last_press > 150) {
+		if (glfwGetKey(sc.window, GLFW_KEY_CAPS_LOCK) == GLFW_PRESS || glfwGetKey(sc.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+			text.append("P");
+		}
+		else {
+			text.append("p");
+		}
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_Q) == GLFW_PRESS && current_press - _last_press > 150) {
+		if (glfwGetKey(sc.window, GLFW_KEY_CAPS_LOCK) == GLFW_PRESS || glfwGetKey(sc.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+			text.append("Q");
+		}
+		else {
+			text.append("q");
+		}
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_R) == GLFW_PRESS && current_press - _last_press > 150) {
+		if (glfwGetKey(sc.window, GLFW_KEY_CAPS_LOCK) == GLFW_PRESS || glfwGetKey(sc.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+			text.append("R");
+		}
+		else {
+			text.append("r");
+		}
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_S) == GLFW_PRESS && current_press - _last_press > 150) {
+		if (glfwGetKey(sc.window, GLFW_KEY_CAPS_LOCK) == GLFW_PRESS || glfwGetKey(sc.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+			text.append("S");
+		}
+		else {
+			text.append("s");
+		}
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_T) == GLFW_PRESS && current_press - _last_press > 150) {
+		if (glfwGetKey(sc.window, GLFW_KEY_CAPS_LOCK) == GLFW_PRESS || glfwGetKey(sc.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+			text.append("T");
+		}
+		else {
+			text.append("t");
+		}
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_U) == GLFW_PRESS && current_press - _last_press > 150) {
+		if (glfwGetKey(sc.window, GLFW_KEY_CAPS_LOCK) == GLFW_PRESS || glfwGetKey(sc.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+			text.append("U");
+		}
+		else {
+			text.append("u");
+		}
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_V) == GLFW_PRESS && current_press - _last_press > 150) {
+		if (glfwGetKey(sc.window, GLFW_KEY_CAPS_LOCK) == GLFW_PRESS || glfwGetKey(sc.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+			text.append("V");
+		}
+		else {
+			text.append("v");
+		}
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_W) == GLFW_PRESS && current_press - _last_press > 150) {
+		if (glfwGetKey(sc.window, GLFW_KEY_CAPS_LOCK) == GLFW_PRESS || glfwGetKey(sc.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+			text.append("W");
+		}
+		else {
+			text.append("w");
+		}
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_X) == GLFW_PRESS && current_press - _last_press > 150) {
+		if (glfwGetKey(sc.window, GLFW_KEY_CAPS_LOCK) == GLFW_PRESS || glfwGetKey(sc.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+			text.append("X");
+		}
+		else {
+			text.append("x");
+		}
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_Y) == GLFW_PRESS && current_press - _last_press > 150) {
+		if (glfwGetKey(sc.window, GLFW_KEY_CAPS_LOCK) == GLFW_PRESS || glfwGetKey(sc.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+			text.append("Y");
+		}
+		else {
+			text.append("y");
+		}
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_Z) == GLFW_PRESS && current_press - _last_press > 150) {
+		if (glfwGetKey(sc.window, GLFW_KEY_CAPS_LOCK) == GLFW_PRESS || glfwGetKey(sc.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+			text.append("Z");
+		}
+		else {
+			text.append("z");
+		}
+		_last_press = current_press;
+	}
+	if (glfwGetKey(sc.window, GLFW_KEY_BACKSPACE) == GLFW_PRESS && current_press - _last_press > 100) {
+		if (!text.empty()) {
+			text.pop_back();
+		}
+		_last_press = current_press;
+	}
+}
+
 
 void Game::textInit()
 {

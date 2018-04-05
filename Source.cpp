@@ -1,4 +1,4 @@
-﻿#define SOFTWARE_VERSION "ver 0.4.6"
+﻿#define SOFTWARE_VERSION "ver 0.4.7"
 
 #include "Define.h"
 #include "Include.h"
@@ -19,16 +19,6 @@ int main() {
 	glfwSetMouseButtonCallback(game->scene->window, mouse_button_callback);
 	glfwSetScrollCallback(game->scene->window, scroll_callback);
 
-	Render::addTexture("./background.jpg", "background");
-	Render::addTexture("./wall.jpg", "wall");
-	//BackgroundObject *grass = new BackgroundObject("wall", glm::vec3(0, 0.5, 0), glm::vec3(1, 0.5, 1));
-	BackgroundObject *background = new BackgroundObject("background", glm::vec3(-25, 0, -25), glm::vec3(25, 0, 25));
-	//ObjectManager::addEntity(grass);
-	ObjectManager::addEntity(background);
-	glm::vec4 pos1 = camera.getProjectMatrix()*camera.getViewMatrix()*glm::vec4(0, 0.5, 0, 1);
-	glm::vec4 pos2 = camera.getProjectMatrix()*camera.getViewMatrix()*glm::vec4(0, 0, 0, 1);
-
-	
 
 	game->gameLoop();
 	return 0;

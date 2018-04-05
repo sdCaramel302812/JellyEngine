@@ -18,7 +18,9 @@ using std::wstring;
 extern class Entity;
 
 
-namespace nstd {
+//namespace nstd {
+	int bstrncmp(const char *s1, const char *s2, int n);
+
 	//*****			template hash table			*****//
 	template<typename T>
 	class dic {
@@ -85,24 +87,25 @@ namespace nstd {
 		TString(const string &data);
 		TString(const char *data);
 		TString(const wchar_t *data);
-		nstd::TString operator+(nstd::TString value);
-		nstd::TString operator+(string value);
-		nstd::TString operator+(wstring value);
-		nstd::TString operator+(const char *value);
+		TString operator+(TString value);
+		TString operator+(string value);
+		TString operator+(wstring value);
+		TString operator+(const char *value);
 		int operator=(string value);
 		int operator=(wstring value);
 		wchar_t operator[](int x);
-		nstd::TString &operator+=(nstd::TString value);
-		nstd::TString &operator+=(string value);
-		nstd::TString &operator+=(wstring value);
-		nstd::TString &operator+=(const char *value);
+		TString &operator+=(TString value);
+		TString &operator+=(string value);
+		TString &operator+=(wstring value);
+		TString &operator+=(const char *value);
 		std::istream &operator>>(std::istream &is);
 		std::ostream &operator<<(std::ostream &os);
 		std::ifstream &operator>>(std::ifstream &is);
 		std::ofstream &operator<<(std::ofstream &os);
 		string wstr2str(std::wstring const & src);
 		wstring str2wstr(std::string const & src);
-		nstd::TString &number(double num);		//this function will let the data be the number
+		TString &number(double num);		//this function will let the data be the number
+		TString &number(int num);
 		//size and length is same function with difference name
 		int size();
 		int length();
@@ -121,58 +124,7 @@ namespace nstd {
 		wstring _data;
 	};
 	//*****			translation string			*****//
-	//*****				AABB tree				*****//
-	class AABBNode;
-	/*
 	
-
-	AABB unionAABB(AABB ab1, AABB ab2);
-
-	class AABBNode {
-	public:
-		AABBNode *_parent;
-		AABBNode *_children[2];
-
-
-		//node's bounding box
-		AABB _aabb;
-		//things that should be collide
-		Entity *_data;
-		AABBNode();
-		bool isLeaf();
-		void setBranch(AABBNode *n1, AABBNode *n2);
-		void setLeaf(Entity * e, int id);
-		void updateAABB(float margin);
-		//sibling : ¥S§Ì
-		AABBNode *getSibling();
-
-		//Entity id
-		int _id = -1;
-	};
-	
-	class AABBTree {
-	public:	
-		void add(Entity *e, int id);
-		void remove(AABBNode *node);
-		void update();
-		AABBNode *pick(AABB *ab1, int id);
-		std::vector<AABBNode *> &collisionWith(AABBNode *);
-
-		AABBNode *_root;
-		float margin = 0.5;
-
-	private:
-		void insert(AABBNode *node, AABBNode **parent);
-		void findInvalidNode(AABBNode *node);
-		void collidingHelperDown(AABBNode *node, AABBNode *cmp);
-		void collidingHelperUp(AABBNode *node);
-		void collidingHelper(AABBNode *node, AABBNode *sibling);
-		std::vector<AABBNode *> invalid_node;
-		std::vector<AABBNode *> collision_list;
-	};
-
-	*/
-	//*****				AABB tree				*****//
-};
+//};
 
 #endif

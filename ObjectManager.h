@@ -17,6 +17,7 @@ public:
 	static void removeEntity(Entity *);
 	static std::vector<Entity *> object_list;
 	static AABBTree aabb_tree;
+	static void textureSort(vector<Entity *> &list);
 	//		Entity
 
 	//		UI

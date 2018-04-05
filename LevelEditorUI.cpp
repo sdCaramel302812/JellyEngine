@@ -61,6 +61,7 @@ WallUI::WallUI(glm::vec3 point1)		//real position in the map
 	setPoint1(point1);
 	_vao = "line_vao";
 	_draw_type = GL_LINES;
+	_ui_type = WALL_UI;
 }
 
 void WallUI::setXY(float x, float y)
@@ -99,6 +100,11 @@ void WallUI::hoverOut()
 {
 	setColor(glm::vec4(0.6, 0.6, 1.0, 0.5));
 }
+
+/*
+x() y() height() width()
+這四個 function 會將 world coordinate 轉成 scene coordinate
+*/
 
 float WallUI::x()
 {

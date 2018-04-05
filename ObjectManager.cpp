@@ -34,6 +34,26 @@ void ObjectManager::removeEntity(Entity *obj)
 	delete obj;
 }
 
+void ObjectManager::textureSort(vector<Entity*>& list)
+{
+	//¨Ï¥Î±í±Æ§Ç
+	std::map<string, std::vector<Entity*>> bucket;
+	for (int i = 0; i < list.size(); ++i) {
+		string texture = list.at(i)->texture;
+		if (bucket.find(texture) == bucket.end()) {
+			bucket.insert(std::pair<string, vector<Entity*>>());
+		}
+		bucket.at(texture).push_back(list.at(i));
+	}
+	vector<Entity*> new_list;
+	for (std::map<string, std::vector<Entity*>>::const_iterator itr = bucket.begin(); itr != bucket.end(); ++itr) {
+		for (int i = 0; i < itr->second.size(); ++i) {
+			new_list.push_back(itr->second.at(i));
+		}
+	}
+	list = new_list;
+}
+
 std::vector<UI*>& ObjectManager::getUI()
 {
 	return ui_list;
@@ -66,43 +86,6 @@ void ObjectManager::qSort(std::vector<Entity*> list, bool _is_x)
 	}
 }
 
-void ObjectManager::insertionSort(std::vector<std::pair<Entity *, glm::vec2>> unsort_list, std::vector<Entity*> &list, bool _is_x)
-{
-	std::vector<Entity *> sorted_list;
-	sorted_list.resize(unsort_list.size());
-	if (_is_x) {
-		for (int i = 0; i < list.size(); ++i) {
-			sorted_list.at(i) = unsort_list.at(i).first;
-			for (int j = i; i > 0; --j) {
-				if (sorted_list.at(j)->rigid.getAABB()->_left_down_back.x < sorted_list.at(j - 1)->rigid.getAABB()->_left_down_back.x) {
-					Entity *tmp = sorted_list.at(j);
-					sorted_list.at(j) = sorted_list.at(i);
-					sorted_list.at(i) = tmp;
-					unsort_list.at(i).second.x--;//not correct
-				}
-				else {
-					break;
-				}
-			}
-		}
-	}
-	else {
-		for (int i = 0; i < unsort_list.size(); ++i) {
-			sorted_list.at(i) = unsort_list.at(i).first;
-			for (int j = i; i > 0; --j) {
-				if (sorted_list.at(j)->rigid.getAABB()->_left_down_back.y < sorted_list.at(j - 1)->rigid.getAABB()->_left_down_back.y) {
-					Entity *tmp = sorted_list.at(j);
-					sorted_list.at(j) = sorted_list.at(i);
-					sorted_list.at(i) = tmp;
-					unsort_list.at(i).second.y--;
-				}
-				else {
-					break;
-				}
-			}
-		}
-	}
-}
 
 void ObjectManager::insertionSortForUI(std::vector<UI*> &list)
 {

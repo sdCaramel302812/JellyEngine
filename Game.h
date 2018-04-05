@@ -47,8 +47,9 @@ public:
 	void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 	bool scrollCallback(GLFWwindow* window, double xoffset, double yoffset);		//回傳是否有執行 wheel event
 
-	//test for mouse button callback
-	void mouseButtonCallback(bool mouse_state);
+	void textInput(Scene &sc, TString &text);
+	void textInput(Scene &sc, string &text);
+
 
 	LevelEditor *level_editor;
 	Scene *scene;
@@ -61,5 +62,6 @@ private:
 	float last_frame;
 
 	bool _is_first_click;
+	int _last_press = clock();
 };
 

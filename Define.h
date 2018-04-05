@@ -1,6 +1,6 @@
 #pragma once
 
-#define SOFTWARE_VERSION "ver 0.4.6"
+#define SOFTWARE_VERSION "ver 0.4.7"
 
 //	Windows
 #define _WIN32_WINNT 0x0500
@@ -27,4 +27,4 @@
 //	Physics
 
 #define CONTAIN_LIMIT 0.1	//tolerent length of contain an aabb 
-#define FLOOR_HEIGHT 5		
+		

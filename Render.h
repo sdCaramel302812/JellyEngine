@@ -25,8 +25,6 @@
 using std::cout;
 using std::endl;
 
-using nstd::dic;
-using nstd::hash;
 
 extern Camera camera;
 
@@ -60,15 +58,18 @@ public:
 		//instance buffer
 		glBindBuffer(GL_ARRAY_BUFFER, VBOs.search("instance"));
 		GLsizei vec4Size = sizeof(glm::vec4);
+		glEnableVertexAttribArray(4);
+		glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 5 * vec4Size, (void*)0);
 		glEnableVertexAttribArray(5);
-		glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)0);
+		glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 5 * vec4Size, (void*)(vec4Size));
 		glEnableVertexAttribArray(6);
-		glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(vec4Size));
+		glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, 5 * vec4Size, (void*)(2 * vec4Size));
 		glEnableVertexAttribArray(7);
-		glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(2 * vec4Size));
+		glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, 5 * vec4Size, (void*)(3 * vec4Size));
 		glEnableVertexAttribArray(8);
-		glVertexAttribPointer(8, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(3 * vec4Size));
+		glVertexAttribPointer(8, 4, GL_FLOAT, GL_FALSE, 5 * vec4Size, (void*)(4 * vec4Size));
 
+		glVertexAttribDivisor(4, 1);
 		glVertexAttribDivisor(5, 1);
 		glVertexAttribDivisor(6, 1);
 		glVertexAttribDivisor(7, 1);
@@ -119,10 +120,15 @@ public:
 
 		int width, height, crChannel;
 		stbi_set_flip_vertically_on_load(true);
-		unsigned char *data = stbi_load(path.c_str(), &width, &height, &crChannel, 0);
+		unsigned char *data = stbi_load(path.c_str(), &width, &height, &crChannel, STBI_rgb_alpha);
 		if (data)
 		{
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+			if (crChannel == 3) {
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+			}
+			else if (crChannel == 4) {
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+			}
 			glGenerateMipmap(GL_TEXTURE_2D);
 		}
 		else
@@ -190,7 +196,7 @@ public:
 		glDrawArrays(ui->_draw_type, 0, 6);
 	}
 	/////////////////////////////////////////////////////////////////////////////////
-	static void draw(UI *ui, int editor) {
+	static void draw(UI *ui, int editor) {			//editor 僅做為指示用途，傳入任意數字即可，此 function 會依照 camera 投影
 		glm::mat4 model;
 		glm::mat4 scale = glm::scale(model, glm::vec3(ui->width(), ui->height(), 1));
 		glm::mat4 translate = glm::translate(model, glm::vec3(ui->x(), ui->y(), ui->getZ()));
@@ -216,6 +222,11 @@ public:
 		unsigned int VBO = VBOs.search("instance");
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(glm::mat4) * length, matrix, GL_STREAM_DRAW);
+	}
+	static void updateInstance(glm::vec4 matrix[], int length) {
+		unsigned int VBO = VBOs.search("instance");
+		glBindBuffer(GL_ARRAY_BUFFER, VBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec4) * length * 5, matrix, GL_STREAM_DRAW);
 	}
 	/////////////////////////////////////////////////////////////////////////////////
 	static void drawAABB(AABB _aabb) {
@@ -451,7 +462,7 @@ public:
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 	/////////////////////////////////////////////////////////////////////////////////
-	static void drawText(nstd::TString txt, float x, float y, float scale, glm::vec3 color, float line_width = 0, float z = 1) {
+	static void drawText(TString txt, float x, float y, float scale, glm::vec3 color, float line_width = 0, float z = 1) {
 		z*=-1;
 		shaders.search("text").use();
 		glm::mat4 projection = glm::ortho(0.0f, static_cast<GLfloat>(1920), 0.0f, static_cast<GLfloat>(1080), 0.0f, 10.0f);

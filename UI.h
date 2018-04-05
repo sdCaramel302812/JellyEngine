@@ -11,6 +11,11 @@
 #include <string>
 using std::string;
 
+enum UIType {
+	UI_BASE,
+	WALL_UI,
+};
+
 class UI
 {
 public:
@@ -71,6 +76,10 @@ public:
 	bool selected();
 	virtual void setSelect(bool value);
 
+	UIType _ui_type = UI_BASE;
+
+	glm::vec2 _position;
+	glm::vec2 _height_width;
 protected:
 	bool _visable = true;
 	bool _enable = true;
@@ -82,8 +91,7 @@ protected:
 	bool _has_hover = false;
 	bool _has_callback = false;
 	bool _has_wheel_event = false;
-	glm::vec2 _position;
-	glm::vec2 _height_width;
+	
 	static int createID();
 	static int _ui_num;
 };

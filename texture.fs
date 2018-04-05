@@ -2,6 +2,8 @@
 out vec4 FragColor;
 in vec2 ourTex;
 
+in vec4 texcood;
+
 struct Material{
 
 	sampler2D diffuse;
@@ -14,9 +16,11 @@ uniform Material material;
 void main()
 {
 
-	vec3 result =vec3(texture(material.diffuse,ourTex));
+	vec4 result =vec4(texture(material.diffuse,ourTex));
 
-
-	FragColor =vec4(result, 0.8);
+	if(result.a<0.1){
+		discard;
+	}
+	FragColor =result;
 }
 // 

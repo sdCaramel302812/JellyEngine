@@ -1,0 +1,8 @@
+<Level name = "./abc.level" >
+	background name = "background />
+		<position x = -4.16 />
+		<position z = -5.33 />
+		<scale x = 10 />
+		<scale z = 10 />
+	</background>
+</Level>

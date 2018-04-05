@@ -1,0 +1,8 @@
+<Level name = "./def.level" >
+	background name = "walking />
+		<position x = -4.907 />
+		<position z = -5.031 />
+		<scale x = 10 />
+		<scale z = 10 />
+	</background>
+</Level>

@@ -3,102 +3,102 @@
 #include <windows.h>
 #include <queue>
 
-nstd::TString::TString()
+TString::TString()
 {
 	_data = L'/0';
 }
 
-nstd::TString::TString(const string & data)
+TString::TString(const string & data)
 {
 	_data = str2wstr(data);
 }
 
-nstd::TString::TString(const char * data)
+TString::TString(const char * data)
 {
 	string str = data;
 	_data = str2wstr(str);
 }
 
-nstd::TString::TString(const wchar_t * data)
+TString::TString(const wchar_t * data)
 {
 	_data = data;
 }
 
-nstd::TString::TString(const wstring &data)
+TString::TString(const wstring &data)
 {
 	_data = data;
 }
 
-nstd::TString nstd::TString::operator+(nstd::TString value)
+TString TString::operator+(TString value)
 {
 	TString str;
 	str._data = this->_data + value._data;
 	return str;
 }
 
-nstd::TString nstd::TString::operator+(string value)
+TString TString::operator+(string value)
 {
 	TString str;
 	str._data = this->_data + str2wstr(value);
 	return str;
 }
 
-nstd::TString nstd::TString::operator+(wstring value)
+TString TString::operator+(wstring value)
 {
 	TString str;
 	str._data = this->_data + value;
 	return str;
 }
 
-nstd::TString nstd::TString::operator+(const char * value)
+TString TString::operator+(const char * value)
 {
 	TString str;
 	str._data = this->_data + str2wstr(value);
 	return str;
 }
 
-int nstd::TString::operator=(string value)
+int TString::operator=(string value)
 {
 	this->_data = str2wstr(value);
 	return 1;
 }
 
-int nstd::TString::operator=(wstring value)
+int TString::operator=(wstring value)
 {
 	this->_data = value;
 	return 1;
 }
 
-wchar_t  nstd::TString::operator[](int x)
+wchar_t  TString::operator[](int x)
 {
 	return _data.at(x);
 }
 
-nstd::TString & nstd::TString::operator+=(nstd::TString value)
+TString & TString::operator+=(TString value)
 {
 	*this = *this + value;
 	return *this;
 }
 
-nstd::TString & nstd::TString::operator+=(string value)
+TString & TString::operator+=(string value)
 {
 	*this = *this + value;
 	return *this;
 }
 
-nstd::TString & nstd::TString::operator+=(wstring value)
+TString & TString::operator+=(wstring value)
 {
 	*this = *this + value;
 	return *this;
 }
 
-nstd::TString & nstd::TString::operator+=(const char * value)
+TString & TString::operator+=(const char * value)
 {
 	*this = *this + value;
 	return *this;
 }
 
-std::istream & nstd::TString::operator>>(std::istream & is)
+std::istream & TString::operator>>(std::istream & is)
 {
 	string str = wstr2str(_data);
 	is >> str;
@@ -106,25 +106,25 @@ std::istream & nstd::TString::operator>>(std::istream & is)
 	return is;
 }
 
-std::ostream & nstd::TString::operator<<(std::ostream & os)
+std::ostream & TString::operator<<(std::ostream & os)
 {
 	os << wstr2str(_data);
 	return os;
 }
 
-std::ifstream & nstd::TString::operator>>(std::ifstream & is)
+std::ifstream & TString::operator>>(std::ifstream & is)
 {
 	// TODO: 於此處插入傳回陳述式
 	return is;
 }
 
-std::ofstream & nstd::TString::operator<<(std::ofstream & os)
+std::ofstream & TString::operator<<(std::ofstream & os)
 {
 	// TODO: 於此處插入傳回陳述式
 	return os;
 }
 
-string nstd::TString::wstr2str(std::wstring const & src)
+string TString::wstr2str(std::wstring const & src)
 {
 	int len;
 	int slength = (int)src.length() + 1;
@@ -134,7 +134,7 @@ string nstd::TString::wstr2str(std::wstring const & src)
 	return r;
 }
 
-wstring nstd::TString::str2wstr(std::string const & src)
+wstring TString::str2wstr(std::string const & src)
 {
 	int len;
 	int slength = (int)src.length() + 1;
@@ -144,7 +144,15 @@ wstring nstd::TString::str2wstr(std::string const & src)
 	return r;
 }
 
-nstd::TString & nstd::TString::number(double num)
+TString & TString::number(double num)
+{
+	std::stringstream ss;
+	ss << num;
+	_data = str2wstr(ss.str());
+	return *this;
+}
+
+TString & TString::number(int num)
 {
 	std::stringstream ss;
 	ss << num;
@@ -154,7 +162,7 @@ nstd::TString & nstd::TString::number(double num)
 
 
 
-int nstd::TString::size()
+int TString::size()
 {
 	int n = 0;
 	while (1) {
@@ -168,7 +176,7 @@ int nstd::TString::size()
 	return n;
 }
 
-int nstd::TString::length()
+int TString::length()
 {
 	int n = 0;
 	while (1) {
@@ -182,54 +190,70 @@ int nstd::TString::length()
 	return n;
 }
 
-void nstd::TString::resize(int n)
+void TString::resize(int n)
 {
 	_data.resize(n);
 }
 
-void nstd::TString::clear()
+void TString::clear()
 {
 	_data.clear();
 }
 
-bool nstd::TString::empty()
+bool TString::empty()
 {
 	return _data.empty();
 }
 
-wchar_t nstd::TString::at(int x)
+wchar_t TString::at(int x)
 {
 	return _data.at(x);
 }
 
-wchar_t &nstd::TString::back()
+wchar_t &TString::back()
 {
 	return _data.back();
 }
 
-wchar_t &nstd::TString::front()
+wchar_t &TString::front()
 {
 	return _data.front();
 }
 
-void nstd::TString::append(TString value)
+void TString::append(TString value)
 {
 	_data.append(value._data);
 }
 
-void nstd::TString::append(string value)
+void TString::append(string value)
 {
 	_data.append(str2wstr(value));
 }
 
-void nstd::TString::append(wstring value)
+void TString::append(wstring value)
 {
 	_data.append(value);
 }
 
-wstring &nstd::TString::data()
+wstring &TString::data()
 {
 	return _data;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
+
+int bstrncmp(const char * s1, const char * s2, int n)
+{
+	int count = 0;
+	if (*s1 == '\0' || *s2 == '0')
+		return (*s1 - *s2);
+	for (; *s1 != '\0'; s1++);
+	for (; *s2 != '\0'; s2++);
+	s1--;
+	s2--;
+	for (; *s1 != '\0'&&*s2 != '\0'&&count<n; s1--, s2--, count++) {
+		if (*s1 - *s2 != 0)
+			return (*s1 - *s2);
+	}
+	return 0;
+}

@@ -1,6 +1,6 @@
 ﻿#include "LevelEditor.h"
 #include "Render.h"
-using nstd::TString;
+
 
 
 
@@ -11,14 +11,28 @@ LevelEditor::LevelEditor()
 	_wall_button = new Button(100, 500, 240, 80);
 	_background_button = new Button(700, 900, 240, 80);
 	_background_option_button = new Button(1000, 900, 240, 80);
+	_set_file_name_button = new Button(1500, 20, 240, 80);
+	_file_name = new TextItem(1500, 100, 240, 80);
 	_background_list = new ScrollList(700, 500, 240, 400);
 	_background_list->setItemHeight(80.0f);
+	_map_list = new ScrollList(400, 500, 240, 400);
+	_map_list->setItemHeight(80.0f);
 
 	_save_button->setButtonText(TString("save"), _font_size);
 	_load_button->setButtonText(TString("load"), _font_size);
 	_wall_button->setButtonText(TString("wall"), _font_size);
 	_background_button->setButtonText(TString("background"), _font_size);
 	_background_option_button->setButtonText(TString(""), _font_size);
+	_set_file_name_button->setButtonText(TString("file name"), _font_size);
+	_file_name->setText(TString(""));
+	_file_name->setFontSize(_font_size);
+
+	_save_button->setCallback([=]() {
+		string map_name = "./";
+		map_name.append(_map_name);
+		map_name.append(".level");
+		ResourceManager::saveMap(map_name);
+	});
 
 	_wall_button->setCallback([=]() {
 		state = SET_WALL;
@@ -29,6 +43,14 @@ LevelEditor::LevelEditor()
 		state = SET_BACKGROUND;
 		_background_list->setVisable(true);
 		cout << "set background" << endl;
+	});
+
+	_load_button->setCallback([=]() {
+		_map_list->setVisable(true);
+	});
+
+	_set_file_name_button->setCallback([=]() {
+		state = SET_FILE_NAME;
 	});
 
 	_background_option_button->setCallback([=]() {
@@ -62,6 +84,9 @@ LevelEditor::LevelEditor()
 	ObjectManager::addUI(_background_option_button);
 	ObjectManager::addText(_background_option_button->button_text);
 	ObjectManager::addUI(_background_list);
+	ObjectManager::addUI(_set_file_name_button);
+	ObjectManager::addText(_set_file_name_button->button_text);
+	ObjectManager::addText(_file_name);
 	
 }
 
@@ -98,6 +123,9 @@ void LevelEditor::drawBaseLine()
 	if (state == SET_BACKGROUND) {
 		Render::drawText(TString().number(pos.z) + "\t" + TString().number(pos.x) + "BACKGROUND", 120, 120, 0.7, glm::vec3(1.0, 1.0, 1.0));
 	}
+	if (state == SET_FILE_NAME) {
+		Render::drawText(TString().number(pos.z) + "\t" + TString().number(pos.x) + "SET FILE NAME", 120, 120, 0.7, glm::vec3(1.0, 1.0, 1.0));
+	}
 	else {
 		Render::drawText(TString().number(pos.z) + "\t" + TString().number(pos.x), 120, 120, 0.7, glm::vec3(1.0, 1.0, 1.0));
 	}
@@ -118,6 +146,19 @@ void LevelEditor::setBackgroundList()
 	}
 
 	_background_list->setVisable(false);
+}
+
+void LevelEditor::setMapList()
+{
+	cout << "map number  " << ResourceManager::getMapList().size() << endl;
+	for (int i = 0; i < ResourceManager::getMapList().size();  ++i) {
+		_map_list->addItem(ResourceManager::getMapList().at(i), [=]() {
+			
+			_map_list->setVisable(false);
+		});
+
+		_map_list->setVisable(false);
+	}
 }
 
 glm::vec3 LevelEditor::mouse2map(float x, float y)	//將 UI 坐標系轉為世界坐標系，UI 坐標系的 X Y 分別對應世界坐標系的 Z X 

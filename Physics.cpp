@@ -204,7 +204,7 @@ void Physics::displace(Entity * obj,float dt)
 	if (obj->rigid.type == SPHERE) {
 		draw->setDrawType(GL_LINE_STRIP);
 	}
-	if (obj->shader == "texture_ins" || obj->shader == "texture" && obj->isVisible()) {
+	if ((obj->shader == "texture_ins" || obj->shader == "texture" ) && obj->isVisible()) {
 		EventManager::texture_render_event.push_back(draw);
 	}
 	else if (obj->shader == "color_ins" && obj->isVisible()) {
@@ -297,7 +297,34 @@ int Physics::collisionDetect(Entity * A, Entity * B, MotionEvent<Entity*>* event
 		//
 		return 0;
 	}
+	if (A->rigid.type == SPHERE&&B->rigid.type == PLATFORM) {
+		glm::vec3 normal;
+		float a, b, c, d;//surface equation coefficient
 
+		a = 0;
+		b = 1;
+		c = 0;
+		d = 0;
+
+		float dist;
+		float x0 = A->rigid.data.position.x + event->dx();
+		float y0 = A->rigid.data.position.y + event->dy();
+		float z0 = A->rigid.data.position.z + event->dz();
+		float r = A->rigid.getRadius();
+		dist = abs((a*x0 + b*y0 + c*z0 + d));//點到面的距離 
+		if (dist < r) {
+			if (dist < r - ALLOW_DIST) {
+				return -1;
+			}
+			else {
+				return 1;
+			}
+		}
+
+
+		//
+		return 0;
+	}
 
 
 	return 0;//無碰撞物體回傳值
