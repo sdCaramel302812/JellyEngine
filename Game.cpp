@@ -1092,6 +1092,13 @@ void Game::textInput(Scene & sc, string & text)
 }
 
 
+
+void Game::setCurrentPage(string key)
+{
+	_current_page = key;
+}
+
+
 void Game::textInit()
 {
 	glEnable(GL_BLEND);
@@ -1266,4 +1273,44 @@ void showVersion() {
 	glm::vec2 pos(900.0f, 1030.0f);
 	TString tex(SOFTWARE_VERSION);
 	Render::drawText(tex, pos.x, pos.y, 0.7, color);
+}
+
+std::map<string, CALL_BACK>& Game::getPageMouseFunction()
+{
+	return _page_mouse_function;
+}
+
+std::map<string, CALL_BACK>& Game::getPageMouseClickFunction()
+{
+	return _page_mouse_click_function;
+}
+
+std::map<string, CALL_BACK>& Game::getPageKeyFunction()
+{
+	return _page_key_function;
+}
+
+std::map<string, CALL_BACK>& Game::getPageScrollFunction()
+{
+	return _page_scroll_function;
+}
+
+void Game::setPageMouseFunction(string key, CALL_BACK func)
+{
+	_page_mouse_function[key] = func;
+}
+
+void Game::setPageMouseClickFunction(string key, CALL_BACK func)
+{
+	_page_mouse_click_function[key] = func;
+}
+
+void Game::setPageKeyFunction(string key, CALL_BACK func)
+{
+	_page_key_function[key] = func;
+}
+
+void Game::setPageScrollFunction(string key, CALL_BACK func)
+{
+	_page_scroll_function[key] = func;
 }

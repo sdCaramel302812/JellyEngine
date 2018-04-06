@@ -1,6 +1,6 @@
 #pragma once
 
-#define SOFTWARE_VERSION "ver 0.4.7"
+#define SOFTWARE_VERSION "ver 0.4.8"
 
 //	Windows
 #define _WIN32_WINNT 0x0500
@@ -27,4 +27,7 @@
 //	Physics
 
 #define CONTAIN_LIMIT 0.1	//tolerent length of contain an aabb 
+
+#include <functional>
+typedef std::function<void(void)> CALL_BACK;
 		

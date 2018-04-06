@@ -1,8 +1,14 @@
 <Level name = "./abc.level" >
-	background name = "background />
-		<position x = -4.16 />
-		<position z = -5.33 />
-		<scale x = 10 />
-		<scale z = 10 />
-	</background>
-</Level>
+ 	<background name = "background" />
+ 		<position x = (number)-4.09 />
+ 		<position z = (number)-5.62 />
+ 		<scale x = (number)10 />
+ 		<scale z = (number)10 />
+ 	</background>
+ 	<wall>
+ 		<point1 x = (number)-1.11 />
+ 		<point1 z = (number)-3.72 />
+ 		<point2 x = (number)-1.11 />
+ 		<point2 z = (number)3.78 />
+ 	</wall>
+ </Level> 

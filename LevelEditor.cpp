@@ -150,10 +150,10 @@ void LevelEditor::setBackgroundList()
 
 void LevelEditor::setMapList()
 {
-	cout << "map number  " << ResourceManager::getMapList().size() << endl;
+	cout << "number of maps  " << ResourceManager::getMapList().size() << endl;
 	for (int i = 0; i < ResourceManager::getMapList().size();  ++i) {
 		_map_list->addItem(ResourceManager::getMapList().at(i), [=]() {
-			
+			ResourceManager::loadMap(ResourceManager::getMapList().at(i).c_str(), 1);
 			_map_list->setVisable(false);
 		});
 

@@ -1,4 +1,4 @@
-﻿#define SOFTWARE_VERSION "ver 0.4.7"
+﻿#define SOFTWARE_VERSION "ver 0.4.8"
 
 #include "Define.h"
 #include "Include.h"

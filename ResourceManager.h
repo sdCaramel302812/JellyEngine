@@ -17,6 +17,7 @@
 #include "Include.h"
 #include <io.h>
 #include "nstdlib.h"
+#include "LevelEditorUI.h"
 using std::vector;
 using std::string;
 using std::ifstream;
@@ -30,8 +31,8 @@ public:
 	static void loadResource(char *fileName);
 	static void loadMapList(char *dirName);
 
-	static void loadMap(char *fileName);
-	static void loadMap(char *fileName, int editor);
+	static void loadMap(string fileName);
+	static void loadMap(string fileName, int editor);
 	static void saveMap(string fileName);
 
 	static vector<string> &getImageList();

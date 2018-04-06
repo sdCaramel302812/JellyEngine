@@ -94,15 +94,182 @@ void ResourceManager::loadMapList(char * dirName)
 	}
 }
 
-void ResourceManager::loadMap(char * fileName)
+void ResourceManager::loadMap(string fileName)
 {
-	for (int i = 0; i < ObjectManager::object_list.size(); ++i) {
-		ObjectManager::removeEntity(ObjectManager::object_list.at(i));
+	PlatformObject *plat = new PlatformObject();
+	ObjectManager::addEntity(plat);
+	while (!ObjectManager::object_list.empty()) {
+		ObjectManager::removeEntity(ObjectManager::object_list.back());
 	}
-	ObjectManager::object_list.clear();
+	for (int i = 0; i < ObjectManager::getUI().size(); ++i) {
+		if (ObjectManager::getUI().at(i)->_editor) {
+			ObjectManager::removeUI(ObjectManager::getUI().at(i));
+		}
+	}
 	//將現有地圖移除，再載入新地圖
+	ifstream inFile;
+	inFile.open(fileName);
+	if (!inFile) {
+		return;
+	}
+	string text;
+	string object;
+	string parameter;
+	string cood;
+	string texture;
+	float x1, x2, z1, z2;
+	while (std::getline(inFile, text, ' ')) {
 
+		if (text == "\t<background") {
+			object = "background";
+		}
+		else if (text == "name") {
+			parameter = "name";
+		}
+		else if (strncmp(text.c_str(), "\"", 1) == 0) {
+			texture = text.substr(1, text.size() - 2);
+		}
+		else if (text == "\t\t<position") {
+			parameter = "position";
+		}
+		else if (text == "\t\t<scale") {
+			parameter = "scale";
+		}
+		else if (text == "x") {
+			cood = "x";
+		}
+		else if (text == "z") {
+			cood = "z";
+		}
+		else if (text == "\t</background>\n") {		//載入背景
+			object = "";
+			parameter = "";
+			BackgroundObject *back = new BackgroundObject(texture, glm::vec3(x1, 0, z1), glm::vec3(x2, 0, z2));
+			ObjectManager::addEntity(back);
+		}
+		else if (text == "<wall>") {
+			object = "wall";
+		}
+		else if (text == "\t\t<point1") {
+			parameter = "point1";
+		}
+		else if (text == "\t\t<point2") {
+			parameter = "point2";
+		}
+		else if (text == "\t</wall>\n") {			//載入牆壁
+			object = "";
+			parameter = "";
+			WallObject *wall = new WallObject(glm::vec3(x1, 0, z1), glm::vec3(x2, 0, z2));
+			ObjectManager::addEntity(wall);
+		}
+		else if (strncmp(text.c_str(), "(number)", 8) == 0) {
+			if (parameter == "position" || parameter == "point1") {
+				if (cood == "x") {
+					x1 = atof(text.substr(8, text.size() - 8).c_str());
+				}
+				if (cood == "z") {
+					z1 = atof(text.substr(8, text.size() - 8).c_str());
+				}
+			}
+			if (parameter == "scale" || parameter == "point2") {
+				if (cood == "x") {
+					x2 = atof(text.substr(8, text.size() - 8).c_str());
+				}
+				if (cood == "z") {
+					z2 = atof(text.substr(8, text.size() - 8).c_str());
+				}
+			}
+		}
+	}
+}
 
+void ResourceManager::loadMap(string fileName, int editor)
+{
+	while(!ObjectManager::object_list.empty()) {
+		ObjectManager::removeEntity(ObjectManager::object_list.back());
+	}
+	for (int i = 0; i < ObjectManager::getUI().size(); ++i) {
+		if (ObjectManager::getUI().at(i)->_editor) {
+			ObjectManager::removeUI(ObjectManager::getUI().at(i));
+			--i;
+		}
+	}
+	//將現有地圖移除，再載入新地圖
+	ifstream inFile;
+	inFile.open(fileName);
+	if (!inFile) {
+		return;
+	}
+	string text;
+	string object;
+	string parameter;
+	string cood;
+	string texture;
+	float x1, x2, z1, z2;
+	while (std::getline(inFile, text, ' ')) {
+		
+		if (text == "\t<background") {
+			object = "background";
+		}
+		else if (text == "name") {
+			parameter = "name";
+		}
+		else if (strncmp(text.c_str(), "\"", 1) == 0) {
+			texture = text.substr(1, text.size() - 2);
+		}
+		else if (text == "\t\t<position") {
+			parameter = "position";
+		}
+		else if (text == "\t\t<scale") {
+			parameter = "scale";
+		}
+		else if (text == "x") {
+			cood = "x";
+		}
+		else if (text == "z") {
+			cood = "z";
+		}
+		else if (text == "\t</background>\n") {		//載入背景
+			object = "";
+			parameter = "";
+			BackgroundObject *back = new BackgroundObject(texture, glm::vec3(x1, 0, z1), glm::vec3(x2, 0, z2));
+			ObjectManager::addEntity(back);
+		}
+		else if (text == "<wall>") {
+			object = "wall";
+		}
+		else if (text == "\t\t<point1") {
+			parameter = "point1";
+		}
+		else if (text == "\t\t<point2") {
+			parameter = "point2";
+		}
+		else if (text == "\t</wall>\n") {			//載入牆壁
+			object = "";
+			parameter = "";
+			WallUI *wall = new WallUI(glm::vec3(x1, 0, z1));
+			wall->setPoint2(glm::vec3(x2, 0, z2));
+			ObjectManager::addUI(wall);
+		}
+		else if (strncmp(text.c_str(),"(number)", 8) == 0) {
+			if (parameter == "position" || parameter == "point1") {
+				if (cood == "x") {
+					x1 = atof(text.substr(8, text.size() - 8).c_str());
+				}
+				if (cood == "z") {
+					z1 = atof(text.substr(8, text.size() - 8).c_str());
+				}
+			}
+			if (parameter == "scale" || parameter == "point2") {
+				if (cood == "x") {
+					x2 = atof(text.substr(8, text.size() - 8).c_str());
+				}
+				if (cood == "z") {
+					z2 = atof(text.substr(8, text.size() - 8).c_str());
+				}
+			}
+		}
+	}
 }
 
 void ResourceManager::saveMap(string fileName)
@@ -111,7 +278,7 @@ void ResourceManager::saveMap(string fileName)
 	std::ofstream outFile;
 	outFile.open(fileName);
 
-	outFile << "<Level name = \"" << fileName << "\" >\n";
+	outFile << "<Level name = \"" << fileName << "\" >\n ";
 	for (int i = 0; i < ObjectManager::object_list.size(); ++i) {
 		if (ObjectManager::object_list.at(i)->e_type == BACKGROUND_ENTITY) {
 			string texture = ObjectManager::object_list.at(i)->texture;
@@ -119,12 +286,12 @@ void ResourceManager::saveMap(string fileName)
 			float pos_z = ObjectManager::object_list.at(i)->rigid.data.position.z;
 			float scale_x = ObjectManager::object_list.at(i)->_height;
 			float scale_z = ObjectManager::object_list.at(i)->_width;
-			outFile << "\tbackground name = \"" << texture << " />\n";
-			outFile << "\t\t<position x = " << pos_x << " />\n";
-			outFile << "\t\t<position z = " << pos_z << " />\n";
-			outFile << "\t\t<scale x = " << scale_x << " />\n";
-			outFile << "\t\t<scale z = " << scale_z << " />\n";
-			outFile << "\t</background>\n";
+			outFile << "\t<background name = \"" << texture << "\" />\n ";
+			outFile << "\t\t<position x = (number)" << pos_x << " />\n ";
+			outFile << "\t\t<position z = (number)" << pos_z << " />\n ";
+			outFile << "\t\t<scale x = (number)" << scale_x << " />\n ";
+			outFile << "\t\t<scale z = (number)" << scale_z << " />\n ";
+			outFile << "\t</background>\n ";
 		}
 	}
 	for (int i = 0; i < ObjectManager::getUI().size(); ++i) {
@@ -133,15 +300,15 @@ void ResourceManager::saveMap(string fileName)
 			float point1_z = ObjectManager::getUI().at(i)->getZ();
 			float point2_x = ObjectManager::getUI().at(i)->_height_width.x + point1_x;
 			float point2_z = ObjectManager::getUI().at(i)->_height_width.y + point1_z;
-			outFile << "\t<wall>\n";
-			outFile << "\t\t<point1 x = " << point1_x << " />\n";
-			outFile << "\t\t<point1 z = " << point1_z << " />\n";
-			outFile << "\t\t<point2 x = " << point2_x << " />\n";
-			outFile << "\t\t<point2 z = " << point2_z << " />\n";
-			outFile << "\t</wall>\n";
+			outFile << "\t<wall>\n ";
+			outFile << "\t\t<point1 x = (number)" << point1_x << " />\n ";
+			outFile << "\t\t<point1 z = (number)" << point1_z << " />\n ";
+			outFile << "\t\t<point2 x = (number)" << point2_x << " />\n ";
+			outFile << "\t\t<point2 z = (number)" << point2_z << " />\n ";
+			outFile << "\t</wall>\n ";
 		}
 	}
-	outFile << "</Level>";
+	outFile << "</Level> ";
 
 	outFile.close();
 }

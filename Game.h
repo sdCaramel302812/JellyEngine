@@ -26,10 +26,14 @@ enum GameState {
 	LEVEL_EDITOR,
 };
 
+typedef std::function<void(void)> CALL_BACK;
+
 class Game
 {
 public:
 	GameState state;
+
+	
 
 	Game();
 	~Game();
@@ -55,6 +59,16 @@ public:
 	Scene *scene;
 	Player *player;
 
+	std::map<string, CALL_BACK> &getPageMouseFunction();
+	std::map<string, CALL_BACK> &getPageMouseClickFunction();
+	std::map<string, CALL_BACK> &getPageKeyFunction();
+	std::map<string, CALL_BACK> &getPageScrollFunction();
+	void setPageMouseFunction(string key, CALL_BACK func);
+	void setPageMouseClickFunction(string key, CALL_BACK func);
+	void setPageKeyFunction(string key, CALL_BACK func);
+	void setPageScrollFunction(string key, CALL_BACK func);
+	void setCurrentPage(string key);
+
 private:
 	double _mouse_x;
 	double _mouse_y;
@@ -63,5 +77,11 @@ private:
 
 	bool _is_first_click;
 	int _last_press = clock();
+
+	string _current_page;
+	std::map<string, CALL_BACK> _page_mouse_function;
+	std::map<string, CALL_BACK> _page_mouse_click_function;
+	std::map<string, CALL_BACK> _page_key_function;
+	std::map<string, CALL_BACK> _page_scroll_function;
 };
 
