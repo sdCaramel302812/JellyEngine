@@ -1,4 +1,29 @@
-﻿#define SOFTWARE_VERSION "ver 0.4.8"
+﻿#define SOFTWARE_VERSION "ver 0.5.0"
+
+/*
+*　　　　　　　　┏┓　　　┏┓+ +
+*　　　　　　　┏┛┻━━━┛┻┓ + +
+*　　　　　　　┃　　　　　　　┃
+*　　　　　　　┃　　　━　　　┃ ++ + + +
+*　　　　　　 ████━████ ┃+
+*　　　　　　　┃　　　　　　　┃ +
+*　　　　　　　┃　　　┻　　　┃
+*　　　　　　　┃　　　　　　　┃ + +
+*　　　　　　　┗━┓　　　┏━┛
+*　　　　　　　　　┃　　　┃
+*　　　　　　　　　┃　　　┃ + + + +
+*　　　　　　　　　┃　　　┃　　　　Code is far away from bug with the animal protecting
+*　　　　　　　　　┃　　　┃ + 　　　　神獸保佑,程式碼無bug
+*　　　　　　　　　┃　　　┃
+*　　　　　　　　　┃　　　┃　　+
+*　　　　　　　　　┃　 　　┗━━━┓ + +
+*　　　　　　　　　┃ 　　　　　　　┣┓
+*　　　　　　　　　┃ 　　　　　　　┏┛
+*　　　　　　　　　┗┓┓┏━┳┓┏┛ + + + +
+*　　　　　　　　　　┃┫┫　┃┫┫
+*　　　　　　　　　　┗┻┛　┗┻┛+ + + +
+*/
+
 
 #include "Define.h"
 #include "Include.h"

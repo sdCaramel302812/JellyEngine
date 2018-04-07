@@ -154,6 +154,8 @@ void LevelEditor::setMapList()
 	for (int i = 0; i < ResourceManager::getMapList().size();  ++i) {
 		_map_list->addItem(ResourceManager::getMapList().at(i), [=]() {
 			ResourceManager::loadMap(ResourceManager::getMapList().at(i).c_str(), 1);
+			_map_name = ResourceManager::getMapList().at(i).substr(2, ResourceManager::getMapList().at(i).size() - 8);
+			_file_name->text = _map_name;
 			_map_list->setVisable(false);
 		});
 

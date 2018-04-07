@@ -27,6 +27,10 @@ enum GameState {
 };
 
 typedef std::function<void(void)> CALL_BACK;
+typedef std::function<void(GLFWwindow *, double, double)> MOUSE_CALL_BACK;
+typedef std::function<void(GLFWwindow *, int, int, int)> MOUSE_BUTTON_CALL_BACK;
+typedef std::function<bool(GLFWwindow *, double, double)> SCROLL_CALL_BACK;
+typedef std::function<void(Scene &, float)> KEY_CALL_BACK;
 
 class Game
 {
@@ -59,17 +63,31 @@ public:
 	Scene *scene;
 	Player *player;
 
-	std::map<string, CALL_BACK> &getPageMouseFunction();
-	std::map<string, CALL_BACK> &getPageMouseClickFunction();
-	std::map<string, CALL_BACK> &getPageKeyFunction();
-	std::map<string, CALL_BACK> &getPageScrollFunction();
-	void setPageMouseFunction(string key, CALL_BACK func);
-	void setPageMouseClickFunction(string key, CALL_BACK func);
-	void setPageKeyFunction(string key, CALL_BACK func);
-	void setPageScrollFunction(string key, CALL_BACK func);
+	std::map<string, MOUSE_CALL_BACK> &getPageMouseFunction();
+	std::map<string, MOUSE_BUTTON_CALL_BACK> &getPageMouseClickFunction();
+	std::map<string, KEY_CALL_BACK> &getPageKeyFunction();
+	std::map<string, SCROLL_CALL_BACK> &getPageScrollFunction();
+	void setPageMouseFunction(string key, MOUSE_CALL_BACK func);
+	void setPageMouseClickFunction(string key, MOUSE_BUTTON_CALL_BACK func);
+	void setPageKeyFunction(string key, KEY_CALL_BACK func);
+	void setPageScrollFunction(string key, SCROLL_CALL_BACK func);
 	void setCurrentPage(string key);
 
-private:
+	//			level editor function
+	void EditorKeyCallback(Scene &sc, float dt);
+	void EditorMouseCallback(GLFWwindow* window, double xpos, double ypos);
+	void EditorMouseButtonCallback(GLFWwindow *window, int button, int action, int mods);
+	bool EditorScrollCallback(GLFWwindow *window, double xoffset, double yoffset);
+	//
+
+	//			default function
+	void DefaultKeyCallback(Scene &sc, float dt);
+	void DefaultMouseCallback(GLFWwindow* window, double xpos, double ypos);
+	void DefaultMouseButtonCallback(GLFWwindow *window, int button, int action, int mods);
+	bool DefaultScrollCallback(GLFWwindow *window, double xoffset, double yoffset);
+	//
+
+protected:
 	double _mouse_x;
 	double _mouse_y;
 	float dt;
@@ -79,9 +97,9 @@ private:
 	int _last_press = clock();
 
 	string _current_page;
-	std::map<string, CALL_BACK> _page_mouse_function;
-	std::map<string, CALL_BACK> _page_mouse_click_function;
-	std::map<string, CALL_BACK> _page_key_function;
-	std::map<string, CALL_BACK> _page_scroll_function;
+	std::map<string, MOUSE_CALL_BACK> _page_mouse_function;
+	std::map<string, MOUSE_BUTTON_CALL_BACK> _page_mouse_click_function;
+	std::map<string, KEY_CALL_BACK> _page_key_function;
+	std::map<string, SCROLL_CALL_BACK> _page_scroll_function;
 };
 
