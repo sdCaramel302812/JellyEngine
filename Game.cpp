@@ -501,6 +501,7 @@ void Game::EditorMouseButtonCallback(GLFWwindow * window, int button, int action
 	if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
 		level_editor->state = SET_NOTHING;
 		level_editor->_background_list->setVisable(false);
+		level_editor->_map_list->setVisable(false);
 		cout << "set nothing" << endl;
 
 	}
