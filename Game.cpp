@@ -15,7 +15,7 @@ Game::Game()
 	state = LEVEL_EDITOR;
 	level_editor = new LevelEditor();
 	scene = new Scene();
-	player = new Player(glm::vec3(0, 0.5, 0));
+	//player = new Player(glm::vec3(0, 0.5, 0));
 
 	scene->setVSync(false);
 
@@ -77,7 +77,7 @@ void Game::Init()
 		EditorKeyCallback(sc, dt);
 	});
 	
-	setPageMouseFunction("defalut", [this](GLFWwindow* window, double xpos, double ypos) {
+	setPageMouseFunction("default", [this](GLFWwindow* window, double xpos, double ypos) {
 		DefaultMouseCallback(window, xpos, ypos);
 	});
 	setPageMouseClickFunction("default", [this](GLFWwindow *window, int button, int action, int mods) {
@@ -255,6 +255,9 @@ void Game::update(float dt)
 
 		for (int i = 0; i < ObjectManager::object_list.size(); ++i) {
 			//if distance to player too far, don't do the displace//<----------------------some day will finish
+			if (ObjectManager::object_list.at(i)->has_animation) {
+				ObjectManager::object_list.at(i)->update(dt);
+			}
 			Physics::displace(ObjectManager::object_list.at(i), dt);
 		}
 		ObjectManager::aabb_tree.update();
@@ -446,6 +449,7 @@ void Game::EditorMouseButtonCallback(GLFWwindow * window, int button, int action
 			if (_mouse_x < right + 10 && _mouse_x > left - 10 && _mouse_y < top + 10 && _mouse_y > down - 10 && ObjectManager::getUI().at(i)->hasCallback() && ObjectManager::getUI().at(i)->visable()) {
 				ObjectManager::getUI().at(i)->callback();
 				is_button = true;
+				break;
 			}
 			else if (_mouse_x < right + 10 && _mouse_x > left - 10 && _mouse_y < top + 10 && _mouse_y > down - 10 && !ObjectManager::getUI().at(i)->hasCallback() && ObjectManager::getUI().at(i)->visable()) {
 				level_editor->current_UI = ObjectManager::getUI().at(i);
@@ -605,7 +609,7 @@ void Game::DefaultMouseButtonCallback(GLFWwindow * window, int button, int actio
 			float down = (ObjectManager::getUI().at(i)->height() > 0) ? ObjectManager::getUI().at(i)->y() : ObjectManager::getUI().at(i)->y() + ObjectManager::getUI().at(i)->height();
 			if (_mouse_x < right + 10 && _mouse_x > left - 10 && _mouse_y < top + 10 && _mouse_y > down - 10 && ObjectManager::getUI().at(i)->hasCallback() && ObjectManager::getUI().at(i)->visable()) {
 				ObjectManager::getUI().at(i)->callback();
-				cout << "call" << endl;
+				break;
 			}
 		}
 		//		ui callback
@@ -1362,14 +1366,19 @@ void Game::gameLoop()
 
 		input(*scene, dt);
 
-		if (is_player) {
-			player->rigid.data.velocity = camera._v;
+		camera.Position.y = 5;
+		if (_has_player) {
+			player->rigid.data.velocity.x = camera._v.x;
+			player->rigid.data.velocity.z = camera._v.z;
 		}
 
 		update(dt);
 
-		if (is_player) {
-			camera.Position = player->rigid.data.position - camera.radius * camera.Front;
+		if (_has_player) {
+			//		never touch the camera's y position, never		<-------------------------------------	important	
+			//cout << player->rigid.data.position.x << " " << player->rigid.data.position.y << " " << player->rigid.data.position.z << endl;
+			camera.Position.x = player->rigid.data.position.x;
+			camera.Position.z = player->rigid.data.position.z;
 			camera._v = player->rigid.data.velocity;
 		}
 		else {

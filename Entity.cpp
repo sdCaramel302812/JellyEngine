@@ -72,7 +72,7 @@ Entity::Entity(int size)
 {
 	vertex_size = size;
 	_id = createID();
-	e_type = NORMAL;
+	e_type = DEFAULT_ENTITY;
 	_trigger = false;
 	_visible = true;
 }
@@ -93,6 +93,10 @@ int Entity::size()
 }
 
 void Entity::setHeightWidth(float height, float width)
+{
+}
+
+void Entity::update(float dt)
 {
 }
 
@@ -188,7 +192,7 @@ void RigidBody::setAABB()
 		bounding_box._left_down_back.z = data.position.z - _radius-0.1;
 		bounding_box._right_top_front.z = data.position.z + _radius+0.1;
 	}
-	if (type == RECTANGLE) {
+	if (type == RECTANGLE || type == PLATFORM) {
 		float left = _vertices.at(0).x, right = _vertices.at(0).x, top = _vertices.at(0).y, down = _vertices.at(0).y, front = _vertices.at(0).z, back = _vertices.at(0).z;
 		for (int i = 1; i < _vertices.size(); ++i) {
 			if (_vertices.at(i).x < left) {
@@ -226,7 +230,7 @@ AABB * RigidBody::getAABB()
 
 void RigidBody::setNormal()
 {
-	if (type == RECTANGLE) {
+	if (type == RECTANGLE || type == PLATFORM) {
 		glm::vec3 dir1;
 		glm::vec3 dir2;
 		glm::vec3 normal;
@@ -269,17 +273,8 @@ SphereObject::SphereObject(int size) : Entity(size)
 {
 }
 
-Player::Player(glm::vec3 pos) : Entity(6)
+Player::Player(glm::vec3 pos) : MovableObject(pos)
 {
-	rigid.setRadius(0.5);
-	rigid._mass = 50;
-	VAO = "sphere";
-	VBO = "sphere";
-	shader = "color_ins";
-	rigid.data.position = pos;
-	rigid._restitution_coeffient = 0;
-	rigid.type = SPHERE;
-	rigid._is_static = false;
 	e_type = PLAYER;
 }
 
@@ -289,6 +284,7 @@ WallObject::WallObject(glm::vec3 point1, glm::vec3 point2) : Entity(6)
 	_visible = false;
 	rigid._restitution_coeffient = 0.3;
 	rigid.type = RECTANGLE;
+	e_type = WALL;
 	rigid._mass = 300000000;
 	vector<glm::vec3> rigidVer;
 	glm::vec3 ver1 = point1;
@@ -320,6 +316,7 @@ BackgroundObject::BackgroundObject(string texture, glm::vec3 left_down_back, glm
 	_model_matrix = scale;
 	_texture_cood = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
 	e_type = BACKGROUND_ENTITY;
+	rigid.type = NO_COLLIDE;
 	VAO = "instance_texture";
 	shader = "texture";
 	rigid._is_static = true;
@@ -335,16 +332,79 @@ void BackgroundObject::setHeightWidth(float height, float width)
 	_model_matrix = scale;
 }
 
-MovableObject::MovableObject(std::string texture, glm::vec3 position, glm::vec2 texCood1, glm::vec2 texCood2)
+MovableObject::MovableObject(glm::vec3 position) : Entity(6)
 {
+	e_type = NPC;
 	rigid.type = SPHERE;
 	rigid.data.position = position;
 	rigid.setRadius(0.5);
-	this->texture = texture;
+	rigid._mass = 50;
 	rigid._restitution_coeffient = 0;
+	glm::mat4 trans;
+	trans = glm::translate(trans, glm::vec3(-rigid.getRadius(), 0, -rigid.getRadius()));
+	_model_matrix = trans;
+	_height = 1;
+	_width = 1;
 	rigid.setAABB();
+	texture = "walking";
+	shader = "texture";
+	has_animation = true;
+	_visible = true;
+
+	//		init animation
+	FrameAnimation *anime = new FrameAnimation(25, 16, 4, 4);
+	anime->setTexture("walking");
+	setAnimation("default", anime);
+	_action_state = "default";
+	update(0);
 }
 
-PlatformObject::PlatformObject()
+MovableObject::~MovableObject()
 {
+	std::map<std::string, FrameAnimation *>::iterator itr = _action_animation.begin();
+	for (; itr != _action_animation.end(); ++itr) {
+		delete itr->second;
+	}
+}
+
+void MovableObject::setAnimation(std::string action, FrameAnimation * animation)
+{
+	_action_animation[action] = animation;
+}
+
+void MovableObject::update(float dt)
+{
+	AI();
+
+	//animated
+	if (_action_animation.find(_action_state) != _action_animation.end()) {
+		FrameAnimationData data = _action_animation[_action_state]->animated(dt);
+		texture = data._texture;
+		_texture_cood = glm::vec4(data._point1, data._point2);
+	}
+}
+
+void MovableObject::AI()
+{
+}
+
+PlatformObject::PlatformObject() : Entity(6)
+{
+	_visible = false;
+	e_type = GROUND;
+	rigid._is_static = true;
+	rigid._restitution_coeffient = 0;
+	rigid.type = PLATFORM;
+	rigid._mass = 300000000;
+	vector<glm::vec3> rigidVer;
+	glm::vec3 ver1 = glm::vec3(-10000, 0, -10000);
+	glm::vec3 ver2 = glm::vec3(-10000, 0, 10000);
+	glm::vec3 ver3 = glm::vec3(10000, 0, 10000);
+	glm::vec3 ver4 = glm::vec3(10000, 0, -10000);
+	rigidVer.push_back(ver1);
+	rigidVer.push_back(ver2);
+	rigidVer.push_back(ver3);
+	rigidVer.push_back(ver4);
+	rigid.setVertex(rigidVer);
+	rigid.setAABB();
 }

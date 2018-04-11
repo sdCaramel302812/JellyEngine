@@ -98,6 +98,26 @@ TString & TString::operator+=(const char * value)
 	return *this;
 }
 
+bool TString::operator==(TString value)
+{
+	return (value._data == this->_data);
+}
+
+bool TString::operator==(string value)
+{
+	return (value == wstr2str(this->_data));
+}
+
+bool TString::operator==(wstring value)
+{
+	return (value == this->_data);
+}
+
+bool TString::operator==(const char * value)
+{
+	return (wstr2str(this->_data) == string(value));
+}
+
 std::istream & TString::operator>>(std::istream & is)
 {
 	string str = wstr2str(_data);
@@ -131,6 +151,7 @@ string TString::wstr2str(std::wstring const & src)
 	len = WideCharToMultiByte(CP_ACP, 0, src.c_str(), slength, 0, 0, 0, 0);
 	std::string r(len, L'\0');
 	WideCharToMultiByte(CP_ACP, 0, src.c_str(), slength, &r[0], len, 0, 0);
+	r.pop_back();
 	return r;
 }
 
@@ -141,6 +162,7 @@ wstring TString::str2wstr(std::string const & src)
 	len = MultiByteToWideChar(CP_ACP, 0, src.c_str(), slength, 0, 0);
 	std::wstring r(len, L'\0');
 	MultiByteToWideChar(CP_ACP, 0, src.c_str(), slength, &r[0], len);
+	r.pop_back();
 	return r;
 }
 

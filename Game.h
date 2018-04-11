@@ -62,6 +62,7 @@ public:
 	LevelEditor *level_editor;
 	Scene *scene;
 	Player *player;
+	bool _has_player = false;
 
 	std::map<string, MOUSE_CALL_BACK> &getPageMouseFunction();
 	std::map<string, MOUSE_BUTTON_CALL_BACK> &getPageMouseClickFunction();

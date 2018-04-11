@@ -1,6 +1,5 @@
 #include "ResourceManager.h"
 
-
 string ResourceManager::_file_name;
 string ResourceManager::_path_name;
 vector<string> ResourceManager::_image_list;
@@ -96,17 +95,27 @@ void ResourceManager::loadMapList(char * dirName)
 
 void ResourceManager::loadMap(string fileName)
 {
-	PlatformObject *plat = new PlatformObject();
-	ObjectManager::addEntity(plat);
 	while (!ObjectManager::object_list.empty()) {
-		ObjectManager::removeEntity(ObjectManager::object_list.back());
+		if (ObjectManager::object_list.back()->e_type != PLAYER) {
+			ObjectManager::removeEntity(ObjectManager::object_list.back());
+		}
+		else {
+			ObjectManager::removePlayer(ObjectManager::object_list.back());
+		}
 	}
 	for (int i = 0; i < ObjectManager::getUI().size(); ++i) {
 		if (ObjectManager::getUI().at(i)->_editor) {
 			ObjectManager::removeUI(ObjectManager::getUI().at(i));
+			--i;
 		}
 	}
 	//將現有地圖移除，再載入新地圖
+	PlatformObject *plat = new PlatformObject();
+	ObjectManager::addEntity(plat);
+	Player *player = new Player(glm::vec3(0, 1, 0));
+	ObjectManager::addPlayer(player);
+	//載入地面及角色
+
 	ifstream inFile;
 	inFile.open(fileName);
 	if (!inFile) {
@@ -181,12 +190,18 @@ void ResourceManager::loadMap(string fileName)
 			}
 		}
 	}
+
 }
 
 void ResourceManager::loadMap(string fileName, int editor)
 {
 	while(!ObjectManager::object_list.empty()) {
-		ObjectManager::removeEntity(ObjectManager::object_list.back());
+		if (ObjectManager::object_list.back()->e_type != PLAYER) {
+			ObjectManager::removeEntity(ObjectManager::object_list.back());
+		}
+		else {
+			ObjectManager::removePlayer(ObjectManager::object_list.back());
+		}
 	}
 	for (int i = 0; i < ObjectManager::getUI().size(); ++i) {
 		if (ObjectManager::getUI().at(i)->_editor) {

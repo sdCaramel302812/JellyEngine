@@ -14,7 +14,9 @@ public:
 	~ObjectManager();
 	//		Entity
 	static void addEntity(Entity *);
+	static void addPlayer(Player *);
 	static void removeEntity(Entity *);
+	static void removePlayer(Entity *);
 	static std::vector<Entity *> object_list;
 	static AABBTree aabb_tree;
 	static void textureSort(vector<Entity *> &list);

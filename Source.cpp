@@ -1,4 +1,4 @@
-﻿#define SOFTWARE_VERSION "ver 0.5.1"
+﻿#define SOFTWARE_VERSION "ver 0.5.2"
 
 /*
 *　　　　　　　　┏┓　　　┏┓+ +

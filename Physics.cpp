@@ -21,6 +21,8 @@ void Physics::displace(Entity * obj,float dt)
 	//	cout << obj->rigid.data.position.x << " " << obj->rigid.data.position.y << " " << obj->rigid.data.position.z << endl;
 	}
 
+
+
 	if (!obj->rigid._is_static) {
 		//Force
 		DataEvent<Entity *> *force_event = new DataEvent<Entity *>();
@@ -54,11 +56,12 @@ void Physics::displace(Entity * obj,float dt)
 				}
 
 				int is_collided = collisionDetect(obj, collide_list.at(i), dis_event);
-
+				
+				//	vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv		physics collision		vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv//
 				if (is_collided == -1) {//如重疊則縮小時間差重新計算，若 dt 太小仍碰撞則給予反向位移，計算完後進行碰撞反應
 					float small_dt = dt;
 					glm::vec3 normal;
-					if (obj->rigid.type == SPHERE &&collide_list.at(i)->rigid.type == RECTANGLE) {
+					if (obj->rigid.type == SPHERE && (collide_list.at(i)->rigid.type == RECTANGLE || collide_list.at(i)->rigid.type == PLATFORM)) {
 						normal = collide_list.at(i)->rigid.getNormal().at(0);
 						float a, b, c, d;
 						a = normal.x;
@@ -79,7 +82,7 @@ void Physics::displace(Entity * obj,float dt)
 					while (collisionDetect(obj, collide_list.at(i), dis_event) == -1) {
 						small_dt /= 2;
 						++count;
-							if ((obj->rigid.type == SPHERE &&collide_list.at(i)->rigid.type == SPHERE)) {
+						if ((obj->rigid.type == SPHERE &&collide_list.at(i)->rigid.type == SPHERE)) {
 							//                try to use force to solve multiple ball collision problem                            //
 							//                                           unsolve                                                   //
 							//obj->rigid.data.velocity.x*small_dt, obj->rigid.data.velocity.y*small_dt, obj->rigid.data.velocity.z*small_dt
@@ -89,7 +92,7 @@ void Physics::displace(Entity * obj,float dt)
 								break;
 							}
 						}
-						else if(obj->rigid.type == SPHERE &&collide_list.at(i)->rigid.type == RECTANGLE){
+						else if(obj->rigid.type == SPHERE && (collide_list.at(i)->rigid.type == RECTANGLE || collide_list.at(i)->rigid.type == PLATFORM)){
 							dis_event->plusDisplace(re_dis);
 							if (count == 10) {
 								break;
@@ -98,6 +101,9 @@ void Physics::displace(Entity * obj,float dt)
 					}
 					is_collided = 1;
 				}
+				//	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^		physics collision		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^//
+				
+				//	vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv		physics collision		vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv//
 				if (is_collided == 1) {
 					//球碰撞反應
 					if (obj->rigid.type == SPHERE &&collide_list.at(i)->rigid.type == SPHERE) {
@@ -129,7 +135,7 @@ void Physics::displace(Entity * obj,float dt)
 					//球碰撞反應
 					//球對面碰撞反應
 
-					if ((obj->rigid.type == SPHERE &&collide_list.at(i)->rigid.type == RECTANGLE)) {
+					if (obj->rigid.type == SPHERE && (collide_list.at(i)->rigid.type == RECTANGLE || collide_list.at(i)->rigid.type == PLATFORM)) {
 						glm::vec3 normal;
 						float a, b, c, d;//surface equation coefficient
 
@@ -180,11 +186,13 @@ void Physics::displace(Entity * obj,float dt)
 
 						delete collide_event1_A;
 						//delete collide_event1_B;
+
 					}
 					//球對面碰撞反應
 				}
+				//	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^		physics collision		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^//
 			}
-	
+
 		}
 
 		//Collision
@@ -193,17 +201,18 @@ void Physics::displace(Entity * obj,float dt)
 		force_event->use();
 		dis_event->use();
 		delete force_event;
-		delete dis_event;
+		delete dis_event;		
 	}
+
 
 
 	//View Frustum Culling
 	
 	DrawEvent<Entity *> *draw = new DrawEvent<Entity *>();
 	draw->setTarget(obj);
-	if (obj->rigid.type == SPHERE) {
-		draw->setDrawType(GL_LINE_STRIP);
-	}
+	//if (obj->rigid.type == SPHERE) {
+	//	draw->setDrawType(GL_LINE_STRIP);
+	//}
 	if ((obj->shader == "texture_ins" || obj->shader == "texture" ) && obj->isVisible()) {
 		EventManager::texture_render_event.push_back(draw);
 	}
@@ -291,27 +300,14 @@ int Physics::collisionDetect(Entity * A, Entity * B, MotionEvent<Entity*>* event
 				}
 			}
 		}
-
-
-
 		//
 		return 0;
 	}
+	//球對地板碰撞偵測
 	if (A->rigid.type == SPHERE&&B->rigid.type == PLATFORM) {
-		glm::vec3 normal;
-		float a, b, c, d;//surface equation coefficient
-
-		a = 0;
-		b = 1;
-		c = 0;
-		d = 0;
-
-		float dist;
-		float x0 = A->rigid.data.position.x + event->dx();
-		float y0 = A->rigid.data.position.y + event->dy();
-		float z0 = A->rigid.data.position.z + event->dz();
+		float dist = A->rigid.data.position.y - A->rigid.getRadius();
 		float r = A->rigid.getRadius();
-		dist = abs((a*x0 + b*y0 + c*z0 + d));//點到面的距離 
+
 		if (dist < r) {
 			if (dist < r - ALLOW_DIST) {
 				return -1;
@@ -320,8 +316,6 @@ int Physics::collisionDetect(Entity * A, Entity * B, MotionEvent<Entity*>* event
 				return 1;
 			}
 		}
-
-
 		//
 		return 0;
 	}

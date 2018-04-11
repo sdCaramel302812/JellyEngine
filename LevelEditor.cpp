@@ -1,8 +1,8 @@
 ﻿#include "LevelEditor.h"
 #include "Render.h"
+#include "Game.h"
 
-
-
+extern Game *game;
 
 LevelEditor::LevelEditor()
 {
@@ -12,6 +12,7 @@ LevelEditor::LevelEditor()
 	_background_button = new Button(700, 900, 240, 80);
 	_background_option_button = new Button(1000, 900, 240, 80);
 	_set_file_name_button = new Button(1500, 20, 240, 80);
+	_play_button = new Button(1500, 500, 240, 80);
 	_file_name = new TextItem(1500, 100, 240, 80);
 	_background_list = new ScrollList(700, 500, 240, 400);
 	_background_list->setItemHeight(80.0f);
@@ -24,6 +25,7 @@ LevelEditor::LevelEditor()
 	_background_button->setButtonText(TString("background"), _font_size);
 	_background_option_button->setButtonText(TString(""), _font_size);
 	_set_file_name_button->setButtonText(TString("file name"), _font_size);
+	_play_button->setButtonText(TString("play"), _font_size);
 	_file_name->setText(TString(""));
 	_file_name->setFontSize(_font_size);
 
@@ -51,6 +53,53 @@ LevelEditor::LevelEditor()
 
 	_set_file_name_button->setCallback([=]() {
 		state = SET_FILE_NAME;
+	});
+
+	_play_button->setCallback([=]() {
+		if (_play_button->button_text->text == "play" && _map_name != "") {
+			//save map first
+			string map_name = "./";
+			map_name.append(_map_name);
+			map_name.append(".level");
+			ResourceManager::saveMap(map_name);
+
+			game->setCurrentPage("default");
+			_play_button->setButtonText(TString("stop"), _font_size);
+			_save_button->setVisable(false);
+			_load_button->setVisable(false);
+			_wall_button->setVisable(false);
+			_background_button->setVisable(false);
+			_background_option_button->setVisable(false);
+			_set_file_name_button->setVisable(false);
+			_file_name->setVisable(false);
+			_background_list->setVisable(false);
+			_map_list->setVisable(false);
+			_save_button->button_text->setVisable(false);
+			_load_button->button_text->setVisable(false);
+			_wall_button->button_text->setVisable(false);
+			_background_button->button_text->setVisable(false);
+			_background_option_button->button_text->setVisable(false);
+			_set_file_name_button->button_text->setVisable(false);
+			ResourceManager::loadMap("./" + _map_name + ".level");
+		}
+		else {
+			game->setCurrentPage("editor");
+			_play_button->setButtonText(TString("play"), _font_size);
+			_save_button->setVisable(true);
+			_load_button->setVisable(true);
+			_wall_button->setVisable(true);
+			_background_button->setVisable(true);
+			_background_option_button->setVisable(true);
+			_set_file_name_button->setVisable(true);
+			_file_name->setVisable(true);
+			_save_button->button_text->setVisable(true);
+			_load_button->button_text->setVisable(true);
+			_wall_button->button_text->setVisable(true);
+			_background_button->button_text->setVisable(true);
+			_background_option_button->button_text->setVisable(true);
+			_set_file_name_button->button_text->setVisable(true);
+			ResourceManager::loadMap("./" + _map_name + ".level", 0);
+		}
 	});
 
 	_background_option_button->setCallback([=]() {
@@ -83,6 +132,8 @@ LevelEditor::LevelEditor()
 	ObjectManager::addText(_background_button->button_text);
 	ObjectManager::addUI(_background_option_button);
 	ObjectManager::addText(_background_option_button->button_text);
+	ObjectManager::addUI(_play_button);
+	ObjectManager::addText(_play_button->button_text);
 	ObjectManager::addUI(_background_list);
 	ObjectManager::addUI(_set_file_name_button);
 	ObjectManager::addText(_set_file_name_button->button_text);

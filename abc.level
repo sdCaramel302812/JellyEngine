@@ -2,13 +2,55 @@
  	<background name = "background" />
  		<position x = (number)-4.09 />
  		<position z = (number)-5.62 />
- 		<scale x = (number)10 />
- 		<scale z = (number)10 />
+ 		<scale x = (number)26.36 />
+ 		<scale z = (number)32.48 />
  	</background>
  	<wall>
- 		<point1 x = (number)-1.11 />
- 		<point1 z = (number)-3.72 />
- 		<point2 x = (number)-1.11 />
- 		<point2 z = (number)3.78 />
+ 		<point1 x = (number)-3.5458 />
+ 		<point1 z = (number)-4.94308 />
+ 		<point2 x = (number)-1.2658 />
+ 		<point2 z = (number)-3.81508 />
+ 	</wall>
+ 	<wall>
+ 		<point1 x = (number)-0.981341 />
+ 		<point1 z = (number)-3.84023 />
+ 		<point2 x = (number)2.94866 />
+ 		<point2 z = (number)-3.26023 />
+ 	</wall>
+ 	<wall>
+ 		<point1 x = (number)3.0782 />
+ 		<point1 z = (number)-3.02308 />
+ 		<point2 x = (number)3.2942 />
+ 		<point2 z = (number)1.75292 />
+ 	</wall>
+ 	<wall>
+ 		<point1 x = (number)3.4622 />
+ 		<point1 z = (number)1.72892 />
+ 		<point2 x = (number)6.7262 />
+ 		<point2 z = (number)2.18492 />
+ 	</wall>
+ 	<wall>
+ 		<point1 x = (number)6.7982 />
+ 		<point1 z = (number)2.35292 />
+ 		<point2 x = (number)7.0382 />
+ 		<point2 z = (number)5.64092 />
+ 	</wall>
+ 	<wall>
+ 		<point1 x = (number)2.91866 />
+ 		<point1 z = (number)3.49977 />
+ 		<point2 x = (number)-1.25134 />
+ 		<point2 z = (number)3.88977 />
+ 	</wall>
+ 	<wall>
+ 		<point1 x = (number)6.9662 />
+ 		<point1 z = (number)5.73692 />
+ 		<point2 x = (number)-3.4738 />
+ 		<point2 z = (number)7.82492 />
+ 	</wall>
+ 	<wall>
+ 		<point1 x = (number)-3.5698 />
+ 		<point1 z = (number)7.65692 />
+ 		<point2 x = (number)-3.9058 />
+ 		<point2 z = (number)-5.06308 />
  	</wall>
  </Level> 

@@ -40,6 +40,7 @@ public:
 	Button *_background_button;
 	Button *_background_option_button;
 	Button *_set_file_name_button;
+	Button *_play_button;
 	TextItem *_file_name;
 	ScrollList *_background_list;
 	ScrollList *_map_list;

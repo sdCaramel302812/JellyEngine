@@ -6,6 +6,8 @@
 #include "Math.h"
 //#include "Render.h"
 #include <string>
+#include "FrameAnimation.h"
+#include <map>
 //#include "Event.h"
 
 extern class AABBNode;
@@ -36,7 +38,7 @@ enum RigidType {
 };
 
 enum EntityType {
-	NORMAL,
+	DEFAULT_ENTITY,
 	PLAYER,
 	NPC,
 	ENEMY,
@@ -46,6 +48,7 @@ enum EntityType {
 	WALL,				//只包含牆壁碰撞箱，不繪製
 	EVENT_COLLIDER,		//事件偵測器
 };
+
 
 class DynamicData {
 public:
@@ -138,12 +141,14 @@ public:
 	AABBNode *_aabb_node = nullptr;
 
 	virtual void setHeightWidth(float height, float width);		//for editor
+	virtual void update(float dt);
 
 	bool isVisible();
 	void setVisible(bool value);
 	void setTrigger(bool value);
 	bool isTrigger();
 	virtual void trigger();
+	bool has_animation = false;
 protected:
 	int vertex_size;	//繪製時會用到(頂點數量)
 	bool _trigger;
@@ -155,10 +160,7 @@ protected:
 	
 };
 
-class Player :public Entity {
-public:
-	Player(glm::vec3 pos);
-};
+
 
 class SphereObject :public Entity {
 public:
@@ -184,5 +186,19 @@ public:
 
 class MovableObject :public Entity {
 public:
-	MovableObject(std::string texture, glm::vec3 position, glm::vec2 texCood1,glm::vec2 texCood2);//texCood 用來區分貼圖所在位置
+	MovableObject(glm::vec3 position);
+	~MovableObject();
+
+	void setAnimation(std::string action, FrameAnimation *animation);
+	void update(float dt);
+	virtual void AI();
+
+protected:
+	std::map<std::string, FrameAnimation *> _action_animation;
+	std::string _action_state = "standing";
+};
+
+class Player :public MovableObject {
+public:
+	Player(glm::vec3 pos);
 };

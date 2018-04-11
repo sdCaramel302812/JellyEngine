@@ -1,5 +1,7 @@
 #include "ObjectManager.h"
+#include "Game.h"
 
+extern Game *game;
 
 std::vector<Entity *> ObjectManager::object_list;
 AABBTree ObjectManager::aabb_tree;
@@ -22,6 +24,14 @@ void ObjectManager::addEntity(Entity *obj)
 	aabb_tree.add(obj);
 }
 
+void ObjectManager::addPlayer(Player *obj)
+{
+	object_list.push_back(obj);
+	aabb_tree.add(obj);
+	game->player = obj;
+	game->_has_player = true;
+}
+
 void ObjectManager::removeEntity(Entity *obj)
 {
 	aabb_tree.remove(obj->_aabb_node);
@@ -32,6 +42,19 @@ void ObjectManager::removeEntity(Entity *obj)
 		}
 	}
 	delete obj;
+}
+
+void ObjectManager::removePlayer(Entity *obj)
+{
+	aabb_tree.remove(obj->_aabb_node);
+	for (std::vector<Entity *>::iterator itr = object_list.begin(); itr != object_list.end(); ++itr) {
+		if (*itr == obj) {
+			object_list.erase(itr);
+			break;
+		}
+	}
+	delete obj;
+	game->_has_player = false;
 }
 
 void ObjectManager::textureSort(vector<Entity*>& list)
