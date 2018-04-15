@@ -1,6 +1,37 @@
-<Path name = "./">
-	<Image name = "background.jpg" />
+<Resource> 
+<Path name = "./" >
+  <Image name = "background.jpg" />
   <Image name = "wall.jpg" />
   <Image name = "container.jpg" />
   <Image name = "walking.png" />
+  <Image name = "FeliciaA.png" />
 </Path>
+ 
+<Path name = "./animation/" >
+  <Image name = "00.png" />
+  <Image name = "01.png" />
+  <Image name = "02.png" />
+  <Image name = "03.png" />
+  <Image name = "04.png" />
+  <Image name = "05.png" />
+  <Image name = "06.png" />
+  <Image name = "07.png" />
+  <Image name = "08.png" />
+  <Image name = "09.png" />
+  <Image name = "10.png" />
+  <Image name = "11.png" />
+  <Image name = "12.png" />
+  <Image name = "13.png" />
+  <Image name = "14.png" />
+  <Image name = "15.png" />
+  <Image name = "16.png" />
+  <Image name = "17.png" />
+  <Image name = "18.png" />
+  <Image name = "19.png" />
+  <Image name = "20.png" />
+  <Image name = "21.png" />
+  <Image name = "22.png" />
+  <Image name = "23.png" />
+  <Image name = "24.png" />
+</Path>
+</Resource>

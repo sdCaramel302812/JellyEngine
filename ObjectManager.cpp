@@ -85,7 +85,12 @@ std::vector<UI*>& ObjectManager::getUI()
 void ObjectManager::addUI(UI * ui)
 {
 	ui_list.push_back(ui);
-	insertionSortForUI(ui_list);
+	try {
+		insertionSortForUI(ui_list);
+	}
+	catch (std::out_of_range) {
+		cout << "fucking error" << endl;
+	}
 }
 
 void ObjectManager::removeUI(UI * ui)
@@ -116,7 +121,7 @@ void ObjectManager::insertionSortForUI(std::vector<UI*> &list)
 	sorted_list.resize(list.size());
 		for (int i = 0; i < list.size(); ++i) {
 			sorted_list.at(i) = list.at(i);
-			for (int j = i; i > 0; --j) {
+			for (int j = i; j > 0; --j) {
 				if (sorted_list.at(j)->x() < sorted_list.at(j-1)->x()) {
 					UI *tmp = sorted_list.at(j);
 					sorted_list.at(j) = sorted_list.at(j - 1);

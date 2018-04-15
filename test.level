@@ -1,0 +1,20 @@
+<Level name = "./test.level" >
+ 	<background name = "walking" />
+ 		<position x = (number)-4.28 />
+ 		<position z = (number)-6.42 />
+ 		<scale x = (number)48.52 />
+ 		<scale z = (number)67.78 />
+ 	</background>
+ 	<background name = "background" />
+ 		<position x = (number)6.80256 />
+ 		<position z = (number)28.0775 />
+ 		<scale x = (number)3.60512 />
+ 		<scale z = (number)10 />
+ 	</background>
+ 	<background name = "wall" />
+ 		<position x = (number)0.219999 />
+ 		<position z = (number)-18.95 />
+ 		<scale x = (number)10 />
+ 		<scale z = (number)10 />
+ 	</background>
+ </Level> 

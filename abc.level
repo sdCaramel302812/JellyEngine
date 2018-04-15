@@ -1,56 +1,134 @@
 <Level name = "./abc.level" >
  	<background name = "background" />
- 		<position x = (number)-4.09 />
- 		<position z = (number)-5.62 />
- 		<scale x = (number)26.36 />
- 		<scale z = (number)32.48 />
+ 		<position x = (number)-2.1247 />
+ 		<position z = (number)-22.1071 />
+ 		<scale x = (number)29.9558 />
+ 		<scale z = (number)54.9625 />
  	</background>
  	<wall>
- 		<point1 x = (number)-3.5458 />
- 		<point1 z = (number)-4.94308 />
- 		<point2 x = (number)-1.2658 />
- 		<point2 z = (number)-3.81508 />
+ 		<point1 x = (number)11.0553 />
+ 		<point1 z = (number)-13.0004 />
+ 		<point2 x = (number)5.00531 />
+ 		<point2 z = (number)-13.1104 />
  	</wall>
  	<wall>
- 		<point1 x = (number)-0.981341 />
- 		<point1 z = (number)-3.84023 />
- 		<point2 x = (number)2.94866 />
- 		<point2 z = (number)-3.26023 />
+ 		<point1 x = (number)2.79114 />
+ 		<point1 z = (number)-12.9817 />
+ 		<point2 x = (number)2.82514 />
+ 		<point2 z = (number)-7.30372 />
  	</wall>
  	<wall>
- 		<point1 x = (number)3.0782 />
- 		<point1 z = (number)-3.02308 />
- 		<point2 x = (number)3.2942 />
- 		<point2 z = (number)1.75292 />
+ 		<point1 x = (number)3.69214 />
+ 		<point1 z = (number)-12.9647 />
+ 		<point2 x = (number)2.79114 />
+ 		<point2 z = (number)-12.9817 />
  	</wall>
  	<wall>
- 		<point1 x = (number)3.4622 />
- 		<point1 z = (number)1.72892 />
- 		<point2 x = (number)6.7262 />
- 		<point2 z = (number)2.18492 />
+ 		<point1 x = (number)8.82969 />
+ 		<point1 z = (number)-11.6804 />
+ 		<point2 x = (number)6.12369 />
+ 		<point2 z = (number)-11.6804 />
  	</wall>
  	<wall>
- 		<point1 x = (number)6.7982 />
- 		<point1 z = (number)2.35292 />
- 		<point2 x = (number)7.0382 />
- 		<point2 z = (number)5.64092 />
+ 		<point1 x = (number)8.78093 />
+ 		<point1 z = (number)-8.49272 />
+ 		<point2 x = (number)5.95093 />
+ 		<point2 z = (number)-8.45272 />
  	</wall>
  	<wall>
- 		<point1 x = (number)2.91866 />
- 		<point1 z = (number)3.49977 />
- 		<point2 x = (number)-1.25134 />
- 		<point2 z = (number)3.88977 />
+ 		<point1 x = (number)8.8077 />
+ 		<point1 z = (number)-8.49043 />
+ 		<point2 x = (number)8.82969 />
+ 		<point2 z = (number)-11.6804 />
  	</wall>
  	<wall>
- 		<point1 x = (number)6.9662 />
- 		<point1 z = (number)5.73692 />
- 		<point2 x = (number)-3.4738 />
- 		<point2 z = (number)7.82492 />
+ 		<point1 x = (number)5.95093 />
+ 		<point1 z = (number)-8.45272 />
+ 		<point2 x = (number)5.98093 />
+ 		<point2 z = (number)-11.7327 />
  	</wall>
  	<wall>
- 		<point1 x = (number)-3.5698 />
- 		<point1 z = (number)7.65692 />
- 		<point2 x = (number)-3.9058 />
- 		<point2 z = (number)-5.06308 />
+ 		<point1 x = (number)2.89331 />
+ 		<point1 z = (number)-7.19243 />
+ 		<point2 x = (number)4.85131 />
+ 		<point2 z = (number)-7.14843 />
+ 	</wall>
+ 	<wall>
+ 		<point1 x = (number)4.85131 />
+ 		<point1 z = (number)-7.14843 />
+ 		<point2 x = (number)4.87331 />
+ 		<point2 z = (number)-3.91443 />
+ 	</wall>
+ 	<wall>
+ 		<point1 x = (number)10.9233 />
+ 		<point1 z = (number)-6.15843 />
+ 		<point2 x = (number)11.0553 />
+ 		<point2 z = (number)-13.0004 />
+ 	</wall>
+ 	<wall>
+ 		<point1 x = (number)6.95969 />
+ 		<point1 z = (number)-6.02643 />
+ 		<point2 x = (number)10.9857 />
+ 		<point2 z = (number)-6.00443 />
+ 	</wall>
+ 	<wall>
+ 		<point1 x = (number)12.7199 />
+ 		<point1 z = (number)-5.18327 />
+ 		<point2 x = (number)7.92991 />
+ 		<point2 z = (number)-5.20327 />
+ 	</wall>
+ 	<wall>
+ 		<point1 x = (number)4.89531 />
+ 		<point1 z = (number)-3.93643 />
+ 		<point2 x = (number)2.05731 />
+ 		<point2 z = (number)-3.89243 />
+ 	</wall>
+ 	<wall>
+ 		<point1 x = (number)6.93769 />
+ 		<point1 z = (number)-3.93643 />
+ 		<point2 x = (number)6.95969 />
+ 		<point2 z = (number)-6.02643 />
+ 	</wall>
+ 	<wall>
+ 		<point1 x = (number)2.05731 />
+ 		<point1 z = (number)-3.89243 />
+ 		<point2 x = (number)2.07931 />
+ 		<point2 z = (number)-1.45043 />
+ 	</wall>
+ 	<wall>
+ 		<point1 x = (number)6.98663 />
+ 		<point1 z = (number)-3.81583 />
+ 		<point2 x = (number)8.05863 />
+ 		<point2 z = (number)-3.78383 />
+ 	</wall>
+ 	<wall>
+ 		<point1 x = (number)8.05863 />
+ 		<point1 z = (number)-3.79183 />
+ 		<point2 x = (number)8.04263 />
+ 		<point2 z = (number)-5.15183 />
+ 	</wall>
+ 	<wall>
+ 		<point1 x = (number)12.7017 />
+ 		<point1 z = (number)-2.74843 />
+ 		<point2 x = (number)12.7017 />
+ 		<point2 z = (number)-5.21243 />
+ 	</wall>
+ 	<wall>
+ 		<point1 x = (number)12.7001 />
+ 		<point1 z = (number)-2.69851 />
+ 		<point2 x = (number)6.88614 />
+ 		<point2 z = (number)-2.68151 />
+ 	</wall>
+ 	<wall>
+ 		<point1 x = (number)6.89589 />
+ 		<point1 z = (number)-2.51581 />
+ 		<point2 x = (number)6.92589 />
+ 		<point2 z = (number)-1.51581 />
+ 	</wall>
+ 	<wall>
+ 		<point1 x = (number)2.10131 />
+ 		<point1 z = (number)-1.42843 />
+ 		<point2 x = (number)6.91931 />
+ 		<point2 z = (number)-1.49443 />
  	</wall>
  </Level> 

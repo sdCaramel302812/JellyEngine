@@ -337,11 +337,11 @@ MovableObject::MovableObject(glm::vec3 position) : Entity(6)
 	e_type = NPC;
 	rigid.type = SPHERE;
 	rigid.data.position = position;
-	rigid.setRadius(0.5);
+	rigid.setRadius(0.25);
 	rigid._mass = 50;
 	rigid._restitution_coeffient = 0;
 	glm::mat4 trans;
-	trans = glm::translate(trans, glm::vec3(-rigid.getRadius(), 0, -rigid.getRadius()));
+	trans = glm::translate(trans, glm::vec3(-rigid.getRadius() , 0, -rigid.getRadius() * 2));
 	_model_matrix = trans;
 	_height = 1;
 	_width = 1;
@@ -352,8 +352,32 @@ MovableObject::MovableObject(glm::vec3 position) : Entity(6)
 	_visible = true;
 
 	//		init animation
-	FrameAnimation *anime = new FrameAnimation(25, 16, 4, 4);
-	anime->setTexture("walking");
+	FrameAnimation *anime = new FrameAnimation(24, 24, 1, 1);
+	anime->setTexture("01", 0);
+	anime->setTexture("02", 1);
+	anime->setTexture("03", 2);
+	anime->setTexture("04", 3);
+	anime->setTexture("05", 4);
+	anime->setTexture("06", 5);
+	anime->setTexture("07", 6);
+	anime->setTexture("08", 7);
+	anime->setTexture("09", 8);
+	anime->setTexture("10", 9);
+	anime->setTexture("11", 10);
+	anime->setTexture("12", 11);
+	anime->setTexture("13", 12);
+	anime->setTexture("14", 13);
+	anime->setTexture("15", 14);
+	anime->setTexture("16", 15);
+	anime->setTexture("17", 16);
+	anime->setTexture("18", 17);
+	anime->setTexture("19", 18);
+	anime->setTexture("20", 19);
+	anime->setTexture("21", 20);
+	anime->setTexture("22", 21);
+	anime->setTexture("23", 22);
+	anime->setTexture("24", 23);
+	anime->setOneTexture(false);
 	setAnimation("default", anime);
 	_action_state = "default";
 	update(0);

@@ -77,7 +77,7 @@ void Physics::displace(Entity * obj,float dt)
 						}
 					}
 
-					glm::vec3 re_dis = abs(glm::dot(glm::vec3(dis_event->dx(), dis_event->dy(), dis_event->dz()), normal))*normal;
+					glm::vec3 re_dis = abs(glm::dot(glm::vec3(dis_event->dx(), dis_event->dy(), dis_event->dz()), normal))/10*normal;
 					int count = 0;
 					while (collisionDetect(obj, collide_list.at(i), dis_event) == -1) {
 						small_dt /= 2;
@@ -142,19 +142,21 @@ void Physics::displace(Entity * obj,float dt)
 						normal = collide_list.at(i)->rigid.getNormal().at(0);
 						glm::vec3 acc;
 						if (obj->rigid.data.velocity.x != 0 || obj->rigid.data.velocity.y != 0 || obj->rigid.data.velocity.z != 0) {//摩擦力
-							acc = obj->rigid._friction_coeffient * glm::cross(glm::cross(glm::normalize(obj->rigid.data.velocity), normal), normal) * g;
-							if (acc.length() * dt > obj->rigid.data.velocity.length()) {
-								acc /= acc.length();
-								acc *= obj->rigid.data.velocity.length();
-							}
+							//acc = obj->rigid._friction_coeffient * glm::cross(glm::cross(glm::normalize(obj->rigid.data.velocity), normal), normal) * g;
+							//if (acc.length() > glm::vec3(obj->rigid.data.velocity + force_event->_d_v).length()) {
+								//acc /= acc.length();
+								//acc *= (obj->rigid.data.velocity.length() + force_event->_d_v.length());
+								//acc *= 0;
+							//}
 							//std::cerr << a.x << "\t" << a.y << "\t" << a.z << endl;
+							//force_event->_d_v *= 0.99;
 						}
 						if (obj->e_type == PLAYER && obj->rigid.data.velocity.length() * 10 > acc.length() * dt) {//unfixed
 							//acc.x *= 1.26;
 							//acc.y *= 1.26;
 							//acc.z *= 1.26;
 						}
-						force_event->plusV(glm::vec3(acc.x*dt, acc.y*dt, acc.z*dt));//摩擦力
+						//force_event->plusV(glm::vec3(acc.x*dt, acc.y*dt, acc.z*dt));//摩擦力		//<-----------------------待修正
 
 						a = normal.x;
 						b = normal.y;
@@ -261,7 +263,7 @@ int Physics::collisionDetect(Entity * A, Entity * B, MotionEvent<Entity*>* event
 		float x0 = A->rigid.data.position.x + event->dx();
 		float y0 = A->rigid.data.position.y + event->dy();
 		float z0 = A->rigid.data.position.z + event->dz();
-		float r = A->rigid.getRadius();
+		float r = A->rigid.getRadius() - 0.1;
 		dist = abs((a*x0 + b*y0 + c*z0 + d) * B->rigid.getNormalLengthInverse());//點到面的距離 
 		if (dist < r) {
 
@@ -291,7 +293,7 @@ int Physics::collisionDetect(Entity * A, Entity * B, MotionEvent<Entity*>* event
 			x2 = newPoint2.x;
 			y2 = newPoint2.y;
 
-			if (x0 > x1 - r&&x1<x2 + r&&y0>y1 - r&&y0 < y2 + r) {
+			if (x0 > x1 - r && x0 < x2 + r && y0 > y1 - r && y0 < y2 + r) {
 				if (dist < r - ALLOW_DIST) {
 					return -1;
 				}
@@ -308,8 +310,8 @@ int Physics::collisionDetect(Entity * A, Entity * B, MotionEvent<Entity*>* event
 		float dist = A->rigid.data.position.y - A->rigid.getRadius();
 		float r = A->rigid.getRadius();
 
-		if (dist < r) {
-			if (dist < r - ALLOW_DIST) {
+		if (dist < 0) {
+			if (dist <  - ALLOW_DIST) {
 				return -1;
 			}
 			else {

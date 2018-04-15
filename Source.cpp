@@ -1,4 +1,4 @@
-﻿#define SOFTWARE_VERSION "ver 0.5.2"
+﻿#define SOFTWARE_VERSION "ver 0.5.3"
 
 /*
 *　　　　　　　　┏┓　　　┏┓+ +
@@ -43,7 +43,6 @@ int main() {
 	glfwSetCursorPosCallback(game->scene->window, mouse_callback);
 	glfwSetMouseButtonCallback(game->scene->window, mouse_button_callback);
 	glfwSetScrollCallback(game->scene->window, scroll_callback);
-
 
 	game->gameLoop();
 	return 0;

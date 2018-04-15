@@ -40,7 +40,7 @@ void FrameAnimation::setTexture(std::string texture, int frame)
 	if (_frame_texture.empty()) {
 		_frame_texture.push_back(texture);
 	}
-	else if (_frame_texture.size() >= frame) {
+	else if (_frame_texture.size() > frame) {
 		_frame_texture.at(frame) = texture;
 	}
 	else {
@@ -79,6 +79,9 @@ FrameAnimationData & FrameAnimation::animated(float dt)
 		return _data;
 	}
 	else {
+		if (_current_frame == _total_frame) {
+			_current_frame = 0;
+		}
 		_data.setData(_frame_texture.at(_current_frame), glm::vec2(0, 0), glm::vec2(1, 1));
 		return _data;
 	}

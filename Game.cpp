@@ -14,7 +14,7 @@ Game::Game()
 {
 	state = LEVEL_EDITOR;
 	level_editor = new LevelEditor();
-	scene = new Scene();
+	scene = new Scene(SCENE_WIDTH, SCENE_HEIGHT);
 	//player = new Player(glm::vec3(0, 0.5, 0));
 
 	scene->setVSync(false);
@@ -288,6 +288,75 @@ void Game::update(float dt)
 	}
 }
 
+void Game::gameLoop()
+{
+	float lastClock = glfwGetTime();;
+	int count = 0;
+	//////////////////////////////////////	start of the main loop	//////////////////////////////////////
+	while (!glfwWindowShouldClose(scene->window)) {
+		float current_frame = glfwGetTime();
+		dt = current_frame - last_frame;
+		last_frame = current_frame;
+		/////////////////////////////////	display fps
+		float currentClock = glfwGetTime();
+		if (currentClock - lastClock < 1) {
+			++count;
+		}
+		else {
+			lastClock = currentClock;
+			std::cerr << "fps : " << count << endl;
+			count = 0;
+		}
+		/////////////////////////////////	display fps
+
+		glClearColor(0.3, 0.3, 0.3, 1.0);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		// start to rending
+
+		input(*scene, dt);
+
+		camera.Position.y = 5;
+		if (_has_player) {
+			player->rigid.data.velocity.x = camera._v.x;
+			player->rigid.data.velocity.z = camera._v.z;
+		}
+
+		update(dt);
+
+		if (_has_player) {
+			//		never touch the camera's y position, never		<-------------------------------------	important	
+			//cout << player->rigid.data.position.x << " " << player->rigid.data.position.y << " " << player->rigid.data.position.z << endl;
+			camera.Position.x = player->rigid.data.position.x ;
+			camera.Position.z = player->rigid.data.position.z;
+			camera._v = player->rigid.data.velocity;
+		}
+		else {
+			camera.Position += camera._v * dt;
+		}
+		render();
+
+
+		//aabbDebuger();
+		showVersion();
+		level_editor->drawBaseLine();
+
+		// end of loop
+		while (1) {//±±¨îFPS
+			if (glfwGetTime() - currentClock > 0) {		//		0.0155 for 60 fps, 0.032 for 30 fps
+				break;
+			}
+		}
+		//////////////////////////////////////	end of the main loop	//////////////////////////////////////
+		glfwSwapBuffers(scene->window);
+		glfwPollEvents();
+	}
+
+
+	// glfw: terminate, clearing all previously allocated GLFW resources.
+	// ------------------------------------------------------------------
+	glfwTerminate();
+}
+
 void Game::input(Scene &sc, float dt)
 {
 	if (getPageKeyFunction().find(_current_page) != getPageKeyFunction().end()) {
@@ -462,10 +531,15 @@ void Game::EditorMouseButtonCallback(GLFWwindow * window, int button, int action
 		}
 		if (level_editor->state == SET_WALL && !is_button) {
 			if (!level_editor->_is_setting) {
-				WallUI *ui = new WallUI(level_editor->mouse2map(_mouse_x, _mouse_y));
-				level_editor->_is_setting = true;
-				level_editor->current_UI = ui;
-				ObjectManager::addUI(ui);
+				//try {
+					WallUI *ui = new WallUI(level_editor->mouse2map(_mouse_x, _mouse_y));
+					level_editor->_is_setting = true;
+					level_editor->current_UI = ui;
+					ObjectManager::addUI(ui);
+				//}
+				//catch (std::out_of_range) {
+				//	cout << "fucking error" << endl;
+				//}
 			}
 		}
 		if (level_editor->state == SET_BACKGROUND && !is_button) {
@@ -575,6 +649,7 @@ void Game::DefaultMouseCallback(GLFWwindow * window, double xpos, double ypos)
 	_mouse_y /= SCENE_HEIGHT;
 	_mouse_x *= 1920;
 	_mouse_y *= 1080;
+
 
 	//				hover event				//
 	for (int i = 0; i < ObjectManager::getUI().size(); ++i) {
@@ -1339,74 +1414,7 @@ void Game::setPageScrollFunction(string key, SCROLL_CALL_BACK func)
 	_page_scroll_function[key] = func;
 }
 
-void Game::gameLoop()
-{
-	int lastClock = clock();
-	int count = 0;
-	//////////////////////////////////////	start of the main loop	//////////////////////////////////////
-	while (!glfwWindowShouldClose(scene->window)) {
-		float current_frame = glfwGetTime();
-		dt = current_frame - last_frame;
-		last_frame = current_frame;
-		/////////////////////////////////	display fps
-		int currentClock = clock();
-		if (currentClock - lastClock < 1000) {
-			++count;
-		}
-		else {
-			lastClock = currentClock;
-			std::cerr << "fps : " << count << endl;
-			count = 0;
-		}
-		/////////////////////////////////	display fps
 
-		glClearColor(0.3, 0.3, 0.3, 1.0);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		// start to rending
-
-		input(*scene, dt);
-
-		camera.Position.y = 5;
-		if (_has_player) {
-			player->rigid.data.velocity.x = camera._v.x;
-			player->rigid.data.velocity.z = camera._v.z;
-		}
-
-		update(dt);
-
-		if (_has_player) {
-			//		never touch the camera's y position, never		<-------------------------------------	important	
-			//cout << player->rigid.data.position.x << " " << player->rigid.data.position.y << " " << player->rigid.data.position.z << endl;
-			camera.Position.x = player->rigid.data.position.x;
-			camera.Position.z = player->rigid.data.position.z;
-			camera._v = player->rigid.data.velocity;
-		}
-		else {
-			camera.Position += camera._v * dt;
-		}
-		render();
-
-
-		//aabbDebuger();
-		showVersion();
-		level_editor->drawBaseLine();
-
-		// end of loop
-		while (1) {//±±¨îFPS
-			if (clock() - currentClock > 0) {
-				break;
-			}
-		}
-		//////////////////////////////////////	end of the main loop	//////////////////////////////////////
-		glfwSwapBuffers(scene->window);
-		glfwPollEvents();
-	}
-
-
-	// glfw: terminate, clearing all previously allocated GLFW resources.
-	// ------------------------------------------------------------------
-	glfwTerminate();
-}
 
 
 

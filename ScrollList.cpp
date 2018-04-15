@@ -15,7 +15,7 @@ ScrollList::ScrollList(float x, float y, float width, float height) :UI(x, y, wi
 {
 	_scroll_up = true;
 	_scroll_down = true;
-	_scroll_speed = 100;
+	_scroll_speed = height;
 	_has_wheel_event = true;
 	_visable = false;
 	setItemHeight(80.0f);
@@ -87,13 +87,13 @@ void ScrollList::wheelEvent(float yoffset)
 	if (_item_list.empty()) {
 		return;
 	}
-	if (_item_list.at(0)->y() < this->y() + this->height() - _item_height){
+	if (_item_list.at(0)->y() <= this->y() + this->height() - _item_height){
 		_scroll_up = false;
 	}
 	else {
 		_scroll_up = true;
 	}
-	if (_item_list.back()->y() > this->y()) {
+	if (_item_list.back()->y() >= this->y()) {
 		_scroll_down = false;
 	}
 	else {
@@ -104,7 +104,7 @@ void ScrollList::wheelEvent(float yoffset)
 		if ((dy < 0 && _scroll_up) || (dy > 0 && _scroll_down)) {
 			_item_list.at(i)->setXY(_item_list.at(i)->x(), _item_list.at(i)->y() + dy);
 		}
-		if (_item_list.at(i)->y() < this->y() || _item_list.at(i)->y() > this->y() + this->height()) {
+		if (_item_list.at(i)->y() < this->y() || _item_list.at(i)->y() >= this->y() + this->height()) {
 			_item_list.at(i)->setVisable(false);
 			_item_list.at(i)->button_text->setVisable(false);
 		}

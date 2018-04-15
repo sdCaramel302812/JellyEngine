@@ -102,5 +102,10 @@ protected:
 	std::map<string, MOUSE_BUTTON_CALL_BACK> _page_mouse_click_function;
 	std::map<string, KEY_CALL_BACK> _page_key_function;
 	std::map<string, SCROLL_CALL_BACK> _page_scroll_function;
+
+	// for 3d debug
+	double _last_x;
+	double _last_y;
+	bool _first_mouse = true;
 };
 
