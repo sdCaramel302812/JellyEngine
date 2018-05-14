@@ -32,12 +32,12 @@ Scene::Scene(int wid, int hei)
 	// Initialize GLEW to setup the OpenGL Function pointers
 	if (glewInit() != GLEW_OK)
 	{
-//		std::cout << "Failed to initialize GLEW" << std::endl;
+		std::cout << "Failed to initialize GLEW" << std::endl;
 		//return -1;
 	}
 
 	if (ImmIsIME(GetKeyboardLayout(0))) {
-		ImmSimulateHotKey(FindWindow(NULL,"Jelly 2D"), 16);
+		ImmSimulateHotKey(FindWindow(NULL,"Jelly 2D"), IME_KHOTKEY_ENGLISH);
 	}
 	// Define the viewport dimensions (if you will change the winodw size, put these in loop)
 	int width, height;

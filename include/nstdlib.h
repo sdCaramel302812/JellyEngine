@@ -30,15 +30,24 @@ extern class Entity;
 		dic(string Key, T Value) :key(Key), value(Value) {}
 	};
 
+
+	//		suitable size of table
+	//		23 47 79 101 149 199 307 401 557 701 907
 	template<typename T>
 	class hash {
 	public:
-		hash(int m = 100) :size(m){
+		hash(int m = 101) :size(m){
 			table.resize(m);
 		}
 
 		void insert(dic<T> data) {
 			int index = hashing(data.key);
+			table[index].push_back(data);
+		}
+
+		void insert(string key, T value) {
+			dic<T> data(key, value);
+			int index = hashing(key);
 			table[index].push_back(data);
 		}
 
@@ -53,14 +62,26 @@ extern class Entity;
 
 		void deleteHash(string key) {
 			int index = hashing(key);
-			for (list<dic>::iterator itr = table[index].begin(); itr != table[index].end(); ++itr) {
+			for (list<dic<T>>::iterator itr = table[index].begin(); itr != table[index].end(); ++itr) {
 				if ((*itr).key == key) {
 					table[index].erase(itr);
 				}
 			}
 		}
 
-		void resize() {}
+		void resize(int size) {					//<----------------------------------untest
+			vector<list<dic<T>>> newTable;
+			newTable.resize(size);
+			this->size = size;
+			for (int i = 0; i < table.size(); ++i) {
+				for (list<dic<T>>::iterator itr = table[i].begin(); itr != table[i].end(); ++itr) {
+					dic<T> data(itr->key, itr->value);
+					int index = hashing(itr->key);
+					table[i].push_back(data);
+				}
+			}
+			table = newTable;
+		}
 	private:
 		vector<list<dic<T>>> table;
 		int size;//size of table

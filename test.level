@@ -17,4 +17,16 @@
  		<scale x = (number)10 />
  		<scale z = (number)10 />
  	</background>
+ 	<background name = "FeliciaA" />
+ 		<position x = (number)18.0274 />
+ 		<position z = (number)-40.4941 />
+ 		<scale x = (number)16.5688 />
+ 		<scale z = (number)34.4324 />
+ 	</background>
+ 	<background name = "00" />
+ 		<position x = (number)-0.338355 />
+ 		<position z = (number)-37.4435 />
+ 		<scale x = (number)15.83 />
+ 		<scale z = (number)9.408 />
+ 	</background>
  </Level> 

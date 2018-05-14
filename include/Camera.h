@@ -53,6 +53,9 @@ public:
 	float _interval_y1 = -3.6;
 	float _interval_y2 = 3.6;
 
+	int _tilt_angle = 0;			//for sometime we want the camera to display in another angle
+	float _view_distance = 5.5;		//for different angle should have different view distance
+
 	int _camera_mode = 3;	// 1 : first person, 2 : 2D camera, 3 : third person
 
 	/////////////////////////////////////////////////////////////////////////////////
@@ -90,7 +93,25 @@ public:
 	}
 	/////////////////////////////////////////////////////////////////////////////////
 	~Camera() {}
-
+	/////////////////////////////////////////////////////////////////////////////////
+	void setAngle(int angle) {		//now just support 0 and 45 degree
+		if (angle == 0) {
+			Up = glm::vec3(1.0f, 0.0f, 0.0f);
+			Front = glm::vec3(0.0f, -1.0f, 0.0f);
+			_interval_y1 = -3.6;
+			_interval_y2 = 3.6;
+			_view_distance = 5.5;
+			Position.y = 5.0;
+		}
+		else if (angle == 45) {
+			Up = glm::vec3(0.7f, 0.7f, 0.0f);
+			Front = glm::vec3(0.7f, -0.7f, 0.0f);
+			_interval_y1 = -2.5;
+			_interval_y2 = 2.5;
+			_view_distance = 11.5;
+			Position.y = 6.2;
+		}
+	}
 	/////////////////////////////////////////////////////////////////////////////////
 	// Returns the view matrix calculated using Eular Angles and the LookAt Matrix
 	glm::mat4 getViewMatrix() {
@@ -103,7 +124,7 @@ public:
 	/////////////////////////////////////////////////////////////////////////////////
 	glm::mat4 getProjectMatrix() {
 		if (_camera_mode == 2) {
-			return glm::ortho(_interval_x1 * zoom, _interval_x2 * zoom, _interval_y1 * zoom, _interval_y2 * zoom, 0.1f, 5.5f);
+			return glm::ortho(_interval_x1 * zoom, _interval_x2 * zoom, _interval_y1 * zoom, _interval_y2 * zoom, 0.1f, _view_distance);
 		}
 		else if (_camera_mode == 3) {
 			return glm::perspective(glm::radians(45.0f), (float)1920 / (float)1080, 0.1f, 100.0f);

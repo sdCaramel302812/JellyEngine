@@ -1,8 +1,10 @@
 ﻿#include "LevelEditor.h"
 #include "Render.h"
 #include "Game.h"
+#include "Camera.h"
 
 extern Game *game;
+extern Camera camera;
 
 LevelEditor::LevelEditor()
 {
@@ -62,6 +64,7 @@ LevelEditor::LevelEditor()
 			map_name.append(_map_name);
 			map_name.append(".level");
 			ResourceManager::saveMap(map_name);
+			camera.setAngle(45);
 
 			game->setCurrentPage("default");
 			_play_button->setButtonText(TString("stop"), _font_size);
@@ -83,6 +86,7 @@ LevelEditor::LevelEditor()
 			ResourceManager::loadMap("./" + _map_name + ".level");
 		}
 		else {
+			camera.setAngle(0);
 			game->setCurrentPage("editor");
 			_play_button->setButtonText(TString("play"), _font_size);
 			_save_button->setVisable(true);

@@ -116,7 +116,7 @@ public:
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, re);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, re);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, lin);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
 		int width, height, crChannel;
 		stbi_set_flip_vertically_on_load(true);
@@ -138,6 +138,12 @@ public:
 		stbi_image_free(data);
 		dic<unsigned int> Ddata(key, texture);
 		textures.insert(Ddata);
+	}
+	/////////////////////////////////////////////////////////////////////////////////
+	static void removeTexture(string key) {
+		unsigned int texture = textures.search(key);
+		glDeleteTextures(1,&texture);
+		textures.deleteHash(key);
 	}
 	/////////////////////////////////////////////////////////////////////////////////
 	static void addShader(string key, const GLchar *vpath, const GLchar *fpath) {

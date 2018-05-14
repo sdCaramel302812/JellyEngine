@@ -14,6 +14,7 @@ Game::Game()
 {
 	state = LEVEL_EDITOR;
 	level_editor = new LevelEditor();
+	glfwWindowHint(GLFW_SAMPLES, 4);
 	scene = new Scene(SCENE_WIDTH, SCENE_HEIGHT);
 	//player = new Player(glm::vec3(0, 0.5, 0));
 
@@ -36,6 +37,7 @@ void Game::Init()
 {
 	srand(time(NULL));
 
+	glEnable(GL_MULTISAMPLE);
 	glEnable(GL_DEPTH_TEST);
 	glActiveTexture(GL_TEXTURE0);
 	glLineWidth(2.5);
@@ -315,7 +317,7 @@ void Game::gameLoop()
 
 		input(*scene, dt);
 
-		camera.Position.y = 5;
+		//camera.Position.y = 5;
 		if (_has_player) {
 			player->rigid.data.velocity.x = camera._v.x;
 			player->rigid.data.velocity.z = camera._v.z;
@@ -326,7 +328,7 @@ void Game::gameLoop()
 		if (_has_player) {
 			//		never touch the camera's y position, never		<-------------------------------------	important	
 			//cout << player->rigid.data.position.x << " " << player->rigid.data.position.y << " " << player->rigid.data.position.z << endl;
-			camera.Position.x = player->rigid.data.position.x ;
+			camera.Position.x = player->rigid.data.position.x - 6;
 			camera.Position.z = player->rigid.data.position.z;
 			camera._v = player->rigid.data.velocity;
 		}

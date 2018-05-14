@@ -1,4 +1,4 @@
-﻿#define SOFTWARE_VERSION "ver 0.5.3"
+﻿#define SOFTWARE_VERSION "ver 0.5.2"
 
 /*
 *　　　　　　　　┏┓　　　┏┓+ +
@@ -44,6 +44,7 @@ int main() {
 	glfwSetMouseButtonCallback(game->scene->window, mouse_button_callback);
 	glfwSetScrollCallback(game->scene->window, scroll_callback);
 
+	//game->scene->setFullScreen(true);
 	game->gameLoop();
 	return 0;
 }

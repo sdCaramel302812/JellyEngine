@@ -129,7 +129,8 @@ void AABBTree::remove(AABBNode *node)
 {
 	AABBNode *parent = node->_parent;
 	if (parent) {
-		AABBNode *sibling = node->getSibling();
+		AABBNode *sibling = new AABBNode();
+		sibling = node->getSibling();
 		if (parent->_parent) {
 			sibling->_parent = parent->_parent;
 			if (parent == parent->_parent->_children[0]) {
@@ -189,7 +190,8 @@ void AABBTree::findInvalidNode(AABBNode * node)
 
 void AABBTree::collidingHelperUp(AABBNode * node, AABBNode *up)
 {
-	AABBNode *sibling = up->getSibling();
+	AABBNode *sibling = new AABBNode();
+	sibling = up->getSibling();
 	collidingHelper(node, sibling);
 	if (up->_parent) {
 		collidingHelperUp(node, up->_parent);
@@ -210,6 +212,9 @@ void AABBTree::collidingHelper(AABBNode * node, AABBNode *sibling)
 
 void AABBTree::collidingHelperDown(AABBNode * node, AABBNode *cmp)
 {
+	if (!cmp->_children[0] || !cmp->_children[1]) {
+		return;
+	}
 	if (node->_aabb.isCollided(cmp->_children[0]->_aabb)) {
 		if (cmp->_children[0]->isLeaf()) {
 			collision_list.push_back(cmp->_children[0]->_data);

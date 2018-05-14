@@ -341,8 +341,10 @@ MovableObject::MovableObject(glm::vec3 position) : Entity(6)
 	rigid._mass = 50;
 	rigid._restitution_coeffient = 0;
 	glm::mat4 trans;
-	trans = glm::translate(trans, glm::vec3(-rigid.getRadius() , 0, -rigid.getRadius() * 2));
-	_model_matrix = trans;
+	trans = glm::translate(trans, glm::vec3(-rigid.getRadius() * 2 , 0, -rigid.getRadius()));
+	glm::mat4 scale;
+	scale = glm::scale(scale, glm::vec3(1, 1, 0.576));
+	_model_matrix = trans * scale;
 	_height = 1;
 	_width = 1;
 	rigid.setAABB();
