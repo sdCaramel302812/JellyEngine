@@ -16,6 +16,8 @@ UI::UI(float x, float y, float width, float height) :UI()
 	_position.y = y;
 	_height_width.x = height;
 	_height_width.y = width;
+
+	
 }
 
 
@@ -171,11 +173,14 @@ float UI::getZ()
 void UI::setTexture(string texture)
 {
 	_texture = texture;
+	_vao = "ui_texture_vao";
 }
 
 void UI::setColor(glm::vec4 color)
 {
 	_color = color;
+	_texture = "";
+	_vao = "ui_vao";
 }
 
 void UI::setColor(float r, float g, float b, float a)

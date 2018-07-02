@@ -1,9 +1,9 @@
 #include "Render.h"
 
-hash<unsigned int> Render::VAOs = hash<unsigned int>();
-hash<unsigned int> Render::VBOs = hash<unsigned int>();
-hash<unsigned int> Render::EBOs = hash<unsigned int>();
-hash<unsigned int> Render::textures = hash<unsigned int>();
-hash<Shader> Render::shaders = hash<Shader>();
+std::unordered_map<string, unsigned int> Render::VAOs = std::unordered_map<string, unsigned int>();
+std::unordered_map<string, unsigned int> Render::VBOs = std::unordered_map<string, unsigned int>();
+std::unordered_map<string, unsigned int> Render::EBOs = std::unordered_map<string, unsigned int>();
+std::unordered_map<string, unsigned int> Render::textures = std::unordered_map<string, unsigned int>();
+std::unordered_map<string, Shader> Render::shaders = std::unordered_map<string, Shader>();
 std::map<wchar_t, Character> Render::Characters;
 

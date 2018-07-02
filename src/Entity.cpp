@@ -72,7 +72,7 @@ Entity::Entity(int size)
 {
 	vertex_size = size;
 	_id = createID();
-	e_type = DEFAULT_ENTITY;
+	e_type = "DEFAULT_ENTITY";
 	_trigger = false;
 	_visible = true;
 }
@@ -275,7 +275,7 @@ SphereObject::SphereObject(int size) : Entity(size)
 
 Player::Player(glm::vec3 pos) : MovableObject(pos)
 {
-	e_type = PLAYER;
+	e_type = "PLAYER";
 }
 
 WallObject::WallObject(glm::vec3 point1, glm::vec3 point2) : Entity(6)
@@ -284,7 +284,7 @@ WallObject::WallObject(glm::vec3 point1, glm::vec3 point2) : Entity(6)
 	_visible = false;
 	rigid._restitution_coeffient = 0.3;
 	rigid.type = RECTANGLE;
-	e_type = WALL;
+	e_type = "WALL";
 	rigid._mass = 300000000;
 	vector<glm::vec3> rigidVer;
 	glm::vec3 ver1 = point1;
@@ -315,7 +315,7 @@ BackgroundObject::BackgroundObject(string texture, glm::vec3 left_down_back, glm
 	//rotate = glm::rotate(rotate, atan2(height, width), glm::vec3(0, 1, 0));
 	_model_matrix = scale;
 	_texture_cood = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
-	e_type = BACKGROUND_ENTITY;
+	e_type = "BACKGROUND_ENTITY";
 	rigid.type = NO_COLLIDE;
 	VAO = "instance_texture";
 	shader = "texture";
@@ -334,7 +334,7 @@ void BackgroundObject::setHeightWidth(float height, float width)
 
 MovableObject::MovableObject(glm::vec3 position) : Entity(6)
 {
-	e_type = NPC;
+	e_type = "NPC";
 	rigid.type = SPHERE;
 	rigid.data.position = position;
 	rigid.setRadius(0.25);
@@ -417,7 +417,7 @@ void MovableObject::AI()
 PlatformObject::PlatformObject() : Entity(6)
 {
 	_visible = false;
-	e_type = GROUND;
+	e_type = "GROUND";
 	rigid._is_static = true;
 	rigid._restitution_coeffient = 0;
 	rigid.type = PLATFORM;

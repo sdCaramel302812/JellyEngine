@@ -30,7 +30,7 @@ void ScrollList::setItemHeight(float height)
 void ScrollList::addItem(string button_name)
 {
 	Button *button = new Button(this->x(), this->y() + this->height() - _item_height*(_item_list.size() + 1), this->width(), _item_height);
-	button->setButtonText(button_name);
+	button->setButtonText(button_name, _font_size);
 	_item_list.push_back(button);
 	if (button->y() < this->y()) {
 		button->setVisable(false);
@@ -43,7 +43,7 @@ void ScrollList::addItem(string button_name)
 void ScrollList::addItem(string button_name, CALL_BACK function)
 {
 	Button *button = new Button(this->x(), this->y() + this->height() - _item_height*(_item_list.size() + 1), this->width(), _item_height);
-	button->setButtonText(button_name, 36);
+	button->setButtonText(button_name, _font_size);
 	button->setCallback(function);
 	_item_list.push_back(button);
 	if (button->y() < this->y()) {
@@ -52,6 +52,11 @@ void ScrollList::addItem(string button_name, CALL_BACK function)
 	}
 	ObjectManager::addUI(button);
 	ObjectManager::addText(button->button_text);
+}
+
+void ScrollList::setFontSize(int size)
+{
+	_font_size = size;
 }
 
 void ScrollList::setVisable(bool value)

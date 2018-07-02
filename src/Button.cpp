@@ -10,11 +10,11 @@ Button::Button(float x, float y, float width, float height) : UI(x, y, width, he
 {
 	_has_hover = true;
 	button_text = new TextItem();
-	button_text->setXY(x + 20, y + (height - 50 > 0 ? (height - 50) / 2 : 0));
+	button_text->setXY(x + button_text->font_size / 2, y + (this->height() - button_text->font_size * 3 / 2));
 	button_text->setLineWidth(width);
 	setZ(1);
 	button_text->setZ(getZ() + 1);
-	setColor(glm::vec4(0.5, 0.5, 0.5, 0.5));
+	setColor(glm::vec4(0.5, 0.5, 0.5, 1.0));
 }
 
 
@@ -37,12 +37,14 @@ void Button::setButtonText(wstring text, int font_size)
 {
 	button_text->setText(text);
 	button_text->setFontSize(font_size);
+	button_text->setXY(_position.x + button_text->font_size / 2, _position.y + (this->height() - button_text->font_size * 3 / 2));
 }
 
 void Button::setButtonText(TString text, int font_size)
 {
 	button_text->setText(text);
 	button_text->setFontSize(font_size);
+	button_text->setXY(_position.x + button_text->font_size / 2, _position.y + (this->height() - button_text->font_size * 3 / 2));
 }
 
 
@@ -55,19 +57,29 @@ void Button::draw()
 
 void Button::hoverIn()
 {
-	setColor(glm::vec4(0.5, 0.5, 0.5, 0.8));
+	if (this->_texture == "") {
+		setColor(glm::vec4(0.4, 0.4, 0.4, 1.0));
+	}
+	else if (this->_texture2 != "") {
+		setTexture(this->_texture2);
+	}
 }
 
 void Button::hoverOut()
 {
-	setColor(glm::vec4(0.5, 0.5, 0.5, 0.5));
+	if (this->_texture == "") {
+		setColor(glm::vec4(0.5, 0.5, 0.5, 1.0));
+	}
+	else {
+		setTexture(this->_texture);
+	}
 }
 
 void Button::setXY(float x, float y)
 {
 	_position.x = x;
 	_position.y = y;
-	button_text->setXY(x + 20, y + (this->height() - 50 > 0 ? (this->height() - 50) / 2 : 0));
+	button_text->setXY(x + button_text->font_size / 2, y + (this->height() - button_text->font_size * 3 / 2));
 }
 
 wstring & Button::getText()

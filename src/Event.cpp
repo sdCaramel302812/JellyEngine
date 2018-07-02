@@ -3,7 +3,7 @@
 #include "Event.h"
 
 
-
+/*
 template<typename T>
 MotionEvent<T>::MotionEvent()
 {
@@ -114,10 +114,6 @@ EventType Event<T>::getType()
 	return _type;
 }
 
-/*template<typename T>
-void Event<T>::use()
-{
-}*/
 
 template<typename T>
 void Event<T>::setTarget(T target)
@@ -125,20 +121,14 @@ void Event<T>::setTarget(T target)
 	_target_id = target;
 }
 
-/*template<typename T>
-void Event<T>::use()
-{
-}*/
+
 
 template<typename T>
 void DrawEvent<T>::setDrawType(GLenum type)
 {
 	_draw_type = type;
 }
-
-/*void EventBase::use()
-{
-}*/
+*/
 
 #endif
 

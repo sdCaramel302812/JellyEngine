@@ -24,6 +24,7 @@ Game::Game()
 	Init();
 	level_editor->setBackgroundList();
 	level_editor->setMapList();
+	level_editor->setPrefabList();
 }
 
 
@@ -40,21 +41,22 @@ void Game::Init()
 	glEnable(GL_MULTISAMPLE);
 	glEnable(GL_DEPTH_TEST);
 	glActiveTexture(GL_TEXTURE0);
-	glLineWidth(2.5);
+	glLineWidth(1.5);
 
 	Render::addShader("text", "./text.vs", "./text.fs");
 	Render::addShader("texture", "./texture.vs", "./texture.fs");
 	Render::addShader("texture_ins", "./texture_instance.vs", "texture.fs");
 
-	Render::shaders.search("texture").use();
-	Render::shaders.search("texture").setInt("material.diffuse", 0);
+	Render::shaders.at("texture").use();
+	Render::shaders.at("texture").setInt("material.diffuse", 0);
 
-	Render::shaders.search("texture_ins").use();
-	Render::shaders.search("texture_ins").setInt("material.diffuse", 0);
+	Render::shaders.at("texture_ins").use();
+	Render::shaders.at("texture_ins").setInt("material.diffuse", 0);
 
 	Render::addShader("color", "./color.vs", "./color.fs");
 	Render::addShader("color_ins", "./color_instance.vs", "./color_instance.fs");
 
+	ResourceManager::loadPrefabList("./info/prefab.source");
 	ResourceManager::loadResource("./resource.rec");
 	ResourceManager::loadMapList("./");
 
@@ -112,16 +114,16 @@ void Game::render()
 		view = camera.getViewMatrix();
 
 		////////////////////////////////////////	texture shader draw		////////////////////////////////////////
-		(Render::shaders.search("texture_ins")).use();
-		Render::shaders.search("texture_ins").setMat4("view", view);
-		Render::shaders.search("texture_ins").setMat4("projection", projection);
+		(Render::shaders.at("texture_ins")).use();
+		Render::shaders.at("texture_ins").setMat4("view", view);
+		Render::shaders.at("texture_ins").setMat4("projection", projection);
 		//*************************************			實例化渲染			**************************************//
 		//*********************************可依照 texture 做 sorting 做分段實例化*********************************//
 		{
 			if (!EventManager::texture_render_event.empty()) {
 				EventManager::eventSort(EventManager::texture_render_event);
 				glm::vec4 *instMat;
-				glBindVertexArray(Render::VAOs.search("instance_texture"));		//等貼圖問題解決後嘗試移到迴圈外
+				glBindVertexArray(Render::VAOs.at("instance_texture"));		//等貼圖問題解決後嘗試移到迴圈外
 //
 				int count = 0;
 				int size = 0;
@@ -130,7 +132,7 @@ void Game::render()
 				instMat = new glm::vec4[EventManager::texture_render_event.size() * 5];		
 				bool _time_to_stop = false;
 				do {
-					glBindTexture(GL_TEXTURE_2D, Render::textures.search(texture));
+					glBindTexture(GL_TEXTURE_2D, Render::textures.at(texture));
  					for (int i = count; i < EventManager::texture_render_event.size(); ++i) {
 						if (i == EventManager::texture_render_event.size() - 1) {
 							count = i;
@@ -170,9 +172,9 @@ void Game::render()
 		////////////////////////////////////////	texture shader draw		////////////////////////////////////////
 
 		////////////////////////////////////////	color shader draw		////////////////////////////////////////
-		(Render::shaders.search("color_ins")).use();
-		Render::shaders.search("color_ins").setMat4("view", view);
-		Render::shaders.search("color_ins").setMat4("projection", projection);
+		(Render::shaders.at("color_ins")).use();
+		Render::shaders.at("color_ins").setMat4("view", view);
+		Render::shaders.at("color_ins").setMat4("projection", projection);
 		//*************************************			實例化渲染			**************************************//
 		//*********************************可依照 texture 做 sorting 做分段實例化*********************************//
 		{
@@ -184,7 +186,12 @@ void Game::render()
 				instMat[i] = model;
 			}
 			Render::updateInstance(instMat, EventManager::color_render_event.size());
-			glBindVertexArray(Render::VAOs.search("sphere"));
+			try {
+				glBindVertexArray(Render::VAOs.at("sphere"));
+			}
+			catch (...) {
+
+			}
 			glDrawArraysInstanced(GL_LINE_STRIP, 0, 1944, EventManager::color_render_event.size());
 			delete[]instMat;
 		}
@@ -197,10 +204,10 @@ void Game::render()
 		////////////////////////////////////////	color shader draw		////////////////////////////////////////
 
 		////////////////////////////////////////			draw ui			////////////////////////////////////////
-		(Render::shaders.search("color")).use();
+		(Render::shaders.at("color")).use();
 		if (!EventManager::editor_ui_event.empty()) {
-			Render::shaders.search("color").setMat4("view", view);
-			Render::shaders.search("color").setMat4("projection", projection);
+			Render::shaders.at("color").setMat4("view", view);
+			Render::shaders.at("color").setMat4("projection", projection);
 			while (!EventManager::editor_ui_event.empty()) {
 				EventManager::editor_ui_event.back()->_target_id->draw();
 				delete EventManager::editor_ui_event.back();
@@ -211,8 +218,8 @@ void Game::render()
 		view = glm::mat4();
 		projection= glm::ortho(0.0f, static_cast<GLfloat>(1920), 0.0f, static_cast<GLfloat>(1080), 10.0f, -10.0f);
 		if (!EventManager::draw_color_ui_event.empty()) {
-			Render::shaders.search("color").setMat4("view", view);
-			Render::shaders.search("color").setMat4("projection", projection);
+			Render::shaders.at("color").setMat4("view", view);
+			Render::shaders.at("color").setMat4("projection", projection);
 			while (!EventManager::draw_color_ui_event.empty()) {
 				EventManager::draw_color_ui_event.back()->use();
 				delete EventManager::draw_color_ui_event.back();
@@ -221,9 +228,9 @@ void Game::render()
 		}
 
 		if (!EventManager::draw_texture_ui_event.empty()) {
-			(Render::shaders.search("texture")).use();
-			Render::shaders.search("texture").setMat4("view", view);
-			Render::shaders.search("texture").setMat4("projection", projection);
+			(Render::shaders.at("texture")).use();
+			Render::shaders.at("texture").setMat4("view", view);
+			Render::shaders.at("texture").setMat4("projection", projection);
 			while (!EventManager::draw_texture_ui_event.empty()) {
 				EventManager::draw_texture_ui_event.back()->use();
 				delete EventManager::draw_texture_ui_event.back();
@@ -232,9 +239,9 @@ void Game::render()
 		}
 
 		if (!EventManager::draw_text_event.empty()) {
-			(Render::shaders.search("text")).use();
-			Render::shaders.search("text").setMat4("projection", projection);
-			glBindVertexArray(Render::VAOs.search("text"));
+			(Render::shaders.at("text")).use();
+			Render::shaders.at("text").setMat4("projection", projection);
+			glBindVertexArray(Render::VAOs.at("text"));
 			while (!EventManager::draw_text_event.empty()) {
 				EventManager::draw_text_event.back()->use();
 				delete EventManager::draw_text_event.back();
@@ -292,7 +299,7 @@ void Game::update(float dt)
 
 void Game::gameLoop()
 {
-	float lastClock = glfwGetTime();;
+	float lastClock = glfwGetTime();
 	int count = 0;
 	//////////////////////////////////////	start of the main loop	//////////////////////////////////////
 	while (!glfwWindowShouldClose(scene->window)) {
@@ -301,21 +308,23 @@ void Game::gameLoop()
 		last_frame = current_frame;
 		/////////////////////////////////	display fps
 		float currentClock = glfwGetTime();
-		if (currentClock - lastClock < 1) {
-			++count;
-		}
-		else {
-			lastClock = currentClock;
-			std::cerr << "fps : " << count << endl;
-			count = 0;
+		if (_debug_mode) {
+			if (currentClock - lastClock < 1) {
+				++count;
+			}
+			else {
+				lastClock = currentClock;
+				std::cerr << "fps : " << count << endl;
+				count = 0;
+			}
 		}
 		/////////////////////////////////	display fps
 
-		glClearColor(0.3, 0.3, 0.3, 1.0);
+		glClearColor(0.2, 0.2, 0.2, 1.0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		// start to rending
 
-		input(*scene, dt);
+		input(*scene, _time_scale * dt);
 
 		//camera.Position.y = 5;
 		if (_has_player) {
@@ -323,7 +332,7 @@ void Game::gameLoop()
 			player->rigid.data.velocity.z = camera._v.z;
 		}
 
-		update(dt);
+		update(_time_scale * dt);
 
 		if (_has_player) {
 			//		never touch the camera's y position, never		<-------------------------------------	important	
@@ -333,14 +342,15 @@ void Game::gameLoop()
 			camera._v = player->rigid.data.velocity;
 		}
 		else {
-			camera.Position += camera._v * dt;
+			camera.Position += camera._v * _time_scale * dt;
 		}
 		render();
 
-
-		//aabbDebuger();
-		showVersion();
-		level_editor->drawBaseLine();
+		if (_debug_mode) {
+			//aabbDebuger();
+			showVersion();
+			level_editor->drawBaseLine();
+		}
 
 		// end of loop
 		while (1) {//控制FPS
@@ -511,7 +521,7 @@ void Game::EditorMouseButtonCallback(GLFWwindow * window, int button, int action
 		//		ui callback
 		for (int i = 0; i < ObjectManager::getUI().size(); ++i) {
 			if (ObjectManager::getUI().at(i)->x() > _mouse_x) {
-				break;
+			//	break;
 			}
 			float left = (ObjectManager::getUI().at(i)->width() > 0) ? ObjectManager::getUI().at(i)->x() : ObjectManager::getUI().at(i)->x() + ObjectManager::getUI().at(i)->width();
 			float right = (ObjectManager::getUI().at(i)->width() > 0) ? ObjectManager::getUI().at(i)->x() + ObjectManager::getUI().at(i)->width() : ObjectManager::getUI().at(i)->x();
@@ -554,7 +564,7 @@ void Game::EditorMouseButtonCallback(GLFWwindow * window, int button, int action
 		if (level_editor->state == SET_BACKGROUND_SIZE && !is_button) {
 			glm::vec3 map_pos = level_editor->mouse2map(_mouse_x, _mouse_y);
 			for (int i = 0; i < ObjectManager::object_list.size(); ++i) {
-				if (ObjectManager::object_list.at(i)->e_type == BACKGROUND_ENTITY) {
+				if (ObjectManager::object_list.at(i)->e_type == "BACKGROUND_ENTITY") {
 					if (map_pos.x > ObjectManager::object_list.at(i)->rigid.data.position.x&&map_pos.z > ObjectManager::object_list.at(i)->rigid.data.position.z&&map_pos.x < ObjectManager::object_list.at(i)->rigid.data.position.x + ObjectManager::object_list.at(i)->_height&&map_pos.z < ObjectManager::object_list.at(i)->rigid.data.position.z + ObjectManager::object_list.at(i)->_width) {
 						level_editor->current_entity = ObjectManager::object_list.at(i);
 						level_editor->_is_setting = true;
@@ -565,11 +575,17 @@ void Game::EditorMouseButtonCallback(GLFWwindow * window, int button, int action
 		if (level_editor->state == DELETE_BACKGROUND && !is_button) {
 			glm::vec3 map_pos = level_editor->mouse2map(_mouse_x, _mouse_y);
 			for (int i = 0; i < ObjectManager::object_list.size(); ++i) {
-				if (ObjectManager::object_list.at(i)->e_type == BACKGROUND_ENTITY) {
+				if (ObjectManager::object_list.at(i)->e_type == "BACKGROUND_ENTITY") {
 					if (map_pos.x > ObjectManager::object_list.at(i)->rigid.data.position.x&&map_pos.z > ObjectManager::object_list.at(i)->rigid.data.position.z&&map_pos.x < ObjectManager::object_list.at(i)->rigid.data.position.x + ObjectManager::object_list.at(i)->_height&&map_pos.z < ObjectManager::object_list.at(i)->rigid.data.position.z + ObjectManager::object_list.at(i)->_width) {
 						ObjectManager::removeEntity(ObjectManager::object_list.at(i));
 					}
 				}
+			}
+		}
+		if (level_editor->state == SET_PREFAB && !is_button) {
+			glm::vec3 pos = level_editor->mouse2map(_mouse_x, _mouse_y);
+			if (level_editor->_prefab_has_init) {
+				level_editor->_prefab_adder(level_editor->_current_prefab, pos);
 			}
 		}
 	}
@@ -582,6 +598,7 @@ void Game::EditorMouseButtonCallback(GLFWwindow * window, int button, int action
 		level_editor->state = SET_NOTHING;
 		level_editor->_background_list->setVisable(false);
 		level_editor->_map_list->setVisable(false);
+		level_editor->_prefab_list->setVisable(false);
 		cout << "set nothing" << endl;
 
 	}
@@ -1363,16 +1380,29 @@ void Game::uiInit()
 		1.0f, 0.0f, 0.0f,
 		1.0f, 1.0f, 0.0f,
 	};
+	float vbo_texture_vertex[] = {
+		0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+		1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+		0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+		0.0f, 1.0f, 0.0f, 0.1f, 1.0f,
+		1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+		1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+	};
 	float line_vbo[] = {
 		0.0f, 0.0f, 0.0f,
 		1.0f, 0.0f, 0.0f,
 	};
 	Render::addVBO(vbo_vertex, 18, "ui_vbo");
+	Render::addVBO(vbo_texture_vertex, 30, "ui_texture_vbo");
 	Render::addVBO(line_vbo, 6, "line_vbo");
 	int pos[1] = { 0 };
 	int size[1] = { 3 };
 	int shift[1] = { 0 };
+	int pos2[2] = { 0,1 };
+	int size2[2] = { 3,2 };
+	int shift2[2] = { 0,3 };
 	Render::addVAO(pos, size, shift, 1, "ui_vao", "ui_vbo");
+	Render::addVAO(pos2, size2, shift2, 2, "ui_texture_vao", "ui_texture_vbo");
 	Render::addVAO(pos, size, shift, 1, "line_vao", "line_vbo");
 }
 
@@ -1439,30 +1469,31 @@ void aabbDebuger() {
 	glm::mat4 view;
 	view = camera.getViewMatrix();
 	glm::mat4 model;
-	(Render::shaders.search("color")).use();
-	Render::shaders.search("color").setMat4("view", view);
-	Render::shaders.search("color").setMat4("projection", projection);
-	Render::shaders.search("color").setMat4("model", model);
+	(Render::shaders.at("color")).use();
+	Render::shaders.at("color").setMat4("view", view);
+	Render::shaders.at("color").setMat4("projection", projection);
+	Render::shaders.at("color").setMat4("model", model);
 
-	AABBNode *current = ObjectManager::aabb_tree._root;
-	std::queue<AABBNode *> que;
-	que.push(current);
-	while (!que.empty()) {
-		Render::drawAABB(current->_aabb);
-		if (!current->isLeaf()) {
-			que.push(current->_children[0]);
-			que.push(current->_children[1]);
+	if (ObjectManager::aabb_tree._root) {
+		AABBNode *current = ObjectManager::aabb_tree._root;
+		std::queue<AABBNode *> que;
+		que.push(current);
+		while (!que.empty()) {
+			Render::drawAABB(current->_aabb);
+			if (!current->isLeaf()) {
+				que.push(current->_children[0]);
+				que.push(current->_children[1]);
+			}
+			current = que.front();
+			que.pop();
 		}
-		current = que.front();
-		que.pop();
 	}
-
 	//////////////////////////////////////////////////////////////////////draw aabb
 }
 
 void showVersion() {
 	glm::vec3 color(0.9, 0.9f, 0.9f);
-	glm::vec2 pos(900.0f, 1030.0f);
+	glm::vec2 pos(900.0f, 60.0f);
 	TString tex(SOFTWARE_VERSION);
 	Render::drawText(tex, pos.x, pos.y, 0.7, color);
 }

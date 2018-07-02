@@ -1,4 +1,4 @@
-﻿#define SOFTWARE_VERSION "ver 0.5.2"
+﻿#define SOFTWARE_VERSION "ver 0.5.4"
 
 /*
 *　　　　　　　　┏┓　　　┏┓+ +
@@ -29,9 +29,13 @@
 #include "Include.h"
 #include "Game.h"
 
-Game *game = new Game();
 
+Game *game;
 Camera camera(2);
+
+//*
+
+
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
@@ -39,11 +43,22 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
 
 
-int main() {
+int main(int argc, char *argv[]) {
+	game = new Game();
 	glfwSetCursorPosCallback(game->scene->window, mouse_callback);
 	glfwSetMouseButtonCallback(game->scene->window, mouse_button_callback);
 	glfwSetScrollCallback(game->scene->window, scroll_callback);
 
+	if (argc != 1) {
+		if (bstrncmp(argv[1], ".level", 6) == 0) {
+			ResourceManager::loadMap(argv[1], 0);
+			string path = argv[1];
+			int pos = path.rfind("\\");
+			string fileName = path.substr(pos + 1, path.length() - pos - 7);
+			game->level_editor->_map_name = fileName;
+			game->level_editor->_file_name->text = fileName;
+		}
+	}
 	//game->scene->setFullScreen(true);
 	game->gameLoop();
 	return 0;
@@ -70,4 +85,4 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 	}
 }
 
-
+//*/

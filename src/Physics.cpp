@@ -17,7 +17,7 @@ void Physics::displace(Entity * obj,float dt)
 		dt = MIN_DT;
 	}
 
-	if (obj->e_type == PLAYER) {
+	if (obj->e_type == "PLAYER") {
 	//	cout << obj->rigid.data.position.x << " " << obj->rigid.data.position.y << " " << obj->rigid.data.position.z << endl;
 	}
 
@@ -151,7 +151,7 @@ void Physics::displace(Entity * obj,float dt)
 							//std::cerr << a.x << "\t" << a.y << "\t" << a.z << endl;
 							//force_event->_d_v *= 0.99;
 						}
-						if (obj->e_type == PLAYER && obj->rigid.data.velocity.length() * 10 > acc.length() * dt) {//unfixed
+						if (obj->e_type == "PLAYER" && obj->rigid.data.velocity.length() * 10 > acc.length() * dt) {//unfixed
 							//acc.x *= 1.26;
 							//acc.y *= 1.26;
 							//acc.z *= 1.26;
@@ -328,8 +328,8 @@ int Physics::collisionDetect(Entity * A, Entity * B, MotionEvent<Entity*>* event
 }
 
 
-bool Physics::GJK(std::vector<glm::vec3> vertices1, std::vector<glm::vec3> vertices2, float radius)
-{
+bool Physics::GJK(std::vector<glm::vec3> &vertices1, std::vector<glm::vec3> &vertices2, float radius)
+{//need to change into 3d simplex
 	std::vector<glm::vec3> point_set;
 	for (int i = 0; i < vertices1.size(); ++i) {
 		for (int j = 0; j < vertices2.size(); ++j) {
@@ -354,13 +354,15 @@ bool Physics::GJK(std::vector<glm::vec3> vertices1, std::vector<glm::vec3> verti
 			return false;
 		}
 		float p = glm::dot(dir2origin, second_point - first_point);
-		dir2origin = -(first_point + p*(second_point - first_point));
+		//-first point = (second point - first point) * -first point * cos(theta) + dir2origin	v
+		//-(first point + (second point - first point) * p / |second point - first point|^2) = dir2origin
+		dir2origin = -(first_point + p * (second_point - first_point) / (pow(second_point.x - first_point.x, 2) + pow(second_point.y - first_point.y, 2) + pow(second_point.z - first_point.z, 2)));
 		first_point = second_point;
 	}
 	return false;
 }
 
-glm::vec3 Physics::GJKSupport(std::vector<glm::vec3> vertices, std::vector<bool> &has_find, glm::vec3 dir, bool &end)
+glm::vec3 Physics::GJKSupport(std::vector<glm::vec3> &vertices, std::vector<bool> &has_find, glm::vec3 dir, bool &end)
 {
 	//檢查所有點和至原點向量的內積並回傳內積結果最大的點
 	//若最大點已找過代表包含原點，設 end 為 true

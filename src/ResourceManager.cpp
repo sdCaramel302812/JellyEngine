@@ -2,6 +2,7 @@
 
 string ResourceManager::_file_name;
 string ResourceManager::_path_name;
+vector<string> ResourceManager::_prefab_list;
 vector<string> ResourceManager::_image_list;
 vector<string> ResourceManager::_map_list;
 
@@ -14,6 +15,16 @@ ResourceManager::~ResourceManager()
 {
 }
 
+
+void ResourceManager::loadPrefabList(char * fileName)
+{
+	ifstream file;
+	file.open(fileName);
+	string name;
+	while (file >> name) {
+		_prefab_list.push_back(name);
+	}
+}
 
 void ResourceManager::loadResource(char * fileName)
 {
@@ -115,6 +126,7 @@ fclose(inFile);
 */
 
 
+
 void ResourceManager::loadMapList(char * dirName)
 {
 	HANDLE hnd;
@@ -135,7 +147,7 @@ void ResourceManager::loadMapList(char * dirName)
 void ResourceManager::loadMap(string fileName)
 {
 	while (!ObjectManager::object_list.empty()) {
-		if (ObjectManager::object_list.back()->e_type != PLAYER) {
+		if (ObjectManager::object_list.back()->e_type != "PLAYER") {
 			ObjectManager::removeEntity(ObjectManager::object_list.back());
 		}
 		else {
@@ -154,7 +166,6 @@ void ResourceManager::loadMap(string fileName)
 	Player *player = new Player(glm::vec3(0, 1, 0));
 	ObjectManager::addPlayer(player);
 	//載入地面及角色
-
 	ifstream inFile;
 	inFile.open(fileName);
 	if (!inFile) {
@@ -235,7 +246,7 @@ void ResourceManager::loadMap(string fileName)
 void ResourceManager::loadMap(string fileName, int editor)
 {
 	while(!ObjectManager::object_list.empty()) {
-		if (ObjectManager::object_list.back()->e_type != PLAYER) {
+		if (ObjectManager::object_list.back()->e_type != "PLAYER") {
 			ObjectManager::removeEntity(ObjectManager::object_list.back());
 		}
 		else {
@@ -334,7 +345,7 @@ void ResourceManager::saveMap(string fileName)
 
 	outFile << "<Level name = \"" << fileName << "\" >\n ";
 	for (int i = 0; i < ObjectManager::object_list.size(); ++i) {
-		if (ObjectManager::object_list.at(i)->e_type == BACKGROUND_ENTITY) {
+		if (ObjectManager::object_list.at(i)->e_type == "BACKGROUND_ENTITY") {
 			string texture = ObjectManager::object_list.at(i)->texture;
 			float pos_x = ObjectManager::object_list.at(i)->rigid.data.position.x;
 			float pos_z = ObjectManager::object_list.at(i)->rigid.data.position.z;
@@ -365,6 +376,11 @@ void ResourceManager::saveMap(string fileName)
 	outFile << "</Level> ";
 
 	outFile.close();
+}
+
+vector<string>& ResourceManager::getPrefabList()
+{
+	return _prefab_list;
 }
 
 vector<string>& ResourceManager::getImageList()
